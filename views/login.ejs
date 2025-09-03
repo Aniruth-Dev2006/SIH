@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - Gradlink</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+    <input type="checkbox" id="theme-toggle" class="theme-toggle-checkbox">
+    <html class="light">
+
+    <div class="page-container">
+        
+        <div class="login-section">
+            <header class="page-header">
+                <div class="logo">
+                    <div class="logo-box"></div>
+                    <span>Gradlink</span>
+                </div>
+                <label for="theme-toggle" class="theme-toggle-label" aria-label="Toggle theme">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                </label>
+            </header>
+
+            <main class="login-card">
+                <div class="login-card-header">
+                    <h1>Welcome Back</h1>
+                    <p>Enter your credentials to access your account.</p>
+                </div>
+
+                <form action="/" method="post">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" name="email" id="email" placeholder="name@example.com" required >
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" name="password" id="password" required >
+                    </div>
+                    <button type="submit" class="btn btn-primary">Sign In</button>
+                </form>
+
+                </main>
+        </div>
+
+        <div class="image-section">
+            <img src="https://content3.jdmagicbox.com/comp/kanchipuram/b9/9999pxx44.xx44.220416235327.g1b9/catalogue/svce-central-library-kanchipuram-libraries-1qbaidwusf.jpg" 
+                 alt="A group of students sitting on a university lawn" 
+                 class="cover-image">
+        </div>
+    </div>
+    
+    <script>
+        const checkbox = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+
+        const applyTheme = (theme) => {
+            html.classList.remove('light', 'dark');
+            html.classList.add(theme);
+            checkbox.checked = theme === 'dark';
+        };
+
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme) {
+            applyTheme(savedTheme);
+        } else {
+            applyTheme(prefersDark ? 'dark' : 'light');
+        }
+
+        checkbox.addEventListener('change', () => {
+            const newTheme = checkbox.checked ? 'dark' : 'light';
+            localStorage.setItem('theme', newTheme);
+            applyTheme(newTheme);
+        });
+    </script>
+</body>
+</html>
