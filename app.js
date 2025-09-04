@@ -12,7 +12,7 @@ mongoose.connect("mongodb://localhost:27017/communityDB");
 // Schemas (no changes needed here)
 const adminschema = new mongoose.Schema({ email:String, password:String });
 const Admin = mongoose.model("admin",adminschema);
-const studentschema = new mongoose.Schema({ name:String, email:String, password:String, batch:String, role:String, rno:String });
+const studentschema = new mongoose.Schema({ name:String, email:String, password:String, batch:String, role:String, rno:String,course:String,dept:String });
 const Student = mongoose.model("student",studentschema);
 const aluminschema = new mongoose.Schema({ name:String, email:String, password:String, batch:String, role:String, rno:String });
 const Alumini = mongoose.model("alumini",aluminschema);
@@ -119,7 +119,28 @@ app.get("/api/search-users", function(req, res) {
         });
 });
 
-
+app.get("/create_student",function(req,res){
+  res.render("create_student");
+});
+app.post("/create_student",function(req,res){
+  const user = new Student({
+    name:req.body.fullName,
+    email:req.body.email,
+    password:req.body.password,
+    batch:req.body.batch,
+    role:"Student",
+    rno:req.body.rollNo,
+    course:req.body.Course,
+    dept:req.body.department
+  });
+  user.save()
+    .then(result=>{
+      res.send("success");
+    })
+    .catch(err=>{
+      console.log("error "+err);
+    });
+});
 app.listen(3000, function(req, res){
     console.log("server is running\n");
 });
