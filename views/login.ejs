@@ -3,82 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - Gradlink</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>Sign In | Gradlink</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="login.css">
 </head>
 <body>
 
-    <input type="checkbox" id="theme-toggle" class="theme-toggle-checkbox">
-    <html class="light">
+    <div class="auth-layout">
+        <div class="auth-branding-section">
+            <div class="branding-content">
+                <h1 class="mb-3"><i class="bi bi-link-45deg"></i> Alumnium</h1>
+                <p class="fs-5">The official portal for our esteemed alumni community.</p>
+            </div>
+        </div>
 
-    <div class="page-container">
-        
-        <div class="login-section">
-            <header class="page-header">
-                <div class="logo">
-                    <div class="logo-box"></div>
-                    <span>Gradlink</span>
-                </div>
-                <label for="theme-toggle" class="theme-toggle-label" aria-label="Toggle theme">
-                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-                </label>
-            </header>
+        <div class="auth-form-section">
+            <div class="aurora-glow-form"></div>
 
-            <main class="login-card">
-                <div class="login-card-header">
-                    <h1>Welcome Back</h1>
-                    <p>Enter your credentials to access your account.</p>
+            <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle theme">
+                <i class="bi bi-sun-fill sun-icon"></i>
+                <i class="bi bi-moon-fill moon-icon"></i>
+            </button>
+
+            <div class="login-card">
+                <div class="text-center mb-5">
+                    <h2 class="h1 fw-bold">Welcome Back</h2>
+                    <p class="text-muted-foreground">Enter your credentials to access your portal.</p>
                 </div>
 
                 <form action="/" method="post">
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" name="email" id="email" placeholder="name@example.com" required >
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-medium">Email Address</label>
+                        <input type="email" name="email" class="form-control" id="email" placeholder="you@example.com" required>
                     </div>
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <input type="password" name="password" id="password" required >
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label for="password" class="form-label fw-medium mb-0">Password</label>
+                            <a href="#" class="forgot-link">Forgot?</a>
+                        </div>
+                        <div class="password-wrapper mt-2">
+                            <input type="password" name="password" class="form-control" id="password" required>
+                            <button type="button" class="password-toggle-btn" id="password-toggle">
+                                <i class="bi bi-eye-fill"></i>
+                                <i class="bi bi-eye-slash-fill d-none"></i>
+                            </button>
+                        </div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Sign In</button>
+
+                    <button type="submit" class="btn btn-primary w-100">Sign In</button>
                 </form>
-
-                </main>
-        </div>
-
-        <div class="image-section">
-            <img src="https://content3.jdmagicbox.com/comp/kanchipuram/b9/9999pxx44.xx44.220416235327.g1b9/catalogue/svce-central-library-kanchipuram-libraries-1qbaidwusf.jpg" 
-                 alt="A group of students sitting on a university lawn" 
-                 class="cover-image">
+            </div>
         </div>
     </div>
-    
+
     <script>
-        const checkbox = document.getElementById('theme-toggle');
-        const html = document.documentElement;
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- THEME TOGGLE LOGIC ---
+            const themeToggle = document.getElementById('theme-toggle');
+            const htmlElement = document.documentElement;
+            const applyTheme = (theme) => {
+                htmlElement.classList.remove('light', 'dark');
+                htmlElement.classList.add(theme);
+            };
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme) { applyTheme(savedTheme); } else { applyTheme(prefersDark ? 'dark' : 'light'); }
+            
+            themeToggle.addEventListener('click', () => {
+                const newTheme = htmlElement.classList.contains('dark') ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
+            });
 
-        const applyTheme = (theme) => {
-            html.classList.remove('light', 'dark');
-            html.classList.add(theme);
-            checkbox.checked = theme === 'dark';
-        };
+            // --- PASSWORD TOGGLE LOGIC ---
+            const passwordInput = document.getElementById('password');
+            const passwordToggleButton = document.getElementById('password-toggle');
+            const eyeIcon = passwordToggleButton.querySelector('.bi-eye-fill');
+            const eyeSlashIcon = passwordToggleButton.querySelector('.bi-eye-slash-fill');
 
-        const savedTheme = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        
-        if (savedTheme) {
-            applyTheme(savedTheme);
-        } else {
-            applyTheme(prefersDark ? 'dark' : 'light');
-        }
-
-        checkbox.addEventListener('change', () => {
-            const newTheme = checkbox.checked ? 'dark' : 'light';
-            localStorage.setItem('theme', newTheme);
-            applyTheme(newTheme);
+            if (passwordInput && passwordToggleButton) {
+                passwordToggleButton.addEventListener('click', () => {
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        eyeIcon.classList.add('d-none');
+                        eyeSlashIcon.classList.remove('d-none');
+                    } else {
+                        passwordInput.type = 'password';
+                        eyeIcon.classList.remove('d-none');
+                        eyeSlashIcon.classList.add('d-none');
+                    }
+                });
+            }
         });
     </script>
 </body>

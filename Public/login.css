@@ -1,245 +1,182 @@
-/*
-        ========================================
-        Senior Frontend Developer: Gradlink Login Page
-        Tech: Pure HTML & CSS
-        Features:
-        - Two-column responsive layout
-        - Shadcn UI inspired design
-        - CSS-only dark/light theme toggle
-        ========================================
-        */
-
-        /* 1. THEME & VARIABLES
-        ---------------------------------------- */
-        :root {
-            --background: #fcfcfc;
-            --foreground: hsl(222.2 84% 4.9%);
-            --card: hsl(0 0% 100%);
-            --card-foreground: hsl(222.2 84% 4.9%);
-            --primary: hsl(222.2 47.4% 11.2%);
-            --primary-foreground: hsl(210 40% 98%);
-            --muted-foreground: hsl(215.4 16.3% 46.9%);
-            --border: hsl(214.3 31.8% 91.4%);
-            --input: hsl(214.3 31.8% 91.4%);
-            --ring: hsl(222.2 84% 4.9%);
-            --radius: 0.5rem;
-        }
-
-        /* Dark Theme variables applied via checkbox hack */
-        .dark {
-            --background: #121212;
-            --foreground: hsl(210 40% 98%);
-            --card: hsl(224, 71%, 4%);
-            --card-foreground: hsl(210 40% 98%);
-            --primary: hsl(210 40% 98%);
-            --primary-foreground: hsl(222.2 47.4% 11.2%);
-            --muted-foreground: hsl(215 20.2% 65.1%);
-            --border: hsl(217.2 32.6% 17.5%);
-            --input: hsl(217.2 32.6% 17.5%);
-            --ring: hsl(212.7 93.5% 67.8%);
-        }
-
-
-        /* 2. BASE & RESET STYLES
-        ---------------------------------------- */
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        html {
-            /* Smoothly transition theme changes */
-            transition: background-color 0.3s, color 0.3s;
-        }
+ @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
+        /* --- 1. ALUMNIUM THEME --- */
+        :root {
+            --background: #f8f9fa;
+            --foreground: #111827;
+            --card: #ffffff;
+            --primary: #111827;
+            --primary-foreground: #ffffff;
+            --secondary: #f3f4f6;
+            --muted-foreground: #6b7280;
+            --border: #e5e7eb;
+            --radius: 1rem;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+            --glow-color: rgba(139, 92, 246, 0.25);
+        }
+        html.dark {
+            --background: #0d1117;
+            --foreground: #e6edf3;
+            --card: #161b22;
+            --primary: #e6edf3;
+            --primary-foreground: #0d1117;
+            --secondary: #21262d;
+            --muted-foreground: #8b949e;
+            --border: #30363d;
+            --glow-color: rgba(139, 92, 246, 0.3);
+        }
+
+        /* --- 2. SIGN-IN PAGE LAYOUT --- */
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: var(--font-sans);
             background-color: var(--background);
             color: var(--foreground);
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            font-size: 15px;
         }
-        
-        /* 3. LAYOUT
-        ---------------------------------------- */
-        .page-container {
+        .auth-layout {
             display: grid;
             grid-template-columns: 1fr 1fr;
             min-height: 100vh;
-            width: 100%;
         }
-
-        .login-section {
-            position: relative;
+        .auth-form-section {
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 2rem;
-        }
-
-        .image-section {
             position: relative;
-            background-color: #000; /* Fallback */
         }
-
-        .cover-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: filter 0.3s ease;
+        .auth-branding-section {
+            position: relative;
+            background-color: var(--secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 3rem;
+            overflow: hidden;
         }
         
-        /* 4. COMPONENTS
-        ---------------------------------------- */
-        
-        /* Header & Logo */
-        .page-header {
+        .auth-branding-section::before {
+            content: '';
             position: absolute;
-            top: 1.5rem;
-            left: 1.5rem;
-            right: 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            top: 50%;
+            left: 50%;
+            width: 1200px;
+            height: 1200px;
+            background-image: radial-gradient(circle, var(--glow-color) 0%, rgba(0,0,0,0) 60%);
+            animation: slow-pan 25s linear infinite alternate;
         }
 
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-weight: 600;
-            font-size: 1.125rem;
-        }
-        .logo-box {
-            width: 24px;
-            height: 24px;
-            background-color: var(--foreground);
-            border-radius: 0.25rem;
+        @keyframes slow-pan {
+            0% { transform: translate(-45%, -45%); }
+            100% { transform: translate(-55%, -55%); }
         }
 
-        /* Login Card */
+        .branding-content {
+            position: relative;
+            z-index: 2;
+        }
+        .branding-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--foreground);
+        }
+         .branding-content p {
+            color: var(--muted-foreground);
+         }
+
+        /* --- 3. COMPONENTS --- */
         .login-card {
             width: 100%;
             max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
+            position: relative;
+            z-index: 2;
         }
-
-        .login-card-header {
-            text-align: center;
-        }
-        .login-card-header h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            letter-spacing: -0.025em;
-            margin-bottom: 0.5rem;
-        }
-        .login-card-header p {
-            color: var(--muted-foreground);
-            font-size: 0.9rem;
-        }
-
-        /* Form Elements */
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        label {
-            font-size: 0.875rem;
+        .form-control {
+            background-color: var(--secondary);
+            border: 1px solid var(--border);
+            border-radius: 0.75rem;
+            padding: 0.85rem 1rem;
             font-weight: 500;
-        }
-        
-        input[type="email"],
-        input[type="password"] {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--input);
-            background-color: var(--background);
             color: var(--foreground);
-            border-radius: var(--radius);
-            font-size: 0.9rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
         }
-        input:focus {
-            outline: none;
-            border-color: var(--ring);
-            box-shadow: 0 0 0 1px var(--ring);
+        .form-control::placeholder {
+            color: var(--muted-foreground);
         }
-
-        /* UPDATED: Base button class */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%; /* Stretches button to full width */
-            border-radius: var(--radius);
-            padding: 0.75rem 1rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            border: none;
+        .form-control:focus {
+            background-color: var(--secondary);
+            border-color: var(--glow-color);
+            box-shadow: 0 0 0 3px var(--glow-color);
+            color: var(--foreground);
         }
-        
         .btn-primary {
             background-color: var(--primary);
             color: var(--primary-foreground);
-            margin-top: 1rem;
+            border: none;
+            border-radius: 0.75rem;
+            padding: 0.85rem 1rem;
+            font-weight: 600;
         }
-        .btn-primary:hover {
-            opacity: 0.9;
+        html.dark .btn-primary {
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+        }
+        .aurora-glow-form {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px; height: 800px;
+            background: radial-gradient(ellipse at center, var(--glow-color) 0%, rgba(0,0,0,0) 70%);
+            filter: blur(100px); z-index: 0;
         }
 
-        /* 5. CSS-ONLY THEME TOGGLE
-        ---------------------------------------- */
-        .theme-toggle-checkbox {
-            display: none; /* Hide the actual checkbox */
+        .forgot-link {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--muted-foreground);
+            text-decoration: none;
+            transition: color 0.2s ease-in-out;
         }
-        
-        .theme-toggle-label {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 40px;
-            height: 40px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
+        .forgot-link:hover {
+            color: var(--primary);
+        }
+        html.dark .forgot-link:hover {
+            color: var(--primary);
+        }
+
+        /* NEW: Password Toggle Button */
+        .password-wrapper {
+            position: relative;
+        }
+        .password-toggle-btn {
+            position: absolute;
+            top: 50%;
+            right: 0.5rem;
+            transform: translateY(-50%);
+            background: none !important;
+            border: none !important;
+            color: var(--muted-foreground);
+            padding: 0.5rem;
+            line-height: 1;
+            box-shadow: none !important;
             cursor: pointer;
-            transition: background-color 0.2s;
         }
-        .theme-toggle-label:hover {
-            background-color: var(--input);
+        .password-toggle-btn:hover {
+            color: var(--foreground);
         }
-
-        /* Hide moon icon by default (in light mode) */
-        .theme-toggle-label .moon-icon { display: none; }
-        .theme-toggle-label .sun-icon { display: block; }
-        
-        /* Show moon icon and apply dark class when checkbox is checked */
-        .theme-toggle-checkbox:checked + html .theme-toggle-label .moon-icon { display: block; }
-        .theme-toggle-checkbox:checked + html .theme-toggle-label .sun-icon { display: none; }
-        .theme-toggle-checkbox:checked + html .cover-image {
-             filter: brightness(0.8) grayscale(1);
+        .password-wrapper .form-control {
+            padding-right: 3rem; /* Make space for the icon */
         }
 
-        /* 6. RESPONSIVE DESIGN
-        ---------------------------------------- */
-        @media (max-width: 1024px) {
-            .page-container {
-                grid-template-columns: 1fr;
-            }
-            .image-section {
-                display: none;
-            }
-            .login-section {
-                justify-content: flex-start;
-                padding-top: 6rem;
-            }
+        .theme-toggle-btn { position: absolute; top: 1.5rem; right: 1.5rem; background-color: var(--card); border: 1px solid var(--border); color: var(--muted-foreground); width: 40px; height: 40px; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; z-index: 10; }
+        .theme-toggle-btn .sun-icon { display: block; }
+        .theme-toggle-btn .moon-icon { display: none; }
+        html.dark .theme-toggle-btn .sun-icon { display: none; }
+        html.dark .theme-toggle-btn .moon-icon { display: block; }
+
+        @media (max-width: 992px) {
+            .auth-layout { grid-template-columns: 1fr; }
+            .auth-branding-section { display: none; }
         }
