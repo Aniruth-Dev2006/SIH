@@ -117,16 +117,13 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- 1. INITIAL DATA ---
-            // FIX: Replaced EJS tag with static mock data to resolve SyntaxError.
-            const initialUsers = [
-                { name: "Priya Sharma", rno: "23AL001", email: "priya.sharma@example.com", role: "Alumni", batch: 2023 },
-                { name: "Rohan Verma", rno: "25CS012", email: "rohan.verma@example.com", role: "Student", batch: 2025 },
-                { name: "Anjali Gupta", rno: "22ME034", email: "anjali.gupta@example.com", role: "Alumni", batch: 2022 },
-                { name: "Vikram Singh", rno: "24EE007", email: "vikram.singh@example.com", role: "Student", batch: 2024 },
-                { name: "Sameer Khan", rno: "21CE056", email: "sameer.khan@example.com", role: "Alumni", batch: 2021 },
-                { name: "Neha Reddy", rno: "26IT023", email: "neha.reddy@example.com", role: "Student", batch: 2026 },
-                { name: "Arjun Desai", rno: "20CS101", email: "arjun.desai@example.com", role: "Alumni", batch: 2020 }
-            ];
+            var users = <%- JSON.stringify(users) %>;  
+
+            // Now your loop works
+            var initialUsers = [];
+            for (var i = 0; i < users.length; i++) {
+                initialUsers.push(users[i]);
+            }
 
             // --- 2. ELEMENT SELECTORS ---
             const tableBody = document.getElementById('users-table-body');
