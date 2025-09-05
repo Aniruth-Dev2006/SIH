@@ -32,7 +32,8 @@
                         <a href="#" class="user-profile">
                             <img src="https://placehold.co/40x40/EBEBEB/000000?text=A" alt="Admin">
                             <div>
-                                <div class="fw-bold">Admin User</div><small class="text-muted-foreground"><%=admin%></small></div>
+                                <div class="fw-bold">Admin User</div><small class="text-muted-foreground"><%=admin%></small>
+                            </div>
                         </a>
                         <a href="#" class="profile-menu-trigger" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></a>
                         <ul class="dropdown-menu">
@@ -55,7 +56,6 @@
             <h1 class="h2 d-none d-lg-block mb-4">Dashboard</h1>
 
             <div class="row g-4">
-                <!-- Stat Cards -->
                 <div class="col-sm-6 col-xl-3 animate-on-scroll" style="--animation-order: 1;">
                     <div class="content-card">
                         <div class="aurora-glow"></div>
@@ -93,33 +93,40 @@
                     <div class="content-card">
                         <div class="aurora-glow"></div>
                         <h5 class="mb-3">Upcoming Events</h5>
-                        <div class="col-12 animate-on-scroll" style="--animation-order: 5;">
-                            <div class="content-card">
-                                <div class="aurora-glow"></div>
-                                <div class="table-responsive">
-                                    <table class="table mb-0">
-                                        <thead>
+                        <div class="table-responsive">
+                            <table class="table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Event Name</th>
+                                        <th>Date</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% if(events && events.length > 0) { %>
+                                        <% for(var i = 0; i < events.length; i++) { %>
                                             <tr>
-                                                <th>Event Name</th>
-                                                <th>Date</th>
-                                                <th>Time</th>
+                                                <td><%= events[i].title %></td>
+                                                <td><%= events[i].date %></td>
+                                                <td>
+                                                    <span class="fw-bold"><%= events[i].registered_count %></span> 
+                                                    <% if(events[i].time) { %>
+                                                        <%= events[i].time %>
+                                                    <% } %>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody>
-                                            <%for(var i=0;i<events.length;i++){%>
-                                            <tr>
-                                                <td><%=events[i].title%></td>
-                                                <td><%=events[i].date%></td>
-                                                <td><span class="fw-bold"></span> <%=events[i].time%></td>
-                                            </tr>
-                                            <%}%>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                                        <% } %>
+                                    <% } else { %>
+                                        <tr>
+                                            <td colspan="3" class="text-center">No upcoming events.</td>
+                                        </tr>
+                                    <% } %>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
+
 
                 <div class="col-lg-6 animate-on-scroll" style="--animation-order: 6;">
                     <div class="content-card">
@@ -129,11 +136,13 @@
                             <li class="mb-3 pb-3 border-bottom">
                                 <p class="fw-bold mb-1">
                                     <%=ann%>
-                                </p><small class="text-muted-foreground">Posted 2 hours ago</small></li>
+                                </p><small class="text-muted-foreground">Posted 2 hours ago</small>
+                            </li>
                             <li>
                                 <p class="fw-bold mb-1">
                                     <%=ann1%>
-                                </p><small class="text-muted-foreground">Posted yesterday</small></li>
+                                </p><small class="text-muted-foreground">Posted yesterday</small>
+                            </li>
                         </ul>
                         <button class="btn btn-light mt-3" data-bs-toggle="modal" data-bs-target="#announcementModal">✨ Generate with AI</button>
                     </div>
@@ -143,7 +152,8 @@
                         <div class="aurora-glow"></div>
                         <h5 class="mb-3">Latest Feedback</h5>
                         <div class="p-3 rounded-2 mb-3" style="background-color: var(--secondary); flex-grow: 1;">
-                            <p class="mb-1 fst-italic">"The recent webinar on AI was fantastic. It would be great to have more events focused on emerging technologies..."</p><small class="text-muted-foreground">- Priya Sharma, Class of '22</small></div>
+                            <p class="mb-1 fst-italic">"The recent webinar on AI was fantastic. It would be great to have more events focused on emerging technologies..."</p><small class="text-muted-foreground">- Priya Sharma, Class of '22</small>
+                        </div>
                         <button class="btn btn-light mt-3" data-bs-toggle="modal" data-bs-target="#feedbackModal">✨ Summarize Feedback</button>
                     </div>
                 </div>
@@ -151,8 +161,6 @@
         </main>
     </div>
 
-    <!-- Gemini Modals -->
-    <!-- Announcement Generator Modal -->
     <div class="modal fade" id="announcementModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -177,7 +185,6 @@
         </div>
     </div>
 
-    <!-- Feedback Summary Modal -->
     <div class="modal fade" id="feedbackModal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -232,8 +239,8 @@
             }
 
             // --- GEMINI API INTEGRATION ---
-            const apiKey = "AIzaSyBkL4U3az1ccg9s8_z3YKSU0y6IhXf7898";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const apiKey = "YOUR_API_KEY_HERE"; // Replace with your actual key
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
             const callGeminiAPI = async (payload, resultElement, buttonElement) => {
                 const originalButtonText = buttonElement.innerHTML;
