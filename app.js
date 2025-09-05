@@ -135,12 +135,40 @@ app.post("/create_student",function(req,res){
   });
   user.save()
     .then(result=>{
-      res.send("success");
+      res.redirect("/all_users");
     })
     .catch(err=>{
       console.log("error "+err);
     });
 });
+app.post("/all_users/:email",function(req,res){
+  res.send(req.params.email);
+});
+app.post("/all_users/delete/:email",function(req,res){
+  Student.findOne({email:req.params.email})
+    .then(result=>{
+      if(result){
+        Student.deleteOne({email:req.params.email})
+          .then(result=>{
+            res.redirect("/all_users");
+          })
+          .catch(err=>{
+            console.log("error "+err);
+          });
+      }else{
+        Alumini.deleteOne({email:req.params.email})
+          .then(result=>{
+            res.redirect("/all_users");
+          })
+          .catch(err=>{
+            console.log("error "+err);
+          });
+      }
+    })
+    .catch(err=>{
+      console.log("error "+err);
+    });
+})
 app.listen(3000, function(req, res){
     console.log("server is running\n");
 });
