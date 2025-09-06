@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Requests | Alumnium</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        /* --- 1. ALUMNIUM THEME --- */
+        :root {
+            --background: #f8f9fa; --foreground: #111827; --card: #ffffff; --primary: #111827;
+            --primary-foreground: #ffffff; --secondary: #f3f4f6; --muted-foreground: #6b7280;
+            --border: #e5e7eb; --radius: 1rem; --font-sans: 'Inter', sans-serif;
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+            --glow-color: rgba(139, 92, 246, 0.2); --danger: #dc3545; --success: #16a34a;
+        }
+        html.dark {
+            --background: #0d1117; --foreground: #e6edf3; --card: #161b22; --primary: #e6edf3;
+            --primary-foreground: #0d1117; --secondary: #21262d; --muted-foreground: #8b949e;
+            --border: #30363d; --glow-color: rgba(139, 92, 246, 0.2); --danger: #ff5b5b; --success: #22c55e;
+        }
+
+        /* --- 2. DASHBOARD STRUCTURE --- */
+        html { overflow-y: scroll; }
+        body {
+            font-family: var(--font-sans); background-color: var(--background); color: var(--foreground);
+            overflow-x: hidden; font-size: 15px;
+        }
+        .dashboard-layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+        .sidebar {
+            background-color: var(--card); border-right: 1px solid var(--border); display: flex;
+            flex-direction: column; padding: 1.5rem; transition: transform 0.3s ease-in-out;
+            position: fixed; top: 0; left: 0; height: 100%; width: 280px; z-index: 1050;
+        }
+        .main-content { background-color: var(--secondary); padding: 2.5rem; overflow-y: auto; grid-column: 2; }
+        h1.h2 { font-size: 1.75rem; font-weight: 700; }
+
+        /* --- 3. SIDEBAR & NAVIGATION --- */
+        .sidebar-header { font-size: 1.5rem; font-weight: 700; color: var(--foreground); text-decoration: none; margin-bottom: 2rem; display:flex; align-items:center; gap: 0.5rem; }
+        .sidebar-nav .nav-link { color: var(--muted-foreground); font-weight: 500; padding: 0.75rem 1rem; border-radius: 0.75rem; margin-bottom: 0.25rem; display: flex; align-items: center; font-size: 14px; transition: all 0.2s ease; }
+        .sidebar-nav .nav-link i { margin-right: 0.75rem; font-size: 1.1rem; }
+        .sidebar-nav .nav-link:hover { color: var(--foreground); background-color: var(--secondary); }
+        .sidebar-nav .nav-link.active { color: var(--primary-foreground); background-color: var(--primary); }
+        .sidebar-footer { margin-top: auto; border-top: 1px solid var(--border); padding-top: 1.5rem; }
+        .user-profile { display: flex; align-items: center; text-decoration: none; color: var(--foreground); flex-grow: 1; }
+        .user-profile img { width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; }
+        .profile-menu-trigger { color: var(--muted-foreground); text-decoration: none; padding: 0.5rem; margin-left: 0.5rem; border-radius: 0.5rem; }
+        .profile-menu-trigger:hover { background-color: var(--secondary); color: var(--foreground); }
+        .dropdown-menu { background-color: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-lg); padding: 0.5rem; }
+        .dropdown-item { color: var(--foreground); padding: 0.6rem 1rem; border-radius: 0.5rem; font-weight: 500; font-size: 14px; }
+        .dropdown-item:hover, .dropdown-item:focus { background-color: var(--secondary); color: var(--foreground); }
+        .dropdown-item.text-danger { color: var(--danger) !important; }
+        .dropdown-item.text-danger:hover { background-color: rgba(220, 53, 69, 0.1); }
+        html.dark .dropdown-item.text-danger:hover { background-color: rgba(255, 91, 91, 0.1); }
+        .dropdown-divider { border-color: var(--border); }
+
+        /* --- 4. GENERIC & PAGE-SPECIFIC COMPONENTS --- */
+        .content-card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 1.5rem; position: relative; overflow: hidden; }
+        .aurora-glow { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; background: radial-gradient(ellipse at center, var(--glow-color) 0%, rgba(0, 0, 0, 0) 70%); filter: blur(80px); z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s ease-out; }
+        .is-visible .aurora-glow { opacity: 1; }
+        .btn { border-radius: 0.5rem; font-weight: 500; font-size: 14px; }
+        .btn-light { background-color: var(--secondary); border-color: var(--border); color: var(--foreground); }
+        .table { --bs-table-bg: transparent; --bs-table-color: var(--foreground); --bs-table-border-color: var(--border); font-size: 14px; }
+        .table thead th { color: var(--muted-foreground); font-weight: 500; border-bottom: 1px solid var(--border); }
+        .table tbody tr:last-child td { border-bottom: 0; }
+        .table td { vertical-align: middle; }
+        
+        /* HOVER FIX */
+        html.dark .table-hover > tbody > tr:hover > * {
+            --bs-table-accent-bg: var(--secondary);
+            color: var(--foreground);
+        }
+
+        /* --- 5. ANIMATIONS & RESPONSIVENESS --- */
+        .animate-on-scroll { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .is-visible { opacity: 1; transform: translateY(0); }
+        .mobile-header { display: none; }
+        .sidebar-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1040; opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out; }
+        body.sidebar-open .sidebar-backdrop { opacity: 1; visibility: visible; }
+        @media (max-width: 991.98px) {
+            .dashboard-layout { grid-template-columns: 1fr; }
+            .main-content { grid-column: 1 / -1; padding: 1.5rem; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.show { transform: translateX(0); }
+            .mobile-header { display: flex; justify-content: space-between; align-items: center; }
+        }
+        .modal-content { background-color: var(--card); border-radius: var(--radius); border: 1px solid var(--border); }
+        .modal-body .text-success { color: var(--success) !important; }
+        .modal-body .text-danger { color: var(--danger) !important; }
+    </style>
+</head>
+<body>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <a href="/admin" class="sidebar-header"><i class="bi bi-link-45deg"></i> Alumnium</a>
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link" href="/admin"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/user_management"><i class="bi bi-people-fill"></i> User Management</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/announcements"><i class="bi bi-megaphone-fill"></i> Announcements</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/events"><i class="bi bi-calendar-event-fill"></i> Events</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/donations"><i class="bi bi-cash-coin"></i> Donations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/feedback"><i class="bi bi-chat-quote-fill"></i> Feedback</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="dropdown dropend w-100">
+                    <div class="d-flex align-items-center">
+                        <a href="#" class="user-profile">
+                            <img src="https://placehold.co/40x40/EBEBEB/000000?text=A" alt="Admin">
+                            <div><div class="fw-bold">Admin User</div><small class="text-muted-foreground"><%= admin %></small></div>
+                        </a>
+                        <a href="#" class="profile-menu-trigger" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" id="theme-menu-toggle"><i class="bi bi-moon-stars-fill me-2"></i> Theme</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="mobile-header d-lg-none mb-4">
+                <h1 class="h2">Pending Requests</h1>
+                <button class="btn btn-light" type="button" id="sidebarToggle"><i class="bi bi-list"></i></button>
+            </div>
+            
+            <div class="d-flex justify-content-between align-items-center mb-4 d-none d-lg-flex">
+                <h1 class="h2">Pending Alumni Requests</h1>
+                <a href="/user_management" class="btn btn-light d-none d-lg-flex align-items-center"><i class="bi bi-arrow-left me-2"></i> Back to Hub</a>
+            </div>
+
+            <div class="content-card animate-on-scroll">
+                <div class="aurora-glow"></div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Roll Number</th>
+                                <th>Batch</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (requests && requests.length > 0) { %>
+                                <% requests.forEach(request => { %>
+                                    <tr>
+                                        <td class="fw-bold"><%= request.name %></td>
+                                        <td class="text-muted-foreground"><%= request.email %></td>
+                                        <td class="text-muted-foreground"><%= request.rno %></td>
+                                        <td class="text-muted-foreground"><%= request.batch %></td>
+                                        <td class="text-end">
+                                            <div class="d-flex justify-content-end gap-2">
+                                                <form action="/reject-alumni" method="POST" class="d-inline">
+                                                    <input type="hidden" name="requestId" value="<%= request._id %>">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger">Reject</button>
+                                                </form>
+                                                <form action="/approve-alumni" method="POST" class="d-inline">
+                                                    <input type="hidden" name="requestId" value="<%= request._id %>">
+                                                    <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted-foreground py-5">
+                                        <h5 class="fw-bold">No Pending Requests</h5>
+                                        <p class="mb-0">All alumni sign-up requests have been reviewed.</p>
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Status Modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center py-5">
+                    <div class="aurora-glow"></div>
+                    <i id="statusModalIcon" class="bi mb-3" style="font-size: 4rem;"></i>
+                    <h5 class="modal-title fw-bold" id="statusModalLabel"></h5>
+                    <p class="text-muted-foreground mt-2" id="statusModalMessage"></p>
+                    <button type="button" class="btn btn-primary w-100 mt-4" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- POPUP LOGIC ---
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            if (status === 'approved' || status === 'rejected') {
+                const statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+                const modalTitle = document.getElementById('statusModalLabel');
+                const modalMessage = document.getElementById('statusModalMessage');
+                const modalIcon = document.getElementById('statusModalIcon');
+
+                modalIcon.classList.remove('bi-check-circle-fill', 'text-success', 'bi-x-circle-fill', 'text-danger');
+
+                if (status === 'approved') {
+                    modalTitle.textContent = 'User Approved!';
+                    modalMessage.textContent = 'The alumni account has been created and is now active.';
+                    modalIcon.classList.add('bi-check-circle-fill', 'text-success');
+                } else {
+                    modalTitle.textContent = 'Request Rejected';
+                    modalMessage.textContent = 'The sign-up request has been successfully removed.';
+                    modalIcon.classList.add('bi-x-circle-fill', 'text-danger');
+                }
+                statusModal.show();
+                
+                document.getElementById('statusModal').addEventListener('hidden.bs.modal', () => {
+                    window.history.replaceState({}, document.title, "/pending-requests");
+                });
+            }
+
+            // --- SHARED DASHBOARD LOGIC ---
+            const themeMenuToggle = document.getElementById('theme-menu-toggle');
+            const htmlElement = document.documentElement;
+            const applyTheme = (theme) => {
+                htmlElement.classList.remove('light', 'dark');
+                htmlElement.classList.add(theme);
+            };
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            applyTheme(savedTheme);
+
+            themeMenuToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const newTheme = htmlElement.classList.contains('dark') ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
+            });
+
+            const animatedElements = document.querySelectorAll('.animate-on-scroll');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); } });
+            }, { threshold: 0.1 });
+            animatedElements.forEach(el => { observer.observe(el); });
+
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', () => { 
+                    sidebar.classList.add('show'); 
+                    document.body.classList.add('sidebar-open'); 
+                });
+            }
+            if (backdrop) {
+                backdrop.addEventListener('click', () => { 
+                    sidebar.classList.remove('show'); 
+                    document.body.classList.remove('sidebar-open'); 
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+

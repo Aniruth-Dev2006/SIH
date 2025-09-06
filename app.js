@@ -9,263 +9,299 @@ app.set("view engine", "ejs");
 var ad = "panda"; // This should be managed with sessions in a real app
 mongoose.connect("mongodb://localhost:27017/communityDB");
 
-// Schemas
+// --- Schemas ---
 const adminschema = new mongoose.Schema({ email:String, password:String });
 const Admin = mongoose.model("admin",adminschema);
+
 const studentschema = new mongoose.Schema({ name:String, email:String, password:String, batch:String, role:String, rno:String,course:String,dept:String });
 const Student = mongoose.model("student",studentschema);
+
 const aluminschema = new mongoose.Schema({ name:String, email:String, password:String, batch:String, role:String, rno:String,course:String,dept:String });
 const Alumini = mongoose.model("alumini",aluminschema);
+
 const announcementschema = new mongoose.Schema({ title: String, content: String, date: { type: Date, default: Date.now } });
 const Announcement = mongoose.model("Announcement", announcementschema);
+
 const eventschema = new mongoose.Schema({
-    title: String,
-    date: String,
-    time: String,
-    venue_name: String,
-    venue_link: String,
-    description: String,
-    organizer_name: String,
-    organizer_contact: String,
-    category: String,
-    status: {
-        type: String,
-        default: 'Upcoming'
-    },
-    created_at: {
-        type: Date,
-        default: Date.now
-    }
+    title: String, date: String, time: String, venue_name: String,
+    venue_link: String, description: String, organizer_name: String,
+    organizer_contact: String, category: String,
+    status: { type: String, default: 'Upcoming' },
+    created_at: { type: Date, default: Date.now }
 });
 const Event = mongoose.model("Event", eventschema);
-// --- Standard Page Routes ---
+
+const pendingRequestSchema = new mongoose.Schema({
+    name: String, email: String, password: String, batch: String,
+    role: String, rno: String, course: String, dept: String
+});
+const PendingRequest = mongoose.model("pendingRequest", pendingRequestSchema);
+
+
+// --- AUTHENTICATION & SIGNUP ROUTES ---
 
 app.get("/", function(req, res){
     res.render("login");
 });
-app.post("/", function (req, res) {
-  const { email, password } = req.body;
 
-  Admin.findOne({ email, password })
-    .then(admin => {
-      if (admin) {
-        ad = req.body.email;
-        res.redirect("/admin");
-        return Promise.reject("handled");
-      }
-      return Alumini.findOne({ email, password });
-    })
-    .then(alumni => {
-      if (alumni) {
-        res.send("alumni");
-        return Promise.reject("handled");
-      }
-      return Student.findOne({ email, password });
-    })
-    .then(student => {
-      if (student) {
-        res.send("student");
-        return Promise.reject("handled");
-      }
-      res.redirect("/");
-    })
-    .catch(err => {
-      if (err === "handled") return; 
-      console.log("error " + err);
-      res.status(500).send("Server error");
-    });
+app.post("/", async function (req, res) {
+    const { email, password } = req.body;
+    try {
+        // 1. Check if user is an admin
+        const admin = await Admin.findOne({ email, password });
+        if (admin) {
+            ad = email;
+            return res.redirect("/admin");
+        }
+
+        // 2. Check if the user's request is pending
+        const pending = await PendingRequest.findOne({ email, password });
+        if (pending) {
+            return res.redirect("/?status=pending_approval");
+        }
+
+        // 3. Check if user is an approved alumni
+        const alumni = await Alumini.findOne({ email, password });
+        if (alumni) {
+            // Replace with actual alumni dashboard redirect
+            return res.send("alumni logged in");
+        }
+
+        // 4. Check if user is a student
+        const student = await Student.findOne({ email, password });
+        if (student) {
+            // Replace with actual student dashboard redirect
+            return res.send("student logged in");
+        }
+
+        // 5. If no user is found
+        res.redirect("/?status=login_failed");
+
+    } catch (err) {
+        console.log("Login Error: " + err);
+        res.status(500).send("Server error during login.");
+    }
 });
 
+// Route to render the signup page
+app.get("/signup", function(req, res){
+    res.render("signup");
+});
+
+// Route to handle signup form submission
+app.post("/signup", async function(req, res){
+    const { name, email, password, batch, rno, course, dept } = req.body;
+
+    try {
+        // Check if email already exists in any collection
+        const existingAdmin = await Admin.findOne({ email });
+        const existingAlumni = await Alumini.findOne({ email });
+        const existingStudent = await Student.findOne({ email });
+        const existingPending = await PendingRequest.findOne({ email });
+
+        if (existingAdmin || existingAlumni || existingStudent || existingPending) {
+            return res.redirect("/signup?status=email_exists"); // You can add a message on signup page
+        }
+
+        const newRequest = new PendingRequest({
+            name, email, password, batch, rno, course, dept,
+            role: 'Alumni'
+        });
+
+        await newRequest.save();
+        res.redirect("/?status=signup_success");
+
+    } catch (err) {
+        console.error("Error creating pending request:", err);
+        res.status(500).send("Error submitting request.");
+    }
+});
+
+
+// --- ADMIN & USER MANAGEMENT ROUTES ---
 app.get("/user_management", function(req, res){
-  res.render("user_management",{admin:ad});
+    res.render("user_management",{admin:ad});
 });
 
 app.get("/all_users", function(req, res){
-  // Check for a success flag from the delete operation
-  const deleteSuccess = req.query.deleteSuccess === 'true';
-  Promise.all([
-      Alumini.find({}),
-      Student.find({})
-  ]).then(([alumni, students]) => {
-      const allUsers = [...alumni, ...students];
-      res.render("all_users", { 
-          users: allUsers, 
-          admin: ad,
-          deleteSuccess: deleteSuccess // Pass the flag to the template
-      });
-  }).catch(err => {
-      console.log("error " + err);
-      res.status(500).send("Server error");
-  });
+    const deleteSuccess = req.query.deleteSuccess === 'true';
+    Promise.all([
+        Alumini.find({}),
+        Student.find({})
+    ]).then(([alumni, students]) => {
+        const allUsers = [...alumni, ...students];
+        res.render("all_users", {
+            users: allUsers,
+            admin: ad,
+            deleteSuccess: deleteSuccess
+        });
+    }).catch(err => {
+        console.log("error " + err);
+        res.status(500).send("Server error");
+    });
 });
 
 app.get("/admin", function(req, res){
-  Announcement.find().sort({ _id: -1 }).limit(2)
-  .then(docs => {
-    Event.find({status:"Upcoming"})
-      .then(result => {
-        Event.find({status:"Upcoming"})
-          .then(up => {
-            Event.find({status:"Completed"})
-                .then(tot=>{
-                    res.render("admin", {
-                        admin: ad,
-                        ann: docs.length > 0 ? docs[0].title : "No announcements",
-                        ann1: docs.length > 1 ? docs[1].title : "No older announcements",
-                        events: result,
-                        Upcoming: up,
-                        total:tot
-                    });
-                });
-          });
-      });
-  })
-  .catch(err => console.log("error " + err));
+    Promise.all([
+        Announcement.find().sort({ _id: -1 }).limit(2),
+        Event.find(),
+        Event.countDocuments({status:"Upcoming"}),
+        Event.countDocuments({status:"Completed"})
+    ]).then(([docs, allEvents, upcomingCount, completedCount]) => {
+        res.render("admin", {
+            admin: ad,
+            ann: docs.length > 0 ? docs[0].title : "No announcements",
+            ann1: docs.length > 1 ? docs[1].title : "No older announcements",
+            events: allEvents,
+            Upcoming: { length: upcomingCount },
+            total: { length: completedCount }
+        });
+    }).catch(err => {
+        console.log("error " + err);
+        res.status(500).send("Server Error");
+    });
 });
 
-// --- API Route for Live Search ---
-app.get("/api/search-users", function(req, res) {
-    const { name, role, batch } = req.query;
-
-    let query = {};
-
-    // Build the dynamic query for powerful searching
-    if (name) {
-        query.name = { $regex: name, $options: 'i' };
-    }
-    if (batch) {
-        query.batch = batch;
-    }
-
-    const searchTasks = [];
-    if (role === "Student") {
-        searchTasks.push(Student.find(query));
-    } else if (role === "Alumni") {
-        searchTasks.push(Alumini.find(query));
-    } else {
-        searchTasks.push(Student.find(query));
-        searchTasks.push(Alumini.find(query));
-    }
-
-    Promise.all(searchTasks)
-        .then(results => {
-            const combinedResults = results.flat();
-            res.json(combinedResults);
+app.get("/pending-requests", function(req, res){
+    PendingRequest.find({})
+        .then(requests => {
+            res.render("pending-requests", {
+                requests: requests,
+                admin: ad
+            });
         })
         .catch(err => {
-            console.error("API Search Error:", err);
-            res.status(500).json({ error: "An error occurred during search." });
+            console.error("Error fetching pending requests:", err);
+            res.status(500).send("Server error");
         });
 });
 
-// --- Create Student Routes ---
+app.post("/approve-alumni", function(req, res){
+    const { requestId } = req.body;
+    PendingRequest.findById(requestId)
+        .then(request => {
+            if (!request) {
+                return res.status(404).send("Request not found.");
+            }
+            const newAlumni = new Alumini({
+                name: request.name,
+                email: request.email,
+                password: request.password,
+                batch: request.batch,
+                role: "Alumni",
+                rno: request.rno,
+                course: request.course,
+                dept: request.dept
+            });
+            return newAlumni.save().then(() => PendingRequest.findByIdAndDelete(requestId));
+        })
+        .then(() => {
+            res.redirect("/pending-requests?status=approved");
+        })
+        .catch(err => {
+            console.error("Error approving request:", err);
+            res.status(500).send("Server error.");
+        });
+});
+
+app.post("/reject-alumni", function(req, res){
+    const { requestId } = req.body;
+    PendingRequest.findByIdAndDelete(requestId)
+        .then(result => {
+            if (!result) {
+                return res.status(404).send("Request not found.");
+            }
+            res.redirect("/pending-requests?status=rejected");
+        })
+        .catch(err => {
+            console.error("Error rejecting request:", err);
+            res.status(500).send("Server error.");
+        });
+});
+
+app.get("/api/search-users", function(req, res) {
+    const { name, role, batch } = req.query;
+    let query = {};
+    if (name) { query.name = { $regex: name, $options: 'i' }; }
+    if (batch) { query.batch = batch; }
+
+    const searchTasks = [];
+    if (role === "Student") { searchTasks.push(Student.find(query)); }
+    else if (role === "Alumni") { searchTasks.push(Alumini.find(query)); }
+    else {
+        searchTasks.push(Student.find(query));
+        searchTasks.push(Alumini.find(query));
+    }
+    Promise.all(searchTasks)
+        .then(results => res.json(results.flat()))
+        .catch(err => res.status(500).json({ error: "An error occurred." }));
+});
+
 app.get("/create_student",function(req,res){
-    const wasSuccess = req.query.success === 'true';
-    res.render("create_student", { admin: ad, success: wasSuccess });
+    res.render("create_student", { admin: ad, success: req.query.success === 'true' });
 });
 
 app.post("/create_student",function(req,res){
   const user = new Student({
-    name:req.body.fullName,
-    email:req.body.email,
-    password:req.body.password,
-    batch:req.body.batch,
-    role:"Student",
-    rno:req.body.rollNo,
-    course:req.body.Course,
-    dept:req.body.department
+    name:req.body.fullName, email:req.body.email, password:req.body.password,
+    batch:req.body.batch, role:"Student", rno:req.body.rollNo,
+    course:req.body.Course, dept:req.body.department
   });
   user.save()
-    .then(result=>{
-      res.redirect("/create_student?success=true");
-    })
-    .catch(err=>{
-      console.log("error "+err);
-      res.redirect("/create_student?success=false");
-    });
+    .then(() => res.redirect("/create_student?success=true"))
+    .catch(() => res.redirect("/create_student?success=false"));
 });
 
-// --- Route for Deleting a User ---
 app.post("/delete-user", function(req, res) {
     const { userId, userRole } = req.body;
-
-    let deletePromise;
-
-    if (userRole === 'Student') {
-        deletePromise = Student.findByIdAndDelete(userId);
-    } else if (userRole === 'Alumni') {
-        deletePromise = Alumini.findByIdAndDelete(userId);
-    } else {
-        return res.status(400).send("Invalid user role.");
-    }
-
-    deletePromise.then(result => {
-        if (!result) {
-            return res.status(404).send("User not found.");
-        }
-        console.log("Deleted user:", result.name);
-        res.redirect("/all_users?deleteSuccess=true");
-    }).catch(err => {
-        console.log("Error deleting user: " + err);
-        res.status(500).send("Error deleting user.");
-    });
+    let Model = userRole === 'Student' ? Student : Alumini;
+    Model.findByIdAndDelete(userId)
+        .then(result => {
+            if (!result) { return res.status(404).send("User not found."); }
+            res.redirect("/all_users?deleteSuccess=true");
+        })
+        .catch(err => res.status(500).send("Error deleting user."));
 });
+
 app.get("/create_alumni",function(req,res){
-    const wasSuccess = req.query.success === 'true';
-    res.render("create_alumini", { admin: ad, success: wasSuccess });
+    res.render("create_alumini", { admin: ad, success: req.query.success === 'true' });
 });
+
 app.post("/create_alumni",function(req,res){
   const user = new Alumini({
-    name:req.body.fullName,
-    email:req.body.email,
-    password:req.body.password,
-    batch:req.body.batch,
-    role:"Alumni",
-    rno:req.body.rollNo,
-    course:req.body.Course,
-    dept:req.body.department
+    name:req.body.fullName, email:req.body.email, password:req.body.password,
+    batch:req.body.batch, role:"Alumni", rno:req.body.rollNo,
+    course:req.body.Course, dept:req.body.department
   });
   user.save()
-    .then(result=>{
-      res.redirect("/create_alumni?success=true");
-    })
-    .catch(err=>{
-      console.log("error "+err);
-      res.redirect("/create_alumni?success=false");
-    });
+    .then(() => res.redirect("/create_alumni?success=true"))
+    .catch(() => res.redirect("/create_alumni?success=false"));
 });
 
+
+// --- ANNOUNCEMENT ROUTES ---
+
 app.get("/announcements", function(req, res) {
-    const success = req.query.success === 'true';
     Announcement.find({}).sort({ date: -1 })
         .then(announcements => {
             res.render("announcements", {
-                announcements: announcements,
-                admin: ad,
-                success: success
+                announcements: announcements, admin: ad,
+                success: req.query.success === 'true'
             });
         })
-        .catch(err => {
-            console.error("Error fetching announcements: " + err);
-            res.status(500).send("Server error fetching announcements.");
-        });
+        .catch(err => res.status(500).send("Server error."));
 });
 
 app.post("/create-announcement", function(req, res) {
-    const newAnnouncement = new Announcement({
-        title: req.body.title,
-        content: req.body.content
-    });
+    const newAnnouncement = new Announcement({ title: req.body.title, content: req.body.content });
     newAnnouncement.save()
-        .then(() => {
-            res.redirect("/announcements?success=true");
-        })
-        .catch(err => {
-            console.error("Error saving announcement: " + err);
-            res.redirect("/announcements?success=false");
-        });
+        .then(() => res.redirect("/announcements?success=true"))
+        .catch(() => res.redirect("/announcements?success=false"));
 });
-// --- NEW EVENTS ROUTES ---
+
+
+// --- EVENTS ROUTES ---
+
 app.get("/events", function(req, res) {
     const { title, category, status } = req.query;
     let query = {};
@@ -274,114 +310,36 @@ app.get("/events", function(req, res) {
     if (status) query.status = status;
 
     Event.find(query).sort({ created_at: -1 })
-        .then(events => {
-            res.render("events", {
-                events: events,
-                admin: ad
-            });
-        })
-        .catch(err => {
-            console.error("Error fetching events: " + err);
-            res.status(500).send("Server error fetching events.");
-        });
+        .then(events => res.render("events", { events: events, admin: ad }))
+        .catch(err => res.status(500).send("Server error."));
 });
 
 app.get("/api/event/:id", function(req, res) {
     Event.findById(req.params.id)
-        .then(event => {
-            if (!event) {
-                return res.status(404).json({ error: "Event not found." });
-            }
-            res.json(event);
-        })
-        .catch(err => {
-            console.error("Error fetching event: " + err);
-            res.status(500).json({ error: "Server error fetching event." });
-        });
+        .then(event => res.json(event))
+        .catch(() => res.status(404).json({ error: "Event not found." }));
 });
 
 app.post("/create-event", function(req, res) {
-    const newEvent = new Event({
-        title: req.body.title,
-        date: req.body.date,
-        time: req.body.time,
-        venue_name: req.body.venue_name,
-        venue_link: req.body.venue_link,
-        description: req.body.description,
-        organizer_name: req.body.organizer_name,
-        organizer_contact: req.body.organizer_contact,
-        category: req.body.category
-    });
+    const newEvent = new Event(req.body);
     newEvent.save()
-        .then(() => {
-            res.redirect("/events?status=created");
-        })
-        .catch(err => {
-            console.error("Error saving event: " + err);
-            res.redirect("/events?status=failed");
-        });
+        .then(() => res.sendStatus(200))
+        .catch(() => res.sendStatus(500));
 });
 
 app.post("/edit-event", function(req, res) {
-    const eventId = req.body.id;
-    const updatedEvent = {
-        title: req.body.title,
-        date: req.body.date,
-        time: req.body.time,
-        venue_name: req.body.venue_name,
-        venue_link: req.body.venue_link,
-        description: req.body.description,
-        organizer_name: req.body.organizer_name,
-        organizer_contact: req.body.organizer_contact,
-        category: req.body.category,
-        status: req.body.status // <-- ADDED THIS LINE
-    };
-    Event.findByIdAndUpdate(eventId, updatedEvent, { new: true })
-        .then(result => {
-            if (!result) {
-                return res.status(404).send("Event not found.");
-            }
-            res.redirect("/events?status=updated");
-        })
-        .catch(err => {
-            console.error("Error updating event: " + err);
-            res.status(500).send("Error updating event.");
-        });
+    Event.findByIdAndUpdate(req.body.id, req.body)
+        .then(() => res.sendStatus(200))
+        .catch(() => res.sendStatus(500));
 });
 
 app.post("/delete-event", function(req, res) {
-    const eventId = req.body.eventId;
-    Event.findByIdAndDelete(eventId)
-        .then(result => {
-            if (!result) {
-                return res.status(404).send("Event not found.");
-            }
-            console.log("Deleted event:", result.title);
-            res.redirect("/events?status=deleted");
-        })
-        .catch(err => {
-            console.error("Error deleting event: " + err);
-            res.status(500).send("Error deleting event.");
-        });
-});
-
-app.get("/api/search-events", function(req, res) {
-    const { title, category, status } = req.query;
-    let query = {};
-    if (title) query.title = { $regex: title, $options: 'i' };
-    if (category) query.category = category;
-    if (status) query.status = status;
-    
-    Event.find(query).sort({ created_at: -1 })
-        .then(results => {
-            res.json(results);
-        })
-        .catch(err => {
-            console.error("API Event Search Error:", err);
-            res.status(500).json({ error: "An error occurred during event search." });
-        });
+    Event.findByIdAndDelete(req.body.eventId)
+        .then(() => res.sendStatus(200))
+        .catch(() => res.sendStatus(500));
 });
 
 app.listen(3000, function(req, res){
     console.log("server is running\n");
 });
+

@@ -218,6 +218,15 @@
 </head>
 <body>
 
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <div class="dashboard-layout">
         <aside class="sidebar" id="sidebar">
