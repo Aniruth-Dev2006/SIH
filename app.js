@@ -100,7 +100,7 @@ app.post("/signup", async function(req, res){
         const existingPending = await PendingRequest.findOne({ email });
 
         if (existingAdmin || existingAlumni || existingStudent || existingPending) {
-            return res.redirect("/signup?status=email_exists"); // You can add a message on signup page
+            return res.redirect("/signup?status=email_exists");
         }
 
         const newRequest = new PendingRequest({
@@ -125,15 +125,17 @@ app.get("/user_management", function(req, res){
 
 app.get("/all_users", function(req, res){
     const deleteSuccess = req.query.deleteSuccess === 'true';
+    const editSuccess = req.query.editSuccess === 'true';
     Promise.all([
         Alumini.find({}),
         Student.find({})
     ]).then(([alumni, students]) => {
         const allUsers = [...alumni, ...students];
-        res.render("all_users", {
-            users: allUsers,
+        res.render("all_users", { 
+            users: allUsers, 
             admin: ad,
-            deleteSuccess: deleteSuccess
+            deleteSuccess: deleteSuccess,
+            editSuccess: editSuccess
         });
     }).catch(err => {
         console.log("error " + err);
@@ -251,6 +253,49 @@ app.post("/create_student",function(req,res){
     .then(() => res.redirect("/create_student?success=true"))
     .catch(() => res.redirect("/create_student?success=false"));
 });
+
+// API route to get a single user's data for editing
+app.get("/api/user/:role/:id", async (req, res) => {
+    try {
+        const { role, id } = req.params;
+        let user;
+        if (role === 'Student') {
+            user = await Student.findById(id);
+        } else if (role === 'Alumni') {
+            user = await Alumini.findById(id);
+        } else {
+            return res.status(400).json({ message: "Invalid user role" });
+        }
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Server error" });
+    }
+});
+
+// Route to update a user's data
+app.post("/edit-user", (req, res) => {
+    const { userId, userRole, name, rno, batch, course, dept } = req.body;
+
+    const updatedData = { name, rno, batch, course, dept };
+    let Model = userRole === 'Student' ? Student : Alumini;
+
+    Model.findByIdAndUpdate(userId, updatedData)
+        .then(user => {
+            if (!user) {
+                return res.status(404).send("User not found.");
+            }
+            res.redirect('/all_users?editSuccess=true');
+        })
+        .catch(err => {
+            console.error("Error updating user:", err);
+            res.status(500).send("Error updating user.");
+        });
+});
+
 
 app.post("/delete-user", function(req, res) {
     const { userId, userRole } = req.body;

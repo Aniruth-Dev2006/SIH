@@ -9,77 +9,26 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
-        /* --- 1. ALUMNIUM THEME --- */
         :root {
-            --background: #f8f9fa;
-            --foreground: #111827;
-            --card: #ffffff;
-            --primary: #111827;
-            --primary-foreground: #ffffff;
-            --secondary: #f3f4f6;
-            --muted-foreground: #6b7280;
-            --border: #e5e7eb;
-            --radius: 1rem;
-            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --background: #f8f9fa; --foreground: #111827; --card: #ffffff; --primary: #111827;
+            --primary-foreground: #ffffff; --secondary: #f3f4f6; --muted-foreground: #6b7280;
+            --border: #e5e7eb; --radius: 1rem; --font-sans: 'Inter', sans-serif;
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
-            --glow-color: rgba(139, 92, 246, 0.2);
-            --danger: #dc3545;
+            --glow-color: rgba(139, 92, 246, 0.2); --danger: #dc3545; --success: #16a34a;
         }
         html.dark {
-            --background: #0d1117;
-            --foreground: #e6edf3;
-            --card: #161b22;
-            --primary: #e6edf3;
-            --primary-foreground: #0d1117;
-            --secondary: #21262d;
-            --muted-foreground: #8b949e;
-            --border: #30363d;
-            --glow-color: rgba(139, 92, 246, 0.2);
-            --danger: #ff5b5b;
+            --background: #0d1117; --foreground: #e6edf3; --card: #161b22; --primary: #e6edf3;
+            --primary-foreground: #0d1117; --secondary: #21262d; --muted-foreground: #8b949e;
+            --border: #30363d; --glow-color: rgba(139, 92, 246, 0.2); --danger: #ff5b5b; --success: #22c55e;
         }
 
-        /* --- 2. DASHBOARD STRUCTURE --- */
-        body {
-            font-family: var(--font-sans);
-            background-color: var(--background);
-            color: var(--foreground);
-            overflow-x: hidden;
-            font-size: 15px;
-        }
-        .dashboard-layout {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            min-height: 100vh;
-        }
-        .sidebar {
-            background-color: var(--card);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem;
-            transition: transform 0.3s ease-in-out;
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 280px;
-            z-index: 1050;
-        }
-        .main-content {
-            background-color: var(--secondary);
-            padding: 2.5rem;
-            overflow-y: auto;
-            grid-column: 2;
-        }
+        body { font-family: var(--font-sans); background-color: var(--background); color: var(--foreground); overflow-x: hidden; font-size: 15px; }
+        .dashboard-layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+        .sidebar { background-color: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem; transition: transform 0.3s ease-in-out; position: fixed; top: 0; left: 0; height: 100%; width: 280px; z-index: 1050; }
+        .main-content { background-color: var(--secondary); padding: 2.5rem; overflow-y: auto; grid-column: 2; }
         h1.h2 { font-size: 1.75rem; font-weight: 700; }
-
-        /* --- 3. SIDEBAR & NAVIGATION --- */
         .sidebar-header { font-size: 1.5rem; font-weight: 700; color: var(--foreground); text-decoration: none; margin-bottom: 2rem; display:flex; align-items:center; gap: 0.5rem; }
-        .sidebar-nav .nav-link {
-            color: var(--muted-foreground); font-weight: 500; padding: 0.75rem 1rem; border-radius: 0.75rem;
-            margin-bottom: 0.25rem; display: flex; align-items: center; font-size: 14px;
-            transition: all 0.2s ease;
-        }
+        .sidebar-nav .nav-link { color: var(--muted-foreground); font-weight: 500; padding: 0.75rem 1rem; border-radius: 0.75rem; margin-bottom: 0.25rem; display: flex; align-items: center; font-size: 14px; transition: all 0.2s ease; }
         .sidebar-nav .nav-link i { margin-right: 0.75rem; font-size: 1.1rem; }
         .sidebar-nav .nav-link:hover { color: var(--foreground); background-color: var(--secondary); }
         .sidebar-nav .nav-link.active { color: var(--primary-foreground); background-color: var(--primary); }
@@ -88,75 +37,33 @@
         .user-profile img { width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; }
         .profile-menu-trigger { color: var(--muted-foreground); text-decoration: none; padding: 0.5rem; margin-left: 0.5rem; border-radius: 0.5rem; }
         .profile-menu-trigger:hover { background-color: var(--secondary); color: var(--foreground); }
-        .dropdown-menu {
-            background-color: var(--card); border-radius: var(--radius); border: 1px solid var(--border);
-            box-shadow: var(--shadow-lg); padding: 0.5rem;
-        }
+        .dropdown-menu { background-color: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-lg); padding: 0.5rem; }
         .dropdown-item { color: var(--foreground); padding: 0.6rem 1rem; border-radius: 0.5rem; font-weight: 500; font-size: 14px; }
         .dropdown-item:hover, .dropdown-item:focus { background-color: var(--secondary); color: var(--foreground); }
         .dropdown-item.text-danger { color: var(--danger) !important; }
         .dropdown-item.text-danger:hover { background-color: rgba(220, 53, 69, 0.1); }
         html.dark .dropdown-item.text-danger:hover { background-color: rgba(255, 91, 91, 0.1); }
         .dropdown-divider { border-color: var(--border); }
-
-        /* --- 4. PAGE-SPECIFIC COMPONENTS --- */
-        .content-card {
-            background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-            box-shadow: var(--shadow-lg); padding: 1.5rem; position: relative; overflow: hidden;
-        }
-        .aurora-glow {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px;
-            background: radial-gradient(ellipse at center, var(--glow-color) 0%, rgba(0, 0, 0, 0) 70%); filter: blur(80px);
-            z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s ease-out;
-        }
+        .content-card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 1.5rem; position: relative; overflow: hidden; }
+        .aurora-glow { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; background: radial-gradient(ellipse at center, var(--glow-color) 0%, rgba(0, 0, 0, 0) 70%); filter: blur(80px); z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s ease-out; }
         .is-visible .aurora-glow { opacity: 1; }
-        
-        .form-control, .form-select {
-            background-color: var(--card);
-            border-color: var(--border);
-            color: var(--foreground);
-            font-weight: 500;
-        }
-        .form-control:focus, .form-select:focus {
-            background-color: var(--card);
-            border-color: var(--glow-color);
-            box-shadow: 0 0 0 3px var(--glow-color);
-            color: var(--foreground);
-        }
+        .form-control, .form-select { background-color: var(--card); border-color: var(--border); color: var(--foreground); font-weight: 500; }
+        .form-control:focus, .form-select:focus { background-color: var(--card); border-color: var(--glow-color); box-shadow: 0 0 0 3px var(--glow-color); color: var(--foreground); }
+        .form-control:disabled { background-color: var(--secondary); opacity: 0.7; }
         .search-wrapper { position: relative; }
         .search-icon { position: absolute; top: 50%; left: 1rem; transform: translateY(-50%); color: var(--muted-foreground); }
         .search-wrapper .form-control { padding-left: 2.75rem; }
-        
         .btn { border-radius: 0.5rem; font-weight: 500; font-size: 14px; }
         .btn-light { background-color: var(--secondary); border-color: var(--border); color: var(--foreground); }
-
         .table { --bs-table-bg: transparent; --bs-table-color: var(--foreground); --bs-table-border-color: var(--border); --bs-table-hover-bg: var(--secondary); --bs-table-hover-color: var(--foreground); font-size: 14px; }
         .table thead th { color: var(--muted-foreground); font-weight: 500; border-bottom: 1px solid var(--border); }
         .table tbody tr:last-child td { border-bottom: 0; }
         .table td { vertical-align: middle; }
-        
-        /* --- 5. ANIMATIONS --- */
-        .animate-on-scroll { 
-            opacity: 0; 
-            transform: translateY(30px); 
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out; 
-        }
-        .is-visible { 
-            opacity: 1; 
-            transform: translateY(0); 
-        }
-        .animate-on-scroll { 
-            transition-delay: calc(0.1s * var(--animation-order, 0)); 
-        }
-
-        /* --- 6. MOBILE RESPONSIVENESS & MODALS --- */
+        .animate-on-scroll { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .is-visible { opacity: 1; transform: translateY(0); }
+        .animate-on-scroll { transition-delay: calc(0.1s * var(--animation-order, 0)); }
         .mobile-header { display: flex; justify-content: space-between; align-items: center; }
-        .sidebar-backdrop {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5); z-index: 1040;
-            opacity: 0; visibility: hidden;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-        }
+        .sidebar-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1040; opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; }
         body.sidebar-open .sidebar-backdrop { opacity: 1; visibility: visible; }
         @media (max-width: 991.98px) {
             .dashboard-layout { grid-template-columns: 1fr; }
@@ -164,15 +71,9 @@
             .sidebar { transform: translateX(-100%); }
             .sidebar.show { transform: translateX(0); }
         }
-        .modal-content {
-            background-color: var(--card);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-        }
-        .modal-body .text-success { color: #16a34a !important; }
-        html.dark .modal-body .text-success { color: #22c55e !important; }
-        .modal-body .text-danger { color: #dc3545 !important; }
-        html.dark .modal-body .text-danger { color: #ff5b5b !important; }
+        .modal-content { background-color: var(--card); border-radius: var(--radius); border: 1px solid var(--border); }
+        .modal-body .text-success { color: var(--success) !important; }
+        .modal-body .text-danger { color: var(--danger) !important; }
     </style>
 </head>
 <body>
@@ -274,7 +175,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id="users-table-body">
-                                    <!-- Table body will be populated by JavaScript -->
+                                    <!-- Table body populated by JS -->
                                 </tbody>
                             </table>
                         </div>
@@ -286,6 +187,35 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="editUserModalLabel">Edit User Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="edit-user-form" action="/edit-user" method="POST">
+                        <input type="hidden" name="userId" id="edit-userId">
+                        <input type="hidden" name="userRole" id="edit-userRole">
+                        <div class="row g-3">
+                            <div class="col-12"><label for="edit-name" class="form-label">Full Name</label><input type="text" class="form-control" id="edit-name" name="name" required></div>
+                            <div class="col-12"><label for="edit-email" class="form-label">Email Address</label><input type="email" class="form-control" id="edit-email" name="email" disabled></div>
+                            <div class="col-md-6"><label for="edit-rno" class="form-label">Roll Number</label><input type="text" class="form-control" id="edit-rno" name="rno" required></div>
+                            <div class="col-md-6"><label for="edit-batch" class="form-label">Batch</label><input type="text" class="form-control" id="edit-batch" name="batch" required></div>
+                            <div class="col-md-6"><label for="edit-course" class="form-label">Course</label><input type="text" class="form-control" id="edit-course" name="course" required></div>
+                            <div class="col-md-6"><label for="edit-dept" class="form-label">Department</label><input type="text" class="form-control" id="edit-dept" name="dept" required></div>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Delete Confirmation Modal -->
@@ -307,14 +237,14 @@
         </div>
     </div>
 
-    <!-- Delete Success Modal -->
-    <div class="modal fade" id="deleteSuccessModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-body text-center py-5">
                     <i class="bi bi-check-circle-fill text-success mb-3" style="font-size: 4rem;"></i>
-                    <h5 class="modal-title fw-bold" id="successModalLabel">Successfully Deleted</h5>
-                    <p class="text-muted-foreground mt-2">The user has been removed from the system.</p>
+                    <h5 class="modal-title fw-bold" id="successModalLabel"></h5>
+                    <p class="text-muted-foreground mt-2" id="successModalMessage"></p>
                     <button type="button" class="btn btn-primary w-100 mt-4" data-bs-dismiss="modal">OK</button>
                 </div>
             </div>
@@ -325,13 +255,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- 1. INITIAL DATA ---
-            let initialUsers = [];
-            try {
-                // This EJS tag is processed by your server to inject the database records.
-                initialUsers = <%- JSON.stringify(users || []) %>;
-            } catch (e) {
-                console.warn("Could not parse server-side data.");
-            }
+            let initialUsers = <%- JSON.stringify(users || []) %>;
 
             // --- 2. ELEMENT SELECTORS & MODAL INSTANCES ---
             const tableBody = document.getElementById('users-table-body');
@@ -340,15 +264,13 @@
             const batchFilter = document.getElementById('batch-filter');
             const noResultsMessage = document.getElementById('no-results-message');
             const deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
-            const animatedElements = document.querySelectorAll('.animate-on-scroll');
+            const editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
             
             // --- 3. FUNCTIONS ---
-
-            // Renders the table with a given list of users
             const renderTable = (userList) => {
                 tableBody.innerHTML = '';
                 noResultsMessage.style.display = userList.length === 0 ? 'block' : 'none';
-
                 userList.forEach(user => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -361,17 +283,11 @@
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></button>
                                 <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" href="#"><i class="bi bi-pencil-square me-2"></i> Edit</a></li>
-                                    <li><a href="#" class="dropdown-item text-danger delete-btn" 
-                                        data-user-id="${user._id}" 
-                                        data-user-name="${user.name}" 
-                                        data-user-role="${user.role}">
-                                        <i class="bi bi-trash-fill me-2"></i> Delete
-                                    </a></li>
+                                    <li><a class="dropdown-item edit-btn" href="#" data-user-id="${user._id}" data-user-role="${user.role}"><i class="bi bi-pencil-square me-2"></i> Edit</a></li>
+                                    <li><a href="#" class="dropdown-item text-danger delete-btn" data-user-id="${user._id}" data-user-name="${user.name}" data-user-role="${user.role}"><i class="bi bi-trash-fill me-2"></i> Delete</a></li>
                                 </ul>
                             </div>
-                        </td>
-                    `;
+                        </td>`;
                     tableBody.appendChild(row);
                 });
             };
@@ -400,32 +316,65 @@
             };
             
             // --- 4. EVENT LISTENERS & INITIALIZERS ---
-
             const debouncedSearch = debounce(performSearch, 300);
             searchInput.addEventListener('input', debouncedSearch);
             batchFilter.addEventListener('input', debouncedSearch);
             roleFilter.addEventListener('change', performSearch);
 
-            tableBody.addEventListener('click', function(event) {
-                const deleteButton = event.target.closest('.delete-btn');
-                if (deleteButton) {
-                    event.preventDefault();
-                    const userId = deleteButton.dataset.userId;
-                    const userName = deleteButton.dataset.userName;
-                    const userRole = deleteButton.dataset.userRole;
+            tableBody.addEventListener('click', async function(event) {
+                const target = event.target.closest('.edit-btn, .delete-btn');
+                if (!target) return;
+                
+                event.preventDefault();
+                const userId = target.dataset.userId;
+                const userRole = target.dataset.userRole;
 
+                if (target.classList.contains('delete-btn')) {
+                    const userName = target.dataset.userName;
                     document.getElementById('userNameToDelete').textContent = userName;
                     document.getElementById('userIdToDelete').value = userId;
                     document.getElementById('userRoleToDelete').value = userRole;
-
                     deleteConfirmModal.show();
+                } else if (target.classList.contains('edit-btn')) {
+                    try {
+                        const response = await fetch(`/api/user/${userRole}/${userId}`);
+                        const user = await response.json();
+                        
+                        document.getElementById('edit-userId').value = user._id;
+                        document.getElementById('edit-userRole').value = user.role;
+                        document.getElementById('edit-name').value = user.name;
+                        document.getElementById('edit-email').value = user.email;
+                        document.getElementById('edit-rno').value = user.rno;
+                        document.getElementById('edit-batch').value = user.batch;
+                        document.getElementById('edit-course').value = user.course;
+                        document.getElementById('edit-dept').value = user.dept;
+                        
+                        editUserModal.show();
+                    } catch (error) {
+                        console.error("Failed to fetch user data for editing:", error);
+                    }
                 }
             });
 
-            const wasDeleteSuccessful = <%= deleteSuccess || false %>;
-            if (wasDeleteSuccessful) {
-                const successModal = new bootstrap.Modal(document.getElementById('deleteSuccessModal'));
+            const urlParams = new URLSearchParams(window.location.search);
+            const wasDeleteSuccessful = urlParams.get('deleteSuccess') === 'true';
+            const wasEditSuccessful = urlParams.get('editSuccess') === 'true';
+
+            if (wasDeleteSuccessful || wasEditSuccessful) {
+                const modalLabel = document.getElementById('successModalLabel');
+                const modalMessage = document.getElementById('successModalMessage');
+
+                if (wasDeleteSuccessful) {
+                    modalLabel.textContent = "Successfully Deleted";
+                    modalMessage.textContent = "The user has been removed from the system.";
+                } else {
+                    modalLabel.textContent = "Update Successful";
+                    modalMessage.textContent = "The user's details have been updated.";
+                }
+
                 successModal.show();
+                 // Clean URL
+                window.history.replaceState({}, document.title, "/all_users");
             }
 
             // Initial render
@@ -433,13 +382,9 @@
 
             // Animate on scroll
             const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => { 
-                    if (entry.isIntersecting) { 
-                        entry.target.classList.add('is-visible'); 
-                    } 
-                });
+                entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); } });
             }, { threshold: 0.1 });
-            animatedElements.forEach(el => observer.observe(el));
+            document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
 
 
             // --- 5. SHARED DASHBOARD LOGIC (THEME & SIDEBAR) ---
@@ -478,4 +423,3 @@
     </script>
 </body>
 </html>
-
