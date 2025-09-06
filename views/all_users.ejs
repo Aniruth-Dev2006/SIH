@@ -202,12 +202,23 @@
                         <input type="hidden" name="userId" id="edit-userId">
                         <input type="hidden" name="userRole" id="edit-userRole">
                         <div class="row g-3">
-                            <div class="col-12"><label for="edit-name" class="form-label">Full Name</label><input type="text" class="form-control" id="edit-name" name="name" required></div>
-                            <div class="col-12"><label for="edit-email" class="form-label">Email Address</label><input type="email" class="form-control" id="edit-email" name="email" disabled></div>
-                            <div class="col-md-6"><label for="edit-rno" class="form-label">Roll Number</label><input type="text" class="form-control" id="edit-rno" name="rno" required></div>
-                            <div class="col-md-6"><label for="edit-batch" class="form-label">Batch</label><input type="text" class="form-control" id="edit-batch" name="batch" required></div>
-                            <div class="col-md-6"><label for="edit-course" class="form-label">Course</label><input type="text" class="form-control" id="edit-course" name="course" required></div>
-                            <div class="col-md-6"><label for="edit-dept" class="form-label">Department</label><input type="text" class="form-control" id="edit-dept" name="dept" required></div>
+                            <div class="col-md-6"><label for="edit-name" class="form-label">Full Name</label><input type="text" class="form-control" id="edit-name" name="name"></div>
+                            <div class="col-md-6"><label for="edit-email" class="form-label">Email Address</label><input type="email" class="form-control" id="edit-email" name="email" disabled></div>
+                            <div class="col-md-6"><label for="edit-rno" class="form-label">Roll Number</label><input type="text" class="form-control" id="edit-rno" name="rno"></div>
+                            <div class="col-md-6"><label for="edit-batch" class="form-label">Batch</label><input type="text" class="form-control" id="edit-batch" name="batch"></div>
+                            <div class="col-md-6"><label for="edit-course" class="form-label">Course</label><input type="text" class="form-control" id="edit-course" name="course"></div>
+                            <div class="col-md-6"><label for="edit-dept" class="form-label">Department</label><input type="text" class="form-control" id="edit-dept" name="dept"></div>
+                            <div class="col-md-6">
+                                <label for="edit-newRole" class="form-label">Change Role</label>
+                                <select class="form-select" id="edit-newRole" name="newRole">
+                                    <option value="Student">Student</option>
+                                    <option value="Alumni">Alumni</option>
+                                </select>
+                            </div>
+                             <div class="col-md-6">
+                                <label for="edit-password" class="form-label">New Password (Optional)</label>
+                                <input type="password" class="form-control" id="edit-password" name="password" placeholder="Leave blank to keep unchanged">
+                            </div>
                         </div>
                         <div class="d-grid mt-4">
                             <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -342,12 +353,14 @@
                         
                         document.getElementById('edit-userId').value = user._id;
                         document.getElementById('edit-userRole').value = user.role;
+                        document.getElementById('edit-newRole').value = user.role; // Set the current role in the dropdown
                         document.getElementById('edit-name').value = user.name;
                         document.getElementById('edit-email').value = user.email;
                         document.getElementById('edit-rno').value = user.rno;
                         document.getElementById('edit-batch').value = user.batch;
                         document.getElementById('edit-course').value = user.course;
                         document.getElementById('edit-dept').value = user.dept;
+                        document.getElementById('edit-password').value = ''; // Clear password field
                         
                         editUserModal.show();
                     } catch (error) {
@@ -373,14 +386,11 @@
                 }
 
                 successModal.show();
-                 // Clean URL
                 window.history.replaceState({}, document.title, "/all_users");
             }
 
-            // Initial render
             renderTable(initialUsers);
 
-            // Animate on scroll
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); } });
             }, { threshold: 0.1 });
@@ -423,3 +433,4 @@
     </script>
 </body>
 </html>
+

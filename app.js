@@ -47,70 +47,44 @@ app.get("/", function(req, res){
 app.post("/", async function (req, res) {
     const { email, password } = req.body;
     try {
-        // 1. Check if user is an admin
         const admin = await Admin.findOne({ email, password });
         if (admin) {
             ad = email;
             return res.redirect("/admin");
         }
-
-        // 2. Check if the user's request is pending
         const pending = await PendingRequest.findOne({ email, password });
         if (pending) {
             return res.redirect("/?status=pending_approval");
         }
-
-        // 3. Check if user is an approved alumni
         const alumni = await Alumini.findOne({ email, password });
         if (alumni) {
-            // Replace with actual alumni dashboard redirect
             return res.send("alumni logged in");
         }
-
-        // 4. Check if user is a student
         const student = await Student.findOne({ email, password });
         if (student) {
-            // Replace with actual student dashboard redirect
             return res.send("student logged in");
         }
-
-        // 5. If no user is found
         res.redirect("/?status=login_failed");
-
     } catch (err) {
         console.log("Login Error: " + err);
         res.status(500).send("Server error during login.");
     }
 });
 
-// Route to render the signup page
 app.get("/signup", function(req, res){
     res.render("signup");
 });
 
-// Route to handle signup form submission
 app.post("/signup", async function(req, res){
     const { name, email, password, batch, rno, course, dept } = req.body;
-
     try {
-        // Check if email already exists in any collection
-        const existingAdmin = await Admin.findOne({ email });
-        const existingAlumni = await Alumini.findOne({ email });
-        const existingStudent = await Student.findOne({ email });
-        const existingPending = await PendingRequest.findOne({ email });
-
-        if (existingAdmin || existingAlumni || existingStudent || existingPending) {
+        const existingUser = await Alumini.findOne({ email }) || await Student.findOne({ email }) || await Admin.findOne({ email }) || await PendingRequest.findOne({ email });
+        if (existingUser) {
             return res.redirect("/signup?status=email_exists");
         }
-
-        const newRequest = new PendingRequest({
-            name, email, password, batch, rno, course, dept,
-            role: 'Alumni'
-        });
-
+        const newRequest = new PendingRequest({ name, email, password, batch, rno, course, dept, role: 'Alumni' });
         await newRequest.save();
         res.redirect("/?status=signup_success");
-
     } catch (err) {
         console.error("Error creating pending request:", err);
         res.status(500).send("Error submitting request.");
@@ -149,9 +123,9 @@ app.get("/admin", function(req, res) {
         Event.find(),
         Event.countDocuments({ status: "Upcoming" }),
         Event.countDocuments({ status: "Completed" }),
-        PendingRequest.find() 
+        PendingRequest.countDocuments() // Correctly count documents
     ])
-    .then(([docs, allEvents, upcomingCount, completedCount, pending]) => {
+    .then(([docs, allEvents, upcomingCount, completedCount, pendingCount]) => {
         res.render("admin", {
             admin: ad,
             ann: docs.length > 0 ? docs[0].title : "No announcements",
@@ -159,7 +133,7 @@ app.get("/admin", function(req, res) {
             events: allEvents,
             Upcoming: { length: upcomingCount },
             total: { length: completedCount },
-            pendings: pending 
+            pendings: { length: pendingCount } // Pass count as an object with length property
         });
     })
     .catch(err => {
@@ -263,15 +237,8 @@ app.post("/create_student",function(req,res){
 app.get("/api/user/:role/:id", async (req, res) => {
     try {
         const { role, id } = req.params;
-        let user;
-        if (role === 'Student') {
-            user = await Student.findById(id);
-        } else if (role === 'Alumni') {
-            user = await Alumini.findById(id);
-        } else {
-            return res.status(400).json({ message: "Invalid user role" });
-        }
-
+        const Model = role === 'Student' ? Student : Alumini;
+        const user = await Model.findById(id);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -281,24 +248,48 @@ app.get("/api/user/:role/:id", async (req, res) => {
     }
 });
 
-// Route to update a user's data
-app.post("/edit-user", (req, res) => {
-    const { userId, userRole, name, rno, batch, course, dept } = req.body;
+// Route to update a user's data, handling role changes and password updates
+app.post("/edit-user", async (req, res) => {
+    const { userId, userRole, newRole, name, rno, batch, course, dept, password } = req.body;
 
-    const updatedData = { name, rno, batch, course, dept };
-    let Model = userRole === 'Student' ? Student : Alumini;
-
-    Model.findByIdAndUpdate(userId, updatedData)
-        .then(user => {
-            if (!user) {
-                return res.status(404).send("User not found.");
+    try {
+        // If the role hasn't changed, just update the document
+        if (userRole === newRole) {
+            const Model = userRole === 'Student' ? Student : Alumini;
+            const updateData = { name, rno, batch, course, dept };
+            if (password && password.trim() !== '') {
+                updateData.password = password;
             }
-            res.redirect('/all_users?editSuccess=true');
-        })
-        .catch(err => {
-            console.error("Error updating user:", err);
-            res.status(500).send("Error updating user.");
-        });
+            await Model.findByIdAndUpdate(userId, updateData);
+        } else {
+            // Role has changed, so migrate the user
+            const SourceModel = userRole === 'Student' ? Student : Alumini;
+            const TargetModel = newRole === 'Student' ? Student : Alumini;
+
+            const originalUser = await SourceModel.findById(userId);
+            if (!originalUser) {
+                return res.status(404).send("Original user not found.");
+            }
+
+            const newUser = new TargetModel({
+                name: name || originalUser.name,
+                email: originalUser.email, // Email is not editable
+                password: (password && password.trim() !== '') ? password : originalUser.password,
+                batch: batch || originalUser.batch,
+                role: newRole,
+                rno: rno || originalUser.rno,
+                course: course || originalUser.course,
+                dept: dept || originalUser.dept,
+            });
+
+            await newUser.save();
+            await SourceModel.findByIdAndDelete(userId);
+        }
+        res.redirect('/all_users?editSuccess=true');
+    } catch (err) {
+        console.error("Error updating user:", err);
+        res.status(500).send("Error updating user.");
+    }
 });
 
 
