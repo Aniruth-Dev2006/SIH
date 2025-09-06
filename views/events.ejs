@@ -4,93 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Events | Alumnium</title>
-    <!-- Inter Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         
         /* --- 1. ALUMNIUM THEME --- */
         :root {
-            --background: #f8f9fa;
-            --foreground: #111827;
-            --card: #ffffff;
-            --primary: #111827;
-            --primary-foreground: #ffffff;
-            --secondary: #f3f4f6;
-            --muted-foreground: #6b7280;
-            --border: #e5e7eb;
-            --radius: 1rem;
-            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --background: #f8f9fa; --foreground: #111827; --card: #ffffff; --primary: #111827;
+            --primary-foreground: #ffffff; --secondary: #f3f4f6; --muted-foreground: #6b7280;
+            --border: #e5e7eb; --radius: 1rem; --font-sans: 'Inter', sans-serif;
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
-            --glow-color: rgba(139, 92, 246, 0.2);
-            --danger: #dc3545;
-            --success: #16a34a;
-            --warning: #f59e0b;
+            --glow-color: rgba(139, 92, 246, 0.2); --danger: #dc3545; --success: #16a34a;
+            --warning: #f59e0b; --info: #0d6efd;
         }
         html.dark {
-            --background: #0d1117;
-            --foreground: #e6edf3;
-            --card: #161b22;
-            --primary: #e6edf3;
-            --primary-foreground: #0d1117;
-            --secondary: #21262d;
-            --muted-foreground: #8b949e;
-            --border: #30363d;
-            --glow-color: rgba(139, 92, 246, 0.3);
-            --danger: #ff5b5b;
-            --success: #22c55e;
-            --warning: #facc15;
+            --background: #0d1117; --foreground: #e6edf3; --card: #161b22; --primary: #e6edf3;
+            --primary-foreground: #0d1117; --secondary: #21262d; --muted-foreground: #8b949e;
+            --border: #30363d; --glow-color: rgba(139, 92, 246, 0.3); --danger: #ff5b5b;
+            --success: #22c55e; --warning: #facc15; --info: #3b82f6;
         }
-        
-        /* --- 2. DASHBOARD STRUCTURE --- */
-        body {
-            font-family: var(--font-sans);
-            background-color: var(--background);
-            color: var(--foreground);
-            overflow-x: hidden;
-            font-size: 15px;
-        }
-        .dashboard-layout {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            min-height: 100vh;
-        }
-        .sidebar {
-            background-color: var(--card);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            padding: 1.5rem;
-            transition: transform 0.3s ease-in-out;
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
-            width: 280px;
-            z-index: 1050;
-        }
-        .main-content {
-            background-color: var(--secondary);
-            padding: 2.5rem;
-            overflow-y: auto;
-            grid-column: 2;
-        }
-        h1, h2 { font-size: 1.75rem; font-weight: 700; }
-        h3, h5 { font-size: 1.25rem; font-weight: 600; }
 
-        /* --- 3. SIDEBAR & NAVIGATION --- */
+        /* --- BASIC STRUCTURE & TYPOGRAPHY --- */
+        body { font-family: var(--font-sans); background-color: var(--background); color: var(--foreground); overflow-x: hidden; font-size: 15px; }
+        .dashboard-layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+        .main-content { background-color: var(--secondary); padding: 2.5rem; overflow-y: auto; grid-column: 2; }
+        h1.h2 { font-size: 1.75rem; font-weight: 700; }
+        h5 { font-size: 1.25rem; font-weight: 600; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { background-color: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem; transition: transform 0.3s ease-in-out; position: fixed; top: 0; left: 0; height: 100%; width: 280px; z-index: 1050; }
         .sidebar-header { font-size: 1.5rem; font-weight: 700; color: var(--foreground); text-decoration: none; margin-bottom: 2rem; display:flex; align-items:center; gap: 0.5rem; }
-        .sidebar-nav .nav-link {
-            color: var(--muted-foreground); font-weight: 500; padding: 0.75rem 1rem; border-radius: 0.75rem;
-            margin-bottom: 0.25rem; display: flex; align-items: center; font-size: 14px;
-            transition: all 0.2s ease;
-        }
+        .sidebar-nav .nav-link { color: var(--muted-foreground); font-weight: 500; padding: 0.75rem 1rem; border-radius: 0.75rem; margin-bottom: 0.25rem; display: flex; align-items: center; font-size: 14px; transition: all 0.2s ease; }
         .sidebar-nav .nav-link i { margin-right: 0.75rem; font-size: 1.1rem; }
         .sidebar-nav .nav-link:hover { color: var(--foreground); background-color: var(--secondary); }
         .sidebar-nav .nav-link.active { color: var(--primary-foreground); background-color: var(--primary); }
@@ -99,10 +48,7 @@
         .user-profile img { width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; }
         .profile-menu-trigger { color: var(--muted-foreground); text-decoration: none; padding: 0.5rem; margin-left: 0.5rem; border-radius: 0.5rem; }
         .profile-menu-trigger:hover { background-color: var(--secondary); color: var(--foreground); }
-        .dropdown-menu {
-            background-color: var(--card); border-radius: var(--radius); border: 1px solid var(--border);
-            box-shadow: var(--shadow-lg); padding: 0.5rem;
-        }
+        .dropdown-menu { background-color: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-lg); padding: 0.5rem; }
         .dropdown-item { color: var(--foreground); padding: 0.6rem 1rem; border-radius: 0.5rem; font-weight: 500; font-size: 14px; }
         .dropdown-item:hover, .dropdown-item:focus { background-color: var(--secondary); color: var(--foreground); }
         .dropdown-item.text-danger { color: var(--danger) !important; }
@@ -110,155 +56,48 @@
         html.dark .dropdown-item.text-danger:hover { background-color: rgba(255, 91, 91, 0.1); }
         .dropdown-divider { border-color: var(--border); }
 
-        /* --- 4. PAGE-SPECIFIC COMPONENTS --- */
-        .content-card {
-            background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-            box-shadow: var(--shadow-lg); padding: 1.5rem; position: relative; overflow: hidden;
-            height: 100%; /* Ensures all cards have the same height */
-            display: flex;
-            flex-direction: column;
-        }
-        .aurora-glow {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(ellipse at center, var(--glow-color) 0%, rgba(0, 0, 0, 0) 70%);
-            filter: blur(50px);
-            z-index: 0;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 1.2s ease-out;
-        }
+        /* --- GENERIC COMPONENTS --- */
+        .content-card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 1.5rem; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        .aurora-glow { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; background: radial-gradient(ellipse at center, var(--glow-color) 0%, rgba(0, 0, 0, 0) 70%); filter: blur(80px); z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s ease-out; }
         .is-visible .aurora-glow { opacity: 1; }
-        
-        .form-control, .form-select {
-            background-color: var(--card);
-            border-color: var(--border);
-            color: var(--foreground);
-            font-weight: 500;
-            border-radius: 0.5rem;
-        }
-        .form-control:focus, .form-select:focus {
-            background-color: var(--card);
-            border-color: var(--glow-color);
-            box-shadow: 0 0 0 3px var(--glow-color);
-            color: var(--foreground);
-        }
+        .form-control, .form-select, .input-group-text { background-color: var(--card) !important; border-color: var(--border) !important; color: var(--foreground) !important; font-weight: 500; }
+        .form-control:focus, .form-select:focus { background-color: var(--card) !important; border-color: var(--glow-color) !important; box-shadow: 0 0 0 3px var(--glow-color) !important; color: var(--foreground) !important; }
+        .form-control::placeholder { color: var(--muted-foreground); opacity: 0.8; }
         .search-wrapper { position: relative; }
         .search-icon { position: absolute; top: 50%; left: 1rem; transform: translateY(-50%); color: var(--muted-foreground); }
         .search-wrapper .form-control { padding-left: 2.75rem; }
-        .input-group .form-control {
-            border-top-right-radius: 0.5rem;
-            border-bottom-right-radius: 0.5rem;
-        }
-        .input-group .input-group-text {
-            background-color: var(--secondary);
-            border-color: var(--border);
-            color: var(--muted-foreground);
-            border-radius: 0.5rem 0 0 0.5rem;
-        }
-        /* New styles for date and time inputs */
-        input[type="date"], input[type="time"] {
-            color-scheme: var(--theme-color-scheme, light);
-        }
-        html.dark {
-            --theme-color-scheme: dark;
-        }
-        input::placeholder {
-            color: var(--muted-foreground);
-            opacity: 1; /* Override default browser opacity */
-        }
-        html.dark input::placeholder {
-             color: var(--muted-foreground);
-        }
-
         .btn { border-radius: 0.5rem; font-weight: 500; font-size: 14px; }
         .btn-light { background-color: var(--secondary); border-color: var(--border); color: var(--foreground); }
-        .btn-primary {
-            background-color: var(--primary);
-            color: var(--primary-foreground);
-            border: none;
-        }
-        html.dark .btn-primary {
-            background-color: var(--primary);
-            color: var(--primary-foreground);
-        }
-
-        .table { --bs-table-bg: transparent; --bs-table-color: var(--foreground); --bs-table-border-color: var(--border); --bs-table-hover-bg: var(--secondary); --bs-table-hover-color: var(--foreground); font-size: 14px; }
-        .table thead th { color: var(--muted-foreground); font-weight: 500; border-bottom: 1px solid var(--border); }
-        .table tbody tr:last-child td { border-bottom: 0; }
-        .table td { vertical-align: middle; }
-
-        /* --- 5. ANIMATIONS --- */
-        .animate-on-scroll { 
-            opacity: 0; 
-            transform: translateY(30px); 
-            transition: opacity 0.8s ease-out, transform 0.8s ease-out; 
-        }
-        .is-visible { 
-            opacity: 1; 
-            transform: translateY(0); 
-        }
-        .animate-on-scroll { 
-            transition-delay: calc(0.1s * var(--animation-order, 0)); 
-        }
-
-        /* --- 6. MOBILE RESPONSIVENESS --- */
-        .mobile-header { display: flex; justify-content: space-between; align-items: center; }
-        .sidebar-backdrop {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5); z-index: 1040;
-            opacity: 0; visibility: hidden;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-        }
+        .btn-light:hover { background-color: var(--border); }
+        .btn-primary { background-color: var(--primary); color: var(--primary-foreground); border: none; }
+        .btn-danger { background-color: var(--danger); }
+        .event-card { height: 100%; }
+        .event-card-body { flex-grow: 1; display: flex; flex-direction: column; }
+        .event-card .card-description { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; min-height: 45px; }
+        .badge.bg-upcoming { background-color: var(--success) !important; }
+        .badge.bg-ongoing { background-color: var(--info) !important; }
+        .badge.bg-completed { background-color: var(--muted-foreground) !important; }
+        .badge.bg-cancelled { background-color: var(--danger) !important; }
+        .view-details-card { background-color: var(--secondary); border-left: 3px solid var(--border); border-radius: 0.5rem; padding: 0.75rem 1.25rem; margin-bottom: 1rem; }
+        
+        /* --- ANIMATIONS & RESPONSIVENESS --- */
+        .animate-on-scroll { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .is-visible { opacity: 1; transform: translateY(0); }
+        .animate-on-scroll { transition-delay: calc(0.1s * var(--animation-order, 0)); }
+        .mobile-header { display: none; }
+        .sidebar-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1040; opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; }
         body.sidebar-open .sidebar-backdrop { opacity: 1; visibility: visible; }
         @media (max-width: 991.98px) {
             .dashboard-layout { grid-template-columns: 1fr; }
             .main-content { grid-column: 1 / -1; padding: 1.5rem; }
             .sidebar { transform: translateX(-100%); }
             .sidebar.show { transform: translateX(0); }
+            .mobile-header { display: flex; justify-content: space-between; align-items: center; }
         }
-        .modal-content {
-            background-color: var(--card);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-lg);
-            position: relative;
-            overflow: hidden;
-        }
-        .modal-content .modal-body {
-            position: relative;
-            z-index: 1;
-        }
-        .modal-body .text-success { color: #16a34a !important; }
-        html.dark .modal-body .text-success { color: #22c55e !important; }
-        .modal-body .text-danger { color: #dc3545 !important; }
-        html.dark .modal-body .text-danger { color: #ff5b5b !important; }
-        .badge { font-weight: 600; font-size: 0.75rem; padding: 0.35em 0.65em; }
-        .card-description {
-            max-height: 5em;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        .event-card .card-description {
-            display: -webkit-box;
-            -webkit-line-clamp: 2; /* Limit to 2 lines */
-            -webkit-box-orient: vertical;
-            white-space: normal;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .view-details-card {
-            background-color: var(--secondary);
-            border-left: 3px solid var(--border);
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            margin-bottom: 1rem;
-        }
+        .modal-content { background-color: var(--card); border-radius: var(--radius); border: 1px solid var(--border); }
+        .modal-header, .modal-footer { border-color: var(--border); }
+        .btn-close { filter: var(--primary) invert(1); }
+        html.dark .btn-close { filter: invert(0); }
     </style>
 </head>
 <body>
@@ -266,15 +105,15 @@
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <div class="dashboard-layout">
         <aside class="sidebar" id="sidebar">
-            <a href="/admin" class="sidebar-header"><i class="fas fa-link me-2"></i> Alumnium</a>
+            <a href="#" class="sidebar-header"><i class="bi bi-link-45deg"></i> Alumnium</a>
             <nav class="sidebar-nav">
                 <ul class="nav flex-column">
-                    <li class="nav-item"><a class="nav-link" href="/admin"><i class="fas fa-grip-horizontal"></i> Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/user_management"><i class="fas fa-users"></i> User Management</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/announcements"><i class="fas fa-bullhorn"></i> Announcements</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="/events"><i class="fas fa-calendar-alt"></i> Events</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-coins"></i> Donations</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="fas fa-comment-dots"></i> Feedback</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/user_management"><i class="bi bi-people-fill"></i> User Management</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/announcements"><i class="bi bi-megaphone-fill"></i> Announcements</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/events"><i class="bi bi-calendar-event-fill"></i> Events</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cash-coin"></i> Donations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-quote-fill"></i> Feedback</a></li>
                 </ul>
             </nav>
             <div class="sidebar-footer">
@@ -282,13 +121,16 @@
                     <div class="d-flex align-items-center">
                         <a href="#" class="user-profile">
                             <img src="https://placehold.co/40x40/EBEBEB/000000?text=A" alt="Admin">
-                            <div><div class="fw-bold">Admin User</div><small class="text-muted-foreground"><%= admin %></small></div>
+                            <div>
+                                <div class="fw-bold">Admin User</div>
+                                <small class="text-muted-foreground"><%= admin %></small>
+                            </div>
                         </a>
-                        <a href="#" class="profile-menu-trigger" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-ellipsis-v"></i></a>
+                        <a href="#" class="profile-menu-trigger" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#" id="theme-menu-toggle"><i class="fas fa-moon me-2"></i> Theme</a></li>
+                            <li><a class="dropdown-item" href="#" id="theme-toggle-btn"><i class="bi bi-moon-stars-fill me-2"></i> Theme</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="/"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+                            <li><a class="dropdown-item text-danger" href="/"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
                         </ul>
                     </div>
                 </div>
@@ -309,7 +151,7 @@
             <div class="row g-4">
                 <!-- Filters & Search Card -->
                 <div class="col-12">
-                    <div class="content-card">
+                    <div class="content-card animate-on-scroll">
                         <div class="aurora-glow"></div>
                         <div class="row g-3 align-items-end">
                             <div class="col-lg-5">
@@ -347,36 +189,32 @@
                 <!-- Events List -->
                 <div class="col-12">
                     <div class="row g-4" id="events-list">
-                        <% if (events.length > 0) { %>
-                            <% events.forEach(event => { %>
-                                <div class="col-lg-6">
+                        <% if (events && events.length > 0) { %>
+                            <% events.forEach((event, index) => { %>
+                                <div class="col-lg-6 animate-on-scroll" style="--animation-order: <%= index %>;">
                                     <div class="content-card event-card">
                                         <div class="aurora-glow"></div>
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
                                             <span class="badge rounded-pill bg-<%= event.status.toLowerCase().replace(' ', '-') %>"><%= event.status %></span>
                                             <div class="dropdown">
-                                                <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>
+                                                <button class="btn btn-sm btn-light py-0 px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>
                                                 <ul class="dropdown-menu dropdown-menu-end">
                                                     <li><a class="dropdown-item view-btn" href="#" data-bs-toggle="modal" data-bs-target="#viewEventModal" data-event-id="<%= event._id %>"><i class="fas fa-eye me-2"></i> View Details</a></li>
                                                     <li><a class="dropdown-item edit-btn" href="#" data-bs-toggle="modal" data-bs-target="#editEventModal" data-event-id="<%= event._id %>"><i class="fas fa-edit me-2"></i> Edit</a></li>
                                                     <li><hr class="dropdown-divider"></li>
-                                                    <li><a class="dropdown-item text-danger delete-btn" data-bs-toggle="modal" data-bs-target="#deleteEventModal" data-event-id="<%= event._id %>" data-event-title="<%= event.title %>"><i class="fas fa-trash-alt me-2"></i> Delete Event</a></li>
+                                                    <li><a class="dropdown-item text-danger delete-btn" href="#" data-bs-toggle="modal" data-bs-target="#deleteEventModal" data-event-id="<%= event._id %>" data-event-title="<%= event.title %>"><i class="fas fa-trash-alt me-2"></i> Delete</a></li>
                                                 </ul>
                                             </div>
                                         </div>
-                                        <h5 class="fw-bold"><%= event.title %></h5>
-                                        <p class="text-muted-foreground"><i class="fas fa-calendar-alt me-2"></i><%= event.date %>, <%= event.time %></p>
-                                        <p class="text-muted-foreground"><i class="fas fa-map-marker-alt me-2"></i><a href="<%= event.venue_link %>" class="text-muted-foreground" target="_blank"><%= event.venue_name %></a></p>
-                                        <p class="text-muted-foreground mt-3 card-description">
-                                            <% if (event.description.length > 150) { %>
-                                                <%= event.description.substring(0, 150) %>...
-                                            <% } else { %>
-                                                <%= event.description %>
-                                            <% } %>
-                                        </p>
-                                        <small class="text-muted-foreground mt-auto">Organizer: <%= event.organizer_name %> (<%= event.organizer_contact %>)</small>
+                                        <h5 class="fw-bold mb-2"><%= event.title %></h5>
+                                        <div class="event-card-body">
+                                             <p class="text-muted-foreground mb-1"><i class="fas fa-calendar-alt me-2"></i><%= new Date(event.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) %>, <%= event.time %></p>
+                                             <p class="text-muted-foreground"><i class="fas fa-map-marker-alt me-2"></i><a href="<%= event.venue_link %>" class="text-muted-foreground" target="_blank"><%= event.venue_name %></a></p>
+                                             <p class="text-muted-foreground my-3 card-description"><%= event.description %></p>
+                                             <small class="text-muted-foreground mt-auto">Organizer: <%= event.organizer_name %> (<%= event.organizer_contact %>)</small>
+                                        </div>
                                         <div class="mt-3">
-                                            <a href="#" class="btn btn-light btn-sm"><%= event.category %></a>
+                                             <span class="badge bg-secondary text-dark"><%= event.category %></span>
                                         </div>
                                     </div>
                                 </div>
@@ -384,7 +222,7 @@
                         <% } else { %>
                             <div class="col-12 text-center text-muted-foreground py-5">
                                 <h5 class="fw-bold">No Events Found</h5>
-                                <p>There are no events to display at the moment. Start by creating a new one!</p>
+                                <p>Try adjusting your filters or create a new one!</p>
                             </div>
                         <% } %>
                     </div>
@@ -397,65 +235,25 @@
     <div class="modal fade" id="createEventModal" tabindex="-1" aria-labelledby="createEventModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <div class="aurora-glow"></div>
+                <div class="modal-header">
+                     <h5 class="modal-title fw-bold">Schedule New Event</h5>
+                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
                 <div class="modal-body p-4">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    <h5 class="modal-title fw-bold text-center mb-4">Schedule New Event</h5>
-                    <form action="/create-event" method="POST">
+                    <div class="aurora-glow"></div>
+                    <form id="create-event-form" action="/create-event" method="POST">
                         <div class="row g-3">
-                            <div class="col-12">
-                                <label for="event-title" class="form-label">Event Title</label>
-                                <input type="text" class="form-control" id="event-title" name="title" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="event-date" class="form-label">Date</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                                    <input type="date" class="form-control" id="event-date" name="date" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="event-time" class="form-label">Time</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-clock"></i></span>
-                                    <input type="time" class="form-control" id="event-time" name="time" required>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <label for="event-venue-name" class="form-label">Venue/Online Link Name</label>
-                                <input type="text" class="form-control" id="event-venue-name" name="venue_name" placeholder="e.g., Main Auditorium, Google Meet" required>
-                            </div>
-                             <div class="col-12">
-                                <label for="event-venue-link" class="form-label">Venue/Online Link URL</label>
-                                <input type="url" class="form-control" id="event-venue-link" name="venue_link" placeholder="e.g., https://goo.gl/maps/..." required>
-                            </div>
-                            <div class="col-12">
-                                <label for="event-description" class="form-label">Description</label>
-                                <textarea class="form-control" id="event-description" name="description" rows="3" required></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="event-organizer-name" class="form-label">Organizer Name</label>
-                                <input type="text" class="form-control" id="event-organizer-name" name="organizer_name" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="event-organizer-contact" class="form-label">Organizer Contact</label>
-                                <input type="text" class="form-control" id="event-organizer-contact" name="organizer_contact" required>
-                            </div>
-                            <div class="col-12">
-                                <label for="event-category" class="form-label">Category</label>
-                                <select id="event-category" class="form-select" name="category" required>
-                                    <option value="">Select a category</option>
-                                    <option value="Workshops">Workshops</option>
-                                    <option value="Alumni meetups">Alumni meetups</option>
-                                    <option value="Webinars">Webinars</option>
-                                    <option value="Hackathons">Hackathons</option>
-                                    <option value="Placements drives">Placements drives</option>
-                                </select>
-                            </div>
+                            <div class="col-12"><label for="create-event-title" class="form-label">Event Title</label><input type="text" class="form-control" id="create-event-title" name="title" required></div>
+                            <div class="col-md-6"><label for="create-event-date" class="form-label">Date</label><div class="input-group"><span class="input-group-text"><i class="fas fa-calendar-alt"></i></span><input type="date" class="form-control" id="create-event-date" name="date" required></div></div>
+                            <div class="col-md-6"><label for="create-event-time" class="form-label">Time</label><div class="input-group"><span class="input-group-text"><i class="fas fa-clock"></i></span><input type="time" class="form-control" id="create-event-time" name="time" required></div></div>
+                            <div class="col-12"><label for="create-event-venue-name" class="form-label">Venue/Online Link Name</label><input type="text" class="form-control" id="create-event-venue-name" name="venue_name" placeholder="e.g., Main Auditorium, Google Meet" required></div>
+                            <div class="col-12"><label for="create-event-venue-link" class="form-label">Venue/Online Link URL</label><input type="text" class="form-control" id="create-event-venue-link" name="venue_link" placeholder="e.g., https://goo.gl/maps/..." required></div>
+                            <div class="col-12"><label for="create-event-description" class="form-label">Description</label><textarea class="form-control" id="create-event-description" name="description" rows="3" required></textarea></div>
+                            <div class="col-md-6"><label for="create-event-organizer-name" class="form-label">Organizer Name</label><input type="text" class="form-control" id="create-event-organizer-name" name="organizer_name" required></div>
+                            <div class="col-md-6"><label for="create-event-organizer-contact" class="form-label">Organizer Contact</label><input type="text" class="form-control" id="create-event-organizer-contact" name="organizer_contact" required></div>
+                            <div class="col-12"><label for="create-event-category" class="form-label">Category</label><select id="create-event-category" class="form-select" name="category" required><option value="" disabled selected>Select a category</option><option value="Workshops">Workshops</option><option value="Alumni meetups">Alumni meetups</option><option value="Webinars">Webinars</option><option value="Hackathons">Hackathons</option><option value="Placements drives">Placements drives</option></select></div>
                         </div>
-                        <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-primary">Schedule Event</button>
-                        </div>
+                        <div class="d-grid mt-4"><button type="submit" class="btn btn-primary">Schedule Event</button></div>
                     </form>
                 </div>
             </div>
@@ -466,66 +264,35 @@
     <div class="modal fade" id="editEventModal" tabindex="-1" aria-labelledby="editEventModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <div class="aurora-glow"></div>
+                 <div class="modal-header">
+                     <h5 class="modal-title fw-bold">Edit Event</h5>
+                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
                 <div class="modal-body p-4">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    <h5 class="modal-title fw-bold text-center mb-4">Edit Event</h5>
+                    <div class="aurora-glow"></div>
                     <form id="edit-event-form" action="/edit-event" method="POST">
                         <input type="hidden" id="edit-event-id" name="id">
                         <div class="row g-3">
-                            <div class="col-12">
-                                <label for="edit-event-title" class="form-label">Event Title</label>
-                                <input type="text" class="form-control" id="edit-event-title" name="title" required>
-                            </div>
+                            <div class="col-12"><label for="edit-event-title" class="form-label">Event Title</label><input type="text" class="form-control" id="edit-event-title" name="title" required></div>
+                            <div class="col-md-6"><label for="edit-event-date" class="form-label">Date</label><div class="input-group"><span class="input-group-text"><i class="fas fa-calendar-alt"></i></span><input type="date" class="form-control" id="edit-event-date" name="date" required></div></div>
+                            <div class="col-md-6"><label for="edit-event-time" class="form-label">Time</label><div class="input-group"><span class="input-group-text"><i class="fas fa-clock"></i></span><input type="time" class="form-control" id="edit-event-time" name="time" required></div></div>
+                            <div class="col-12"><label for="edit-event-venue-name" class="form-label">Venue/Online Link Name</label><input type="text" class="form-control" id="edit-event-venue-name" name="venue_name" required></div>
+                            <div class="col-12"><label for="edit-event-venue-link" class="form-label">Venue/Online Link URL</label><input type="text" class="form-control" id="edit-event-venue-link" name="venue_link" required></div>
+                            <div class="col-12"><label for="edit-event-description" class="form-label">Description</label><textarea class="form-control" id="edit-event-description" name="description" rows="3" required></textarea></div>
+                            <div class="col-md-6"><label for="edit-event-organizer-name" class="form-label">Organizer Name</label><input type="text" class="form-control" id="edit-event-organizer-name" name="organizer_name" required></div>
+                            <div class="col-md-6"><label for="edit-event-organizer-contact" class="form-label">Organizer Contact</label><input type="text" class="form-control" id="edit-event-organizer-contact" name="organizer_contact" required></div>
+                            <div class="col-md-6"><label for="edit-event-category" class="form-label">Category</label><select id="edit-event-category" class="form-select" name="category" required><option value="">Select a category</option><option value="Workshops">Workshops</option><option value="Alumni meetups">Alumni meetups</option><option value="Webinars">Webinars</option><option value="Hackathons">Hackathons</option><option value="Placements drives">Placements drives</option></select></div>
                             <div class="col-md-6">
-                                <label for="edit-event-date" class="form-label">Date</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                                    <input type="date" class="form-control" id="edit-event-date" name="date" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="edit-event-time" class="form-label">Time</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-clock"></i></span>
-                                    <input type="time" class="form-control" id="edit-event-time" name="time" required>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <label for="edit-event-venue-name" class="form-label">Venue/Online Link Name</label>
-                                <input type="text" class="form-control" id="edit-event-venue-name" name="venue_name" placeholder="e.g., Main Auditorium, Google Meet" required>
-                            </div>
-                             <div class="col-12">
-                                <label for="edit-event-venue-link" class="form-label">Venue/Online Link URL</label>
-                                <input type="url" class="form-control" id="edit-event-venue-link" name="venue_link" placeholder="e.g., https://goo.gl/maps/..." required>
-                            </div>
-                            <div class="col-12">
-                                <label for="edit-event-description" class="form-label">Description</label>
-                                <textarea class="form-control" id="edit-event-description" name="description" rows="3" required></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="edit-event-organizer-name" class="form-label">Organizer Name</label>
-                                <input type="text" class="form-control" id="edit-event-organizer-name" name="organizer_name" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="edit-event-organizer-contact" class="form-label">Organizer Contact</label>
-                                <input type="text" class="form-control" id="edit-event-organizer-contact" name="organizer_contact" required>
-                            </div>
-                            <div class="col-12">
-                                <label for="edit-event-category" class="form-label">Category</label>
-                                <select id="edit-event-category" class="form-select" name="category" required>
-                                    <option value="">Select a category</option>
-                                    <option value="Workshops">Workshops</option>
-                                    <option value="Alumni meetups">Alumni meetups</option>
-                                    <option value="Webinars">Webinars</option>
-                                    <option value="Hackathons">Hackathons</option>
-                                    <option value="Placements drives">Placements drives</option>
+                                <label for="edit-event-status" class="form-label">Status</label>
+                                <select id="edit-event-status" class="form-select" name="status" required>
+                                    <option value="Upcoming">Upcoming</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                    <option value="Completed">Completed</option>
+                                    <option value="Cancelled">Cancelled</option>
                                 </select>
                             </div>
                         </div>
-                        <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
-                        </div>
+                        <div class="d-grid mt-4"><button type="submit" class="btn btn-primary">Save Changes</button></div>
                     </form>
                 </div>
             </div>
@@ -536,38 +303,23 @@
     <div class="modal fade" id="viewEventModal" tabindex="-1" aria-labelledby="viewEventModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
-                <div class="aurora-glow"></div>
-                <div class="modal-body p-4">
+                 <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="viewEventTitle"></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    <h5 class="modal-title fw-bold text-center mb-4" id="viewEventTitle"></h5>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="aurora-glow"></div>
                     <div class="row g-3">
+                        <div class="col-md-6 view-details-card"><label class="form-label text-muted-foreground">Date</label><p class="fw-bold mb-0" id="viewEventDate"></p></div>
+                        <div class="col-md-6 view-details-card"><label class="form-label text-muted-foreground">Time</label><p class="fw-bold mb-0" id="viewEventTime"></p></div>
+                        <div class="col-12 view-details-card"><label class="form-label text-muted-foreground">Venue</label><p class="fw-bold mb-0" id="viewEventVenue"></p></div>
+                        <div class="col-12 view-details-card"><label class="form-label text-muted-foreground">Description</label><p class="fw-bold mb-0" id="viewEventDescription" style="white-space: pre-wrap;"></p></div>
+                        <div class="col-md-6 view-details-card"><label class="form-label text-muted-foreground">Organizer</label><p class="fw-bold mb-0" id="viewEventOrganizer"></p></div>
+                        <div class="col-md-6 view-details-card"><label class="form-label text-muted-foreground">Contact</label><p class="fw-bold mb-0" id="viewEventContact"></p></div>
+                        <div class="col-md-6 view-details-card"><label class="form-label text-muted-foreground">Category</label><p class="fw-bold mb-0" id="viewEventCategory"></p></div>
                         <div class="col-md-6 view-details-card">
-                            <label class="form-label text-muted-foreground">Date</label>
-                            <p class="fw-bold" id="viewEventDate"></p>
-                        </div>
-                        <div class="col-md-6 view-details-card">
-                            <label class="form-label text-muted-foreground">Time</label>
-                            <p class="fw-bold" id="viewEventTime"></p>
-                        </div>
-                        <div class="col-12 view-details-card">
-                            <label class="form-label text-muted-foreground">Venue</label>
-                            <p class="fw-bold" id="viewEventVenue"></p>
-                        </div>
-                        <div class="col-12 view-details-card">
-                            <label class="form-label text-muted-foreground">Description</label>
-                            <p class="fw-bold" id="viewEventDescription"></p>
-                        </div>
-                        <div class="col-md-6 view-details-card">
-                            <label class="form-label text-muted-foreground">Organizer</label>
-                            <p class="fw-bold" id="viewEventOrganizer"></p>
-                        </div>
-                        <div class="col-md-6 view-details-card">
-                            <label class="form-label text-muted-foreground">Contact</label>
-                            <p class="fw-bold" id="viewEventContact"></p>
-                        </div>
-                        <div class="col-12 view-details-card">
-                            <label class="form-label text-muted-foreground">Category</label>
-                            <p class="fw-bold" id="viewEventCategory"></p>
+                            <label class="form-label text-muted-foreground">Status</label>
+                            <p class="fw-bold mb-0" id="viewEventStatus"></p>
                         </div>
                     </div>
                 </div>
@@ -579,12 +331,12 @@
     <div class="modal fade" id="deleteEventModal" tabindex="-1" aria-labelledby="deleteEventModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="aurora-glow"></div>
                 <div class="modal-body text-center py-5">
+                    <div class="aurora-glow"></div>
                     <i class="fas fa-exclamation-triangle text-danger mb-3" style="font-size: 4rem;"></i>
                     <h5 class="modal-title fw-bold" id="deleteEventModalLabel">Confirm Deletion</h5>
                     <p class="text-muted-foreground mt-2">Are you sure you want to delete the event "<strong id="eventTitleToDelete"></strong>"? This action cannot be undone.</p>
-                    <form action="/delete-event" method="POST" class="mt-4">
+                    <form id="delete-event-form" action="/delete-event" method="POST" class="mt-4">
                         <input type="hidden" name="eventId" id="eventIdToDelete">
                         <button type="button" class="btn btn-light me-2" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-danger">Confirm Delete</button>
@@ -598,11 +350,11 @@
     <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="aurora-glow"></div>
                 <div class="modal-body text-center py-5">
+                    <div class="aurora-glow"></div>
                     <i class="fas fa-check-circle text-success mb-3" style="font-size: 4rem;"></i>
                     <h5 class="modal-title fw-bold" id="successModalLabel">Success!</h5>
-                    <p class="text-muted-foreground mt-2">The event has been successfully updated.</p>
+                    <p class="text-muted-foreground mt-2" id="successModalMessage">The operation was successful.</p>
                     <button type="button" class="btn btn-primary w-100 mt-4" data-bs-dismiss="modal">OK</button>
                 </div>
             </div>
@@ -612,151 +364,180 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- POPUP LOGIC ---
+
+            // --- THEME TOGGLER LOGIC ---
+            const themeToggleButton = document.getElementById('theme-toggle-btn');
+            const themeIcon = themeToggleButton.querySelector('i');
+            const htmlElement = document.documentElement;
+
+            const setTheme = (theme) => {
+                htmlElement.classList.remove('light', 'dark');
+                htmlElement.classList.add(theme);
+                localStorage.setItem('theme', theme);
+                
+                if (theme === 'dark') {
+                    themeIcon.classList.remove('bi-moon-stars-fill');
+                    themeIcon.classList.add('bi-sun-fill');
+                } else {
+                    themeIcon.classList.remove('bi-sun-fill');
+                    themeIcon.classList.add('bi-moon-stars-fill');
+                }
+            };
+            
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            setTheme(savedTheme);
+
+            themeToggleButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                const newTheme = htmlElement.classList.contains('dark') ? 'light' : 'dark';
+                setTheme(newTheme);
+            });
+
+            // --- NOTIFICATION & POPUP LOGIC ---
             const urlParams = new URLSearchParams(window.location.search);
-            const status = urlParams.get('status');
-            if (status === 'created' || status === 'deleted' || status === 'updated') {
+            const statusMessage = urlParams.get('update_status');
+
+            if (statusMessage) {
                 const successModal = new bootstrap.Modal(document.getElementById('successModal'));
                 const modalTitle = document.getElementById('successModalLabel');
-                const modalMessage = document.querySelector('#successModal .modal-body p');
-                if (status === 'created') {
-                    modalTitle.textContent = 'Event Scheduled!';
-                    modalMessage.textContent = 'The event has been successfully scheduled and is now live.';
-                } else if (status === 'deleted') {
-                    modalTitle.textContent = 'Event Deleted!';
-                    modalMessage.textContent = 'The selected event has been permanently removed.';
-                } else if (status === 'updated') {
-                    modalTitle.textContent = 'Event Updated!';
-                    modalMessage.textContent = 'The event has been successfully updated with your changes.';
+                const modalMessage = document.getElementById('successModalMessage');
+                
+                const messages = {
+                    created: { title: 'Event Scheduled!', msg: 'The event has been successfully scheduled.' },
+                    deleted: { title: 'Event Deleted!', msg: 'The selected event has been permanently removed.' },
+                    updated: { title: 'Event Updated!', msg: 'The event has been successfully updated.' }
+                };
+                
+                if (messages[statusMessage]) {
+                    modalTitle.textContent = messages[statusMessage].title;
+                    modalMessage.textContent = messages[statusMessage].msg;
+                    successModal.show();
+                    
+                    const newUrl = new URL(window.location.href);
+                    newUrl.searchParams.delete('update_status');
+                    window.history.replaceState({}, document.title, newUrl.href);
                 }
-                successModal.show();
             }
             
-            // --- VIEW & EDIT MODAL LOGIC ---
-            document.getElementById('events-list').addEventListener('click', async function(event) {
-                const viewBtn = event.target.closest('.view-btn');
-                const editBtn = event.target.closest('.edit-btn');
-                const deleteBtn = event.target.closest('.delete-btn');
+            // --- VIEW, EDIT & DELETE MODAL LOGIC ---
+            document.getElementById('events-list').addEventListener('click', async (e) => {
+                const target = e.target.closest('.view-btn, .edit-btn, .delete-btn');
+                if (!target) return;
+
+                const eventId = target.dataset.eventId;
                 
-                if (viewBtn || editBtn) {
-                    const eventId = viewBtn ? viewBtn.getAttribute('data-event-id') : editBtn.getAttribute('data-event-id');
-                    try {
-                        const response = await fetch(`/api/event/${eventId}`);
-                        const eventData = await response.json();
-                        if (response.ok) {
-                            if (viewBtn) {
-                                document.getElementById('viewEventTitle').textContent = eventData.title;
-                                document.getElementById('viewEventDate').textContent = eventData.date;
-                                document.getElementById('viewEventTime').textContent = eventData.time;
-                                const viewEventVenueElement = document.getElementById('viewEventVenue');
-                                if (eventData.venue_link && eventData.venue_link.startsWith('http')) {
-                                     viewEventVenueElement.innerHTML = `<a href="${eventData.venue_link}" target="_blank" class="text-muted-foreground" style="color:var(--muted-foreground) !important">${eventData.venue_name}</a>`;
-                                } else {
-                                     viewEventVenueElement.textContent = eventData.venue_name;
-                                }
-                                document.getElementById('viewEventDescription').textContent = eventData.description;
-                                document.getElementById('viewEventOrganizer').textContent = eventData.organizer_name;
-                                document.getElementById('viewEventContact').textContent = eventData.organizer_contact;
-                                document.getElementById('viewEventCategory').textContent = eventData.category;
-                            } else if (editBtn) {
-                                document.getElementById('edit-event-id').value = eventData._id;
-                                document.getElementById('edit-event-title').value = eventData.title;
-                                document.getElementById('edit-event-date').value = eventData.date;
-                                document.getElementById('edit-event-time').value = eventData.time;
-                                document.getElementById('edit-event-venue-name').value = eventData.venue_name;
-                                document.getElementById('edit-event-venue-link').value = eventData.venue_link;
-                                document.getElementById('edit-event-description').value = eventData.description;
-                                document.getElementById('edit-event-organizer-name').value = eventData.organizer_name;
-                                document.getElementById('edit-event-organizer-contact').value = eventData.organizer_contact;
-                                document.getElementById('edit-event-category').value = eventData.category;
-                            }
-                        } else {
-                            console.error("Failed to fetch event data.");
-                        }
-                    } catch (error) {
-                        console.error("Error fetching event data:", error);
-                    }
-                }
-                
-                if (deleteBtn) {
-                    const eventId = deleteBtn.getAttribute('data-event-id');
-                    const eventTitle = deleteBtn.getAttribute('data-event-title');
+                if (target.classList.contains('delete-btn')) {
+                    const eventTitle = target.dataset.eventTitle;
                     document.getElementById('eventTitleToDelete').textContent = eventTitle;
                     document.getElementById('eventIdToDelete').value = eventId;
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/event/${eventId}`);
+                    if (!response.ok) throw new Error('Failed to fetch event data.');
+                    const eventData = await response.json();
+
+                    if (target.classList.contains('view-btn')) {
+                        document.getElementById('viewEventTitle').textContent = eventData.title;
+                        document.getElementById('viewEventDate').textContent = new Date(eventData.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                        document.getElementById('viewEventTime').textContent = eventData.time;
+                        const venueEl = document.getElementById('viewEventVenue');
+                        venueEl.innerHTML = eventData.venue_link.startsWith('http') 
+                            ? `<a href="${eventData.venue_link}" target="_blank" style="color:var(--foreground) !important">${eventData.venue_name}</a>`
+                            : eventData.venue_name;
+                        document.getElementById('viewEventDescription').textContent = eventData.description;
+                        document.getElementById('viewEventOrganizer').textContent = eventData.organizer_name;
+                        document.getElementById('viewEventContact').textContent = eventData.organizer_contact;
+                        document.getElementById('viewEventCategory').textContent = eventData.category;
+                        
+                        const statusEl = document.getElementById('viewEventStatus');
+                        const badgeClass = eventData.status.toLowerCase().replace(' ', '-');
+                        statusEl.innerHTML = `<span class="badge rounded-pill bg-${badgeClass}">${eventData.status}</span>`;
+
+                    } else if (target.classList.contains('edit-btn')) {
+                        document.getElementById('edit-event-id').value = eventData._id;
+                        document.getElementById('edit-event-title').value = eventData.title;
+                        document.getElementById('edit-event-date').value = new Date(eventData.date).toLocaleDateString('en-CA');
+                        document.getElementById('edit-event-time').value = eventData.time;
+                        document.getElementById('edit-event-venue-name').value = eventData.venue_name;
+                        document.getElementById('edit-event-venue-link').value = eventData.venue_link;
+                        document.getElementById('edit-event-description').value = eventData.description;
+                        document.getElementById('edit-event-organizer-name').value = eventData.organizer_name;
+                        document.getElementById('edit-event-organizer-contact').value = eventData.organizer_contact;
+                        document.getElementById('edit-event-category').value = eventData.category;
+                        document.getElementById('edit-event-status').value = eventData.status;
+                    }
+                } catch (error) {
+                    console.error("Error populating modal:", error);
                 }
             });
 
-            // --- SEARCH AND FILTER LOGIC ---
-            const searchInput = document.getElementById('search-input');
-            const categoryFilter = document.getElementById('category-filter');
-            const statusFilter = document.getElementById('status-filter');
-            const eventsListContainer = document.getElementById('events-list');
+            // --- AJAX FORM SUBMISSION FOR CREATE, EDIT & DELETE ---
+            const createForm = document.getElementById('create-event-form');
+            createForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                handleFormSubmit(createForm, 'created');
+            });
 
-            const fetchEvents = async () => {
-                const title = searchInput.value;
-                const category = categoryFilter.value;
-                const status = statusFilter.value;
-                const url = `/api/search-events?title=${title}&category=${category}&status=${status}`;
+            const editForm = document.getElementById('edit-event-form');
+            editForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                handleFormSubmit(editForm, 'updated');
+            });
+
+            const deleteForm = document.getElementById('delete-event-form');
+            deleteForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                handleFormSubmit(deleteForm, 'deleted');
+            });
+
+            const handleFormSubmit = async (form, status) => {
+                const formData = new FormData(form);
+                const submitButton = form.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton.innerHTML;
+                submitButton.disabled = true;
+                submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...`;
 
                 try {
-                    const response = await fetch(url);
-                    const events = await response.json();
-                    renderEvents(events);
+                    const response = await fetch(form.action, {
+                        method: 'POST',
+                        body: new URLSearchParams(formData)
+                    });
+
+                    if (response.ok) {
+                        const currentUrl = new URL(window.location.href);
+                        currentUrl.searchParams.set('update_status', status);
+                        window.location.href = currentUrl.href;
+                    } else {
+                        alert(`An error occurred. Please try again.`);
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalButtonText;
+                    }
                 } catch (error) {
-                    console.error("Error fetching events:", error);
-                    eventsListContainer.innerHTML = `
-                        <div class="col-12 text-center text-muted-foreground py-5">
-                            <h5 class="fw-bold">Error Loading Events</h5>
-                            <p>An error occurred while fetching the events. Please try again later.</p>
-                        </div>
-                    `;
+                    console.error('Failed to submit form:', error);
+                    alert('A network error occurred. Please check your connection and try again.');
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonText;
                 }
             };
 
-            const renderEvents = (events) => {
-                eventsListContainer.innerHTML = '';
-                if (events.length === 0) {
-                    eventsListContainer.innerHTML = `
-                        <div class="col-12 text-center text-muted-foreground py-5">
-                            <h5 class="fw-bold">No Events Found</h5>
-                            <p>There are no events to display at the moment. Try a different search!</p>
-                        </div>
-                    `;
-                    return;
-                }
-                events.forEach(event => {
-                    const badgeClass = event.status.toLowerCase().replace(' ', '-');
-                    const eventCardHtml = `
-                        <div class="col-lg-6">
-                            <div class="content-card event-card">
-                                <div class="aurora-glow"></div>
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <span class="badge rounded-pill bg-${badgeClass}">${event.status}</span>
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-ellipsis-v"></i></button>
-                                        <ul class="dropdown-menu dropdown-menu-end">
-                                            <li><a class="dropdown-item view-btn" href="#" data-bs-toggle="modal" data-bs-target="#viewEventModal" data-event-id="${event._id}"><i class="fas fa-eye me-2"></i> View Details</a></li>
-                                            <li><a class="dropdown-item edit-btn" href="#" data-bs-toggle="modal" data-bs-target="#editEventModal" data-event-id="${event._id}"><i class="fas fa-edit me-2"></i> Edit</a></li>
-                                            <li><hr class="dropdown-divider"></li>
-                                            <li><a class="dropdown-item text-danger delete-btn" data-bs-toggle="modal" data-bs-target="#deleteEventModal" data-event-id="${event._id}" data-event-title="${event.title}"><i class="fas fa-trash-alt me-2"></i> Delete Event</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <h5 class="fw-bold">${event.title}</h5>
-                                <p class="text-muted-foreground"><i class="fas fa-calendar-alt me-2"></i>${event.date}, ${event.time}</p>
-                                <p class="text-muted-foreground"><i class="fas fa-map-marker-alt me-2"></i><a href="${event.venue_link}" class="text-muted-foreground" target="_blank">${event.venue_name}</a></p>
-                                <p class="text-muted-foreground mt-3 card-description">
-                                    ${event.description.length > 150 ? event.description.substring(0, 150) + '...' : event.description}
-                                </p>
-                                <small class="text-muted-foreground mt-auto">Organizer: ${event.organizer_name} (${event.organizer_contact})</small>
-                                <div class="mt-3">
-                                    <a href="#" class="btn btn-light btn-sm">${event.category}</a>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    eventsListContainer.innerHTML += eventCardHtml;
-                });
+            // --- SERVER-SIDE SEARCH AND FILTER LOGIC ---
+            const searchInput = document.getElementById('search-input');
+            const categoryFilter = document.getElementById('category-filter');
+            const statusFilter = document.getElementById('status-filter');
+
+            const currentParams = new URLSearchParams(window.location.search);
+            if (currentParams.has('title')) searchInput.value = currentParams.get('title');
+            if (currentParams.has('category')) categoryFilter.value = currentParams.get('category');
+            if (currentParams.has('status')) statusFilter.value = currentParams.get('status');
+
+            const applyFilters = () => {
+                const params = new URLSearchParams();
+                if (searchInput.value) params.set('title', searchInput.value);
+                if (categoryFilter.value) params.set('category', categoryFilter.value);
+                if (statusFilter.value) params.set('status', statusFilter.value);
+                window.location.href = `/events?${params.toString()}`;
             };
 
             const debounce = (func, delay) => {
@@ -766,29 +547,12 @@
                     timeout = setTimeout(() => func.apply(this, args), delay);
                 };
             };
+            
+            searchInput.addEventListener('input', debounce(applyFilters, 500));
+            categoryFilter.addEventListener('change', applyFilters);
+            statusFilter.addEventListener('change', applyFilters);
 
-            searchInput.addEventListener('input', debounce(fetchEvents, 300));
-            categoryFilter.addEventListener('change', fetchEvents);
-            statusFilter.addEventListener('change', fetchEvents);
-
-
-            // --- SHARED DASHBOARD LOGIC (THEME & SIDEBAR) ---
-            const themeMenuToggle = document.getElementById('theme-menu-toggle');
-            const htmlElement = document.documentElement;
-            const applyTheme = (theme) => {
-                htmlElement.classList.remove('light', 'dark');
-                htmlElement.classList.add(theme);
-            };
-            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-            applyTheme(savedTheme);
-
-            themeMenuToggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                const newTheme = htmlElement.classList.contains('dark') ? 'light' : 'dark';
-                localStorage.setItem('theme', newTheme);
-                applyTheme(newTheme);
-            });
-
+            // --- MOBILE SIDEBAR LOGIC ---
             const sidebarToggle = document.getElementById('sidebarToggle');
             const sidebar = document.getElementById('sidebar');
             const backdrop = document.getElementById('sidebarBackdrop');
@@ -805,21 +569,20 @@
                 });
             }
             
-            // SCROLL-TRIGGERED ANIMATIONS
+            // --- SCROLL-TRIGGERED ANIMATIONS ---
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('is-visible');
-                    } else {
-                        entry.target.classList.remove('is-visible');
                     }
                 });
             }, { threshold: 0.1 });
 
-            document.querySelectorAll('.content-card').forEach(element => {
+            document.querySelectorAll('.animate-on-scroll').forEach(element => {
                 observer.observe(element);
             });
         });
     </script>
 </body>
 </html>
+

@@ -107,8 +107,9 @@
         .aurora-glow {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px;
             background: radial-gradient(ellipse at center, var(--glow-color) 0%, rgba(0, 0, 0, 0) 70%); filter: blur(80px);
-            z-index: 0; pointer-events: none; opacity: 1;
+            z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s ease-out;
         }
+        .is-visible .aurora-glow { opacity: 1; }
         
         .form-control, .form-select {
             background-color: var(--card);
@@ -134,7 +135,21 @@
         .table tbody tr:last-child td { border-bottom: 0; }
         .table td { vertical-align: middle; }
         
-        /* --- 5. MOBILE RESPONSIVENESS --- */
+        /* --- 5. ANIMATIONS --- */
+        .animate-on-scroll { 
+            opacity: 0; 
+            transform: translateY(30px); 
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out; 
+        }
+        .is-visible { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+        .animate-on-scroll { 
+            transition-delay: calc(0.1s * var(--animation-order, 0)); 
+        }
+
+        /* --- 6. MOBILE RESPONSIVENESS & MODALS --- */
         .mobile-header { display: flex; justify-content: space-between; align-items: center; }
         .sidebar-backdrop {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -149,18 +164,10 @@
             .sidebar { transform: translateX(-100%); }
             .sidebar.show { transform: translateX(0); }
         }
-
-        /* --- 6. MODAL THEME FIX --- */
         .modal-content {
             background-color: var(--card);
             border-radius: var(--radius);
             border: 1px solid var(--border);
-        }
-        .modal-header, .modal-footer {
-            border-color: var(--border);
-        }
-        html.dark .btn-close {
-            filter: invert(1) grayscale(100) brightness(200%);
         }
         .modal-body .text-success { color: #16a34a !important; }
         html.dark .modal-body .text-success { color: #22c55e !important; }
@@ -178,8 +185,8 @@
                 <ul class="nav flex-column">
                     <li class="nav-item"><a class="nav-link" href="/admin"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link active" href="/user_management"><i class="bi bi-people-fill"></i> User Management</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-megaphone-fill"></i> Announcements</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-calendar-event-fill"></i> Events</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/announcements"><i class="bi bi-megaphone-fill"></i> Announcements</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/events"><i class="bi bi-calendar-event-fill"></i> Events</a></li>
                     <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cash-coin"></i> Donations</a></li>
                     <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-quote-fill"></i> Feedback</a></li>
                 </ul>
@@ -215,7 +222,7 @@
 
             <div class="row g-4">
                 <!-- Filters & Search Card -->
-                <div class="col-12">
+                <div class="col-12 animate-on-scroll" style="--animation-order: 1;">
                     <div class="content-card">
                         <div class="aurora-glow"></div>
                         <div class="row g-3 align-items-end">
@@ -243,7 +250,7 @@
                 </div>
 
                 <!-- Users Table Card -->
-                <div class="col-12">
+                <div class="col-12 animate-on-scroll" style="--animation-order: 2;">
                     <div class="content-card">
                         <div class="aurora-glow"></div>
                         <div id="table-container" class="table-responsive">
@@ -325,6 +332,7 @@
             const batchFilter = document.getElementById('batch-filter');
             const noResultsMessage = document.getElementById('no-results-message');
             const deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            const animatedElements = document.querySelectorAll('.animate-on-scroll');
             
             // --- 3. FUNCTIONS ---
 
@@ -414,6 +422,17 @@
 
             // Initial render
             renderTable(initialUsers);
+
+            // Animate on scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { 
+                    if (entry.isIntersecting) { 
+                        entry.target.classList.add('is-visible'); 
+                    } 
+                });
+            }, { threshold: 0.1 });
+            animatedElements.forEach(el => observer.observe(el));
+
 
             // --- 5. SHARED DASHBOARD LOGIC (THEME & SIDEBAR) ---
             const themeMenuToggle = document.getElementById('theme-menu-toggle');

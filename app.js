@@ -102,7 +102,7 @@ app.get("/all_users", function(req, res){
 app.get("/admin", function(req, res){
   Announcement.find().sort({ _id: -1 }).limit(2)
   .then(docs => {
-    Event.find()
+    Event.find({status:"Upcoming"})
       .then(result => {
         Event.find({status:"Upcoming"})
           .then(up => {
@@ -110,8 +110,8 @@ app.get("/admin", function(req, res){
                 .then(tot=>{
                     res.render("admin", {
                         admin: ad,
-                        ann: docs[0].title,
-                        ann1: docs[1].title,
+                        ann: docs.length > 0 ? docs[0].title : "No announcements",
+                        ann1: docs.length > 1 ? docs[1].title : "No older announcements",
                         events: result,
                         Upcoming: up,
                         total:tot
@@ -267,15 +267,17 @@ app.post("/create-announcement", function(req, res) {
 });
 // --- NEW EVENTS ROUTES ---
 app.get("/events", function(req, res) {
-    const status = req.query.status;
-    Event.find({}).sort({
-            created_at: -1
-        })
+    const { title, category, status } = req.query;
+    let query = {};
+    if (title) query.title = { $regex: title, $options: 'i' };
+    if (category) query.category = category;
+    if (status) query.status = status;
+
+    Event.find(query).sort({ created_at: -1 })
         .then(events => {
             res.render("events", {
                 events: events,
-                admin: ad,
-                status: status
+                admin: ad
             });
         })
         .catch(err => {
@@ -288,17 +290,13 @@ app.get("/api/event/:id", function(req, res) {
     Event.findById(req.params.id)
         .then(event => {
             if (!event) {
-                return res.status(404).json({
-                    error: "Event not found."
-                });
+                return res.status(404).json({ error: "Event not found." });
             }
             res.json(event);
         })
         .catch(err => {
             console.error("Error fetching event: " + err);
-            res.status(500).json({
-                error: "Server error fetching event."
-            });
+            res.status(500).json({ error: "Server error fetching event." });
         });
 });
 
@@ -335,11 +333,10 @@ app.post("/edit-event", function(req, res) {
         description: req.body.description,
         organizer_name: req.body.organizer_name,
         organizer_contact: req.body.organizer_contact,
-        category: req.body.category
+        category: req.body.category,
+        status: req.body.status // <-- ADDED THIS LINE
     };
-    Event.findByIdAndUpdate(eventId, updatedEvent, {
-            new: true
-        })
+    Event.findByIdAndUpdate(eventId, updatedEvent, { new: true })
         .then(result => {
             if (!result) {
                 return res.status(404).send("Event not found.");
@@ -369,35 +366,19 @@ app.post("/delete-event", function(req, res) {
 });
 
 app.get("/api/search-events", function(req, res) {
-    const {
-        title,
-        category,
-        status
-    } = req.query;
+    const { title, category, status } = req.query;
     let query = {};
-    if (title) {
-        query.title = {
-            $regex: title,
-            $options: 'i'
-        };
-    }
-    if (category) {
-        query.category = category;
-    }
-    if (status) {
-        query.status = status;
-    }
-    Event.find(query).sort({
-            created_at: -1
-        })
+    if (title) query.title = { $regex: title, $options: 'i' };
+    if (category) query.category = category;
+    if (status) query.status = status;
+    
+    Event.find(query).sort({ created_at: -1 })
         .then(results => {
             res.json(results);
         })
         .catch(err => {
             console.error("API Event Search Error:", err);
-            res.status(500).json({
-                error: "An error occurred during event search."
-            });
+            res.status(500).json({ error: "An error occurred during event search." });
         });
 });
 
