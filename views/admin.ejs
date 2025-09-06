@@ -84,7 +84,7 @@
                     <div class="content-card">
                         <div class="aurora-glow"></div>
                         <h5 class="stat-card-title">Pending Verifications</h5>
-                        <p class="stat-card-value">18</p>
+                        <p class="stat-card-value"><%= pendings.length%></p>
                         <p class="text-muted-foreground small mb-0">Action required</p>
                     </div>
                 </div>
@@ -117,7 +117,7 @@
                                                 <td><%= events[i].title %></td>
                                                 <td><%= events[i].date %></td>
                                                 <td>
-                                                    <span class="fw-bold"><%= events[i].registered_count || 'N/A' %></span> 
+                                                    <!-- <span class="fw-bold"><%= events[i].registered_count || 'N/A' %></span>  -->
                                                     <% if(events[i].time) { %>
                                                         <%= events[i].time %>
                                                     <% } %>

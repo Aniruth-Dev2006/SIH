@@ -143,26 +143,31 @@ app.get("/all_users", function(req, res){
     });
 });
 
-app.get("/admin", function(req, res){
+app.get("/admin", function(req, res) {
     Promise.all([
         Announcement.find().sort({ _id: -1 }).limit(2),
         Event.find(),
-        Event.countDocuments({status:"Upcoming"}),
-        Event.countDocuments({status:"Completed"})
-    ]).then(([docs, allEvents, upcomingCount, completedCount]) => {
+        Event.countDocuments({ status: "Upcoming" }),
+        Event.countDocuments({ status: "Completed" }),
+        PendingRequest.find() 
+    ])
+    .then(([docs, allEvents, upcomingCount, completedCount, pending]) => {
         res.render("admin", {
             admin: ad,
             ann: docs.length > 0 ? docs[0].title : "No announcements",
             ann1: docs.length > 1 ? docs[1].title : "No older announcements",
             events: allEvents,
             Upcoming: { length: upcomingCount },
-            total: { length: completedCount }
+            total: { length: completedCount },
+            pendings: pending 
         });
-    }).catch(err => {
+    })
+    .catch(err => {
         console.log("error " + err);
         res.status(500).send("Server Error");
     });
 });
+
 
 app.get("/pending-requests", function(req, res){
     PendingRequest.find({})
