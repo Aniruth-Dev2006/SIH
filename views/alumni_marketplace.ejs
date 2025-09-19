@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace | Alumnium</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --background: #f8f9fa; --foreground: #111827; --card: #ffffff; --primary: #111827;
+            --primary-foreground: #ffffff; --secondary: #f3f4f6; --muted-foreground: #6b7280;
+            --border: #e5e7eb; --radius: 1rem; --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+            --glow-color: rgba(139, 92, 246, 0.2);
+        }
+        html.dark {
+            --background: #0d1117; --foreground: #e6edf3; --card: #161b22; --primary: #e6edf3;
+            --primary-foreground: #0d1117; --secondary: #21262d; --muted-foreground: #8b949e;
+            --border: #30363d; --glow-color: rgba(139, 92, 246, 0.3);
+        }
+        body { font-family: var(--font-sans); background-color: var(--secondary); color: var(--foreground); }
+        .dashboard-layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+        .sidebar { background-color: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem; position: fixed; top: 0; left: 0; height: 100%; width: 280px; z-index: 1050; }
+        .main-content { padding: 2.5rem; grid-column: 2; }
+        .sidebar-header { font-size: 1.5rem; font-weight: 700; color: var(--foreground); text-decoration: none; margin-bottom: 2rem; display:flex; align-items:center; gap: 0.5rem; }
+        .sidebar-nav { flex-grow: 1; overflow-y: auto; margin-bottom: 1.5rem; -ms-overflow-style: none; scrollbar-width: none; }
+        .sidebar-nav::-webkit-scrollbar { display: none; }
+        .sidebar-nav .nav-link { color: var(--muted-foreground); font-weight: 500; padding: 0.75rem 1rem; border-radius: 0.75rem; margin-bottom: 0.25rem; display: flex; align-items: center; font-size: 14px; transition: all 0.2s ease; }
+        .sidebar-nav .nav-link i { margin-right: 0.75rem; font-size: 1.1rem; }
+        .sidebar-nav .nav-link:hover { color: var(--foreground); background-color: var(--secondary); }
+        .sidebar-nav .nav-link.active { color: var(--primary-foreground); background-color: var(--primary); }
+        .sidebar-footer { border-top: 1px solid var(--border); padding-top: 1.5rem; }
+        .user-profile { display: flex; align-items: center; text-decoration: none; color: var(--foreground); flex-grow: 1; }
+        .user-profile img { width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; }
+        .content-card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 1.5rem; position: relative; overflow: hidden; }
+        .aurora-glow { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; background: radial-gradient(ellipse at center, var(--glow-color) 0%, rgba(0, 0, 0, 0) 70%); filter: blur(80px); z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s ease-out; }
+        .is-visible .aurora-glow { opacity: 1; }
+        .form-control, .form-select { background-color: var(--secondary); border-color: var(--border); color: var(--foreground); }
+        .form-control:focus, .form-select:focus { background-color: var(--secondary); border-color: var(--primary); color: var(--foreground); box-shadow: none; }
+        .btn-primary { background-color: var(--primary); color: var(--primary-foreground); border: none; }
+        .btn-light { background-color: var(--secondary); border-color: var(--border); color: var(--foreground); }
+        .modal-content { background-color: var(--card); border-color: var(--border); }
+
+        .animate-on-scroll { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .is-visible { opacity: 1; transform: translateY(0); }
+        .animate-on-scroll { transition-delay: calc(0.1s * var(--animation-order, 0)); }
+
+        @media (max-width: 991.98px) {
+            .dashboard-layout { grid-template-columns: 1fr; }
+            .main-content { grid-column: 1 / -1; padding: 1.5rem; }
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+            .sidebar.show { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (savedTheme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+    
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <strong class="me-auto" id="toastTitle"></strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastBody"></div>
+        </div>
+    </div>
+
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <a href="/alumni-dashboard" class="sidebar-header"><i class="bi bi-link-45deg"></i> Alumnium</a>
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link" href="/alumni-dashboard"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/alumni-announcements"><i class="bi bi-megaphone-fill"></i> Announcements</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/leaderboard"><i class="bi bi-trophy-fill"></i>Leaderboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people-fill"></i> Mentorship</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/alumni-jobs"><i class="bi bi-briefcase-fill"></i> Jobs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-search"></i> Connect</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/alumni-events"><i class="bi bi-calendar-event-fill"></i> Events</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/alumni-marketplace"><i class="bi bi-shop"></i> Marketplace</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cash-coin"></i> Donations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-quote-fill"></i> Feedback</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                 <div class="d-flex align-items-center">
+                    <a href="#" class="user-profile">
+                        <img src="https://placehold.co/40x40/EBEBEB/000000?text=<%= alumni.name.charAt(0) %>" alt="Alumni">
+                        <div>
+                            <div class="fw-bold"><%= alumni.name %></div>
+                            <small class="text-muted-foreground"><%= alumni.email %></small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2 mb-0">Marketplace</h1>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#postListingModal"><i class="bi bi-plus-circle-fill me-2"></i>Post a Requirement</button>
+            </div>
+
+            <div class="content-card mb-4 animate-on-scroll" style="--animation-order: 0;">
+                <div class="aurora-glow"></div>
+                <form action="/alumni-marketplace" method="GET" class="row g-3 align-items-end">
+                    <div class="col-md-7">
+                        <label for="title" class="form-label">Search by Title</label>
+                        <input type="text" class="form-control" id="title" name="title" value="<%= titleQuery %>" placeholder="e.g., Co-founder needed...">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="category" class="form-label">Category</label>
+                        <select id="category" name="category" class="form-select">
+                            <option value="">All Categories</option>
+                            <option value="Service Offered" <%= categoryQuery === 'Service Offered' ? 'selected' : '' %>>Service Offered</option>
+                            <option value="Looking For Talent" <%= categoryQuery === 'Looking For Talent' ? 'selected' : '' %>>Looking For Talent</option>
+                            <option value="For Sale" <%= categoryQuery === 'For Sale' ? 'selected' : '' %>>Product/Item for Sale</option>
+                            <option value="Collaboration" <%= categoryQuery === 'Collaboration' ? 'selected' : '' %>>Collaboration Opportunity</option>
+                            <option value="Inquiry" <%= categoryQuery === 'Inquiry' ? 'selected' : '' %>>General Inquiry</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-light w-100">Filter</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="row g-4">
+                <% if(listings.length > 0) { %>
+                    <% listings.forEach((listing, index) => { %>
+                        <div class="col-lg-6 col-xl-4 animate-on-scroll" style="--animation-order: <%= index + 1 %>;">
+                            <div class="content-card h-100 d-flex flex-column">
+                                <div class="aurora-glow"></div>
+                                <span class="badge bg-secondary position-absolute top-0 end-0 m-3"><%= listing.category %></span>
+                                <h5 class="mb-2"><%= listing.title %></h5>
+                                <p class="text-muted-foreground small mb-3">
+                                    Posted by <%= listing.postedBy.name %> (Batch of <%= listing.postedBy.batch %>)
+                                </p>
+                                <p class="text-muted-foreground flex-grow-1"><%= listing.description.substring(0, 120) %>...</p>
+                                <button class="btn btn-primary mt-auto view-contact-btn" data-bs-toggle="modal" data-bs-target="#viewContactModal"
+                                    data-contact='<%- JSON.stringify(listing) %>'>
+                                    View Contact
+                                </button>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="col-12">
+                        <div class="content-card text-center py-5 animate-on-scroll">
+                             <div class="aurora-glow"></div>
+                            <h5 class="mb-0">No marketplace listings found.</h5>
+                            <p class="text-muted-foreground mt-2">Why not be the first to post one?</p>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </main>
+    </div>
+
+    <!-- Post Listing Modal -->
+    <div class="modal fade" id="postListingModal" tabindex="-1" aria-labelledby="postListingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form id="post-listing-form">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="postListingModalLabel">Post a New Requirement</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="listing-title" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="listing-title" name="title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="listing-category" class="form-label">Category</label>
+                            <select class="form-select" id="listing-category" name="category" required>
+                                <option value="Service Offered">Service Offered</option>
+                                <option value="Looking For Talent">Looking For Talent</option>
+                                <option value="For Sale">Product/Item for Sale</option>
+                                <option value="Collaboration">Collaboration Opportunity</option>
+                                <option value="Inquiry">General Inquiry</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="listing-description" class="form-label">Description</label>
+                            <textarea class="form-control" id="listing-description" name="description" rows="4" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="listing-contact" class="form-label">Contact Information</label>
+                            <input type="text" class="form-control" id="listing-contact" name="contactInfo" placeholder="e.g., yourname@email.com or +91..." required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Post Listing</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- View Contact Modal -->
+    <div class="modal fade" id="viewContactModal" tabindex="-1" aria-labelledby="viewContactModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="contactModalTitle"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>To discuss this opportunity, please contact the poster:</p>
+                    <div class="p-3 rounded-2" style="background-color: var(--secondary);">
+                        <strong id="contactModalInfo"></strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toastElement = document.getElementById('notificationToast');
+            const toast = new bootstrap.Toast(toastElement);
+
+            function showToast(title, message, isSuccess) {
+                document.getElementById('toastTitle').textContent = title;
+                document.getElementById('toastBody').textContent = message;
+                toastElement.classList.remove('bg-success', 'text-white', 'bg-danger');
+                toastElement.classList.add(isSuccess ? 'bg-success' : 'bg-danger', 'text-white');
+                toast.show();
+            }
+
+            const postListingForm = document.getElementById('post-listing-form');
+            const postListingModal = new bootstrap.Modal(document.getElementById('postListingModal'));
+            postListingForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(postListingForm);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch('/post-listing', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        showToast('Success', result.message, true);
+                        postListingModal.hide();
+                        postListingForm.reset();
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        showToast('Error', result.message, false);
+                    }
+                } catch (error) {
+                    showToast('Error', 'An unexpected error occurred.', false);
+                }
+            });
+            
+            const contactModal = document.getElementById('viewContactModal');
+            contactModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const listing = JSON.parse(button.getAttribute('data-contact'));
+                document.getElementById('contactModalTitle').textContent = `Contact for: ${listing.title}`;
+                document.getElementById('contactModalInfo').textContent = listing.contactInfo;
+            });
+
+            const animatedElements = document.querySelectorAll('.animate-on-scroll');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            animatedElements.forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>
+

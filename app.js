@@ -125,6 +125,23 @@ const jobSchema = new mongoose.Schema({
 });
 const Job = mongoose.model("Job", jobSchema);
 
+// New Marketplace Schema
+const marketplaceSchema = new mongoose.Schema({
+    title: String,
+    description: String,
+    category: String,
+    contactInfo: String,
+    postedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'alumini'
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+const Marketplace = mongoose.model("Marketplace", marketplaceSchema);
+
 
 // --- AUTHENTICATION & SIGNUP ROUTES ---
 
@@ -168,7 +185,7 @@ app.post("/", async function(req, res) {
         });
         if (student) {
             loggedInUserEmail = student.email;
-            return res.redirect("/student-dashboard"); // Redirect to student dashboard
+            return res.redirect("/student-dashboard");
         }
         res.redirect("/?status=login_failed");
     } catch (err) {
@@ -235,7 +252,7 @@ app.get("/student-dashboard", async (req, res) => {
             Announcement.find().sort({
                 date: -1
             }).limit(2),
-            Alumini.find().limit(2), // Placeholder for mentor matching
+            Alumini.find().limit(2),
             Job.find().populate('postedBy', 'name').sort({
                 createdAt: -1
             }).limit(2),
@@ -260,18 +277,140 @@ app.get("/student-dashboard", async (req, res) => {
     }
 });
 
-// New route for the career hub
 app.get("/student-career-hub", async (req, res) => {
     if (!loggedInUserEmail) return res.redirect("/");
     try {
-        const student = await Student.findOne({ email: loggedInUserEmail });
+        const student = await Student.findOne({
+            email: loggedInUserEmail
+        });
         if (!student) return res.redirect("/");
-        
-        // Pass the student data to the EJS template
-        res.render("student_career_hub", { student });
-
+        res.render("student_career_hub", {
+            student
+        });
     } catch (err) {
         console.error("Error fetching career hub data:", err);
+        res.status(500).send("Server error.");
+    }
+});
+
+app.get("/student-announcements", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const [student, announcements] = await Promise.all([
+            Student.findOne({
+                email: loggedInUserEmail
+            }),
+            Announcement.find({}).sort({
+                date: -1
+            })
+        ]);
+        if (!student) return res.redirect("/");
+        res.render("student_announcements", {
+            student,
+            announcements
+        });
+    } catch (err) {
+        res.status(500).send("Server error.");
+    }
+});
+
+app.get("/student-events", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const {
+            title,
+            category,
+            status
+        } = req.query;
+        let query = {};
+        if (title) query.title = {
+            $regex: title,
+            $options: 'i'
+        };
+        if (category) query.category = category;
+        if (status) query.status = status;
+
+        const [student, events] = await Promise.all([
+            Student.findOne({
+                email: loggedInUserEmail
+            }),
+            Event.find(query).sort({
+                created_at: -1
+            })
+        ]);
+        if (!student) return res.redirect("/");
+        res.render("student_events", {
+            student,
+            events,
+            titleQuery: title || '',
+            categoryQuery: category || '',
+            statusQuery: status || ''
+        });
+    } catch (err) {
+        res.status(500).send("Server error.");
+    }
+});
+
+app.get("/student-jobs", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const {
+            title,
+            location
+        } = req.query;
+        let jobQuery = {};
+        if (title) jobQuery.title = {
+            $regex: title,
+            $options: 'i'
+        };
+        if (location) jobQuery.location = {
+            $regex: location,
+            $options: 'i'
+        };
+
+        const [student, jobs] = await Promise.all([
+            Student.findOne({
+                email: loggedInUserEmail
+            }),
+            Job.find(jobQuery).populate('postedBy', 'name').sort({
+                createdAt: -1
+            })
+        ]);
+
+        if (!student) return res.redirect("/");
+
+        res.render("student_jobs", {
+            student,
+            jobs,
+            titleQuery: title || '',
+            locationQuery: location || ''
+        });
+    } catch (err) {
+        console.error("Error fetching jobs for student:", err);
+        res.status(500).send("Server error.");
+    }
+});
+
+app.get("/student-marketplace", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const { title, category } = req.query;
+        let query = {};
+        if (title) query.title = { $regex: title, $options: 'i' };
+        if (category) query.category = category;
+
+        const [student, listings] = await Promise.all([
+            Student.findOne({ email: loggedInUserEmail }),
+            Marketplace.find(query).populate('postedBy', 'name batch').sort({ createdAt: -1 })
+        ]);
+        if (!student) return res.redirect("/");
+        res.render("student_marketplace", {
+            student,
+            listings,
+            titleQuery: title || '',
+            categoryQuery: category || ''
+        });
+    } catch (err) {
         res.status(500).send("Server error.");
     }
 });
@@ -571,6 +710,84 @@ app.post("/post-job", async (req, res) => {
     }
 });
 
+app.get("/alumni-marketplace", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const {
+            title,
+            category
+        } = req.query;
+        let query = {};
+        if (title) query.title = {
+            $regex: title,
+            $options: 'i'
+        };
+        if (category) query.category = category;
+
+        const [alumni, listings] = await Promise.all([
+            Alumini.findOne({
+                email: loggedInUserEmail
+            }),
+            Marketplace.find(query).populate('postedBy', 'name batch').sort({
+                createdAt: -1
+            })
+        ]);
+        if (!alumni) return res.redirect("/");
+        res.render("alumni_marketplace", {
+            alumni,
+            listings,
+            titleQuery: title || '',
+            categoryQuery: category || ''
+        });
+    } catch (err) {
+        res.status(500).send("Server error.");
+    }
+});
+
+app.post("/post-listing", async (req, res) => {
+    if (!loggedInUserEmail) {
+        return res.status(401).json({
+            success: false,
+            message: "You must be logged in."
+        });
+    }
+    try {
+        const {
+            title,
+            category,
+            description,
+            contactInfo
+        } = req.body;
+        const alumni = await Alumini.findOne({
+            email: loggedInUserEmail
+        });
+        if (!alumni) {
+            return res.status(404).json({
+                success: false,
+                message: "Alumni profile not found."
+            });
+        }
+        const newListing = new Marketplace({
+            title,
+            category,
+            description,
+            contactInfo,
+            postedBy: alumni._id
+        });
+        await newListing.save();
+        res.status(200).json({
+            success: true,
+            message: "Listing posted successfully!"
+        });
+    } catch (err) {
+        res.status(500).json({
+            success: false,
+            message: "An error occurred."
+        });
+    }
+});
+
+
 // --- ADMIN & USER MANAGEMENT ROUTES ---
 app.get("/admin", function(req, res) {
     if (!loggedInUserEmail) return res.redirect("/");
@@ -750,8 +967,7 @@ app.get("/api/user/:role/:id", async (req, res) => {
 
 app.post("/edit-user", async (req, res) => {
     if (!loggedInUserEmail) return res.redirect("/");
-    
-    // Log the received data to debug the mismatch
+
     console.log("Received data for /edit-user:", req.body);
 
     const {
@@ -965,5 +1181,4 @@ app.post("/delete-event", function(req, res) {
 // --- Server Listener ---
 app.listen(3000, function(req, res) {
     console.log("Server is running on port 3000\n");
-})
-
+});
