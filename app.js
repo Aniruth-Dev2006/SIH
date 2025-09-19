@@ -394,14 +394,24 @@ app.get("/student-jobs", async (req, res) => {
 app.get("/student-marketplace", async (req, res) => {
     if (!loggedInUserEmail) return res.redirect("/");
     try {
-        const { title, category } = req.query;
+        const {
+            title,
+            category
+        } = req.query;
         let query = {};
-        if (title) query.title = { $regex: title, $options: 'i' };
+        if (title) query.title = {
+            $regex: title,
+            $options: 'i'
+        };
         if (category) query.category = category;
 
         const [student, listings] = await Promise.all([
-            Student.findOne({ email: loggedInUserEmail }),
-            Marketplace.find(query).populate('postedBy', 'name batch').sort({ createdAt: -1 })
+            Student.findOne({
+                email: loggedInUserEmail
+            }),
+            Marketplace.find(query).populate('postedBy', 'name batch').sort({
+                createdAt: -1
+            })
         ]);
         if (!student) return res.redirect("/");
         res.render("student_marketplace", {
@@ -409,6 +419,30 @@ app.get("/student-marketplace", async (req, res) => {
             listings,
             titleQuery: title || '',
             categoryQuery: category || ''
+        });
+    } catch (err) {
+        res.status(500).send("Server error.");
+    }
+});
+
+app.get("/student-leaderboard", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const [student, allAlumni] = await Promise.all([
+            Student.findOne({ email: loggedInUserEmail }),
+            Alumini.find({}).sort({ name: 1 }).lean()
+        ]);
+        if (!student) return res.redirect("/");
+
+        const leaderboard = allAlumni.map((user, index) => ({
+            ...user,
+            rank: index + 1,
+            score: (allAlumni.length - index) * 100 // Placeholder score
+        }));
+
+        res.render("student_leaderboard", {
+            student,
+            leaderboard
         });
     } catch (err) {
         res.status(500).send("Server error.");
