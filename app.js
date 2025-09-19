@@ -8,11 +8,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("Public"));
 app.set("view engine", "ejs");
 
-// Using a global variable to track the logged-in user.
-// NOTE: This is not secure for a production environment.
 var loggedInUserEmail = null; 
 
-// --- Database Connection ---
 mongoose.connect("mongodb://localhost:27017/communityDB");
 
 // --- Schemas ---
@@ -47,7 +44,7 @@ const PendingRequest = mongoose.model("pendingRequest", pendingRequestSchema);
 // --- AUTHENTICATION & SIGNUP ROUTES ---
 
 app.get("/", function(req, res){
-    loggedInUserEmail = null; // Reset on visiting login page
+    loggedInUserEmail = null; // Reset user on visiting login page
     res.render("login");
 });
 
@@ -100,40 +97,59 @@ app.post("/signup", async function(req, res){
     }
 });
 
-// --- ALUMNI DASHBOARD ROUTE ---
-app.get("/alumni-dashboard", async (req, res) => {
-    if (!loggedInUserEmail) {
-        return res.redirect("/");
-    }
 
+// --- ALUMNI-FACING ROUTES ---
+
+app.get("/alumni-dashboard", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
     try {
         const alumni = await Alumini.findOne({ email: loggedInUserEmail });
-        if (!alumni) {
-            return res.redirect("/");
-        }
-
-        // Mock data for dashboard cards
-        const dashboardData = {
-            mentorshipSuggestionCount: 3,
-            pendingMentorshipRequests: 1,
-            upcomingEvents: [{ name: 'Annual Alumni Meet' }],
-            lastAttendedEvent: { name: 'Webinar on AI' },
-            userRank: 8,
-            rankChange: 2,
-            nextRankMessage: 'Mentor 2 more students to climb higher!',
-            messages: [
-                { title: 'Mentorship Request', sender: 'From: Vikram Singh', is_read: false },
-                { title: 'Event Invite: Annual Meetup', sender: 'From: College Admin', is_read: true }
-            ]
-        };
-
-        res.render("alumni_dashboard", {
-            alumni: alumni,
-            ...dashboardData
-        });
-
+        if (!alumni) return res.redirect("/");
+        res.render("alumni_dashboard", { alumni: alumni });
     } catch (err) {
-        console.error("Error fetching alumni dashboard data:", err);
+        res.status(500).send("Server error.");
+    }
+});
+
+app.get("/alumni-announcements", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const [alumni, announcements] = await Promise.all([
+            Alumini.findOne({ email: loggedInUserEmail }),
+            Announcement.find({}).sort({ date: -1 })
+        ]);
+        if (!alumni) return res.redirect("/");
+        res.render("alumni_announcements", { alumni: alumni, announcements: announcements });
+    } catch (err) {
+        res.status(500).send("Server error.");
+    }
+});
+
+app.get("/leaderboard", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+     try {
+        const [alumni, allAlumni] = await Promise.all([
+            Alumini.findOne({ email: loggedInUserEmail }),
+            Alumini.find({}).sort({ name: 1 }) // Placeholder sort by name
+        ]);
+        if (!alumni) return res.redirect("/");
+        res.render("alumni_leaderboard", {
+             alumni: alumni,
+             leaderboard: allAlumni 
+        });
+    } catch (err) {
+        console.error("Error fetching leaderboard data:", err);
+        res.status(500).send("Server error.");
+    }
+});
+
+app.get("/my-profile", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const alumni = await Alumini.findOne({ email: loggedInUserEmail });
+        if (!alumni) return res.redirect("/");
+        res.render("alumni_profile", { alumni: alumni });
+    } catch (err) {
         res.status(500).send("Server error.");
     }
 });
@@ -141,14 +157,12 @@ app.get("/alumni-dashboard", async (req, res) => {
 
 // --- ADMIN & USER MANAGEMENT ROUTES ---
 app.get("/admin", function(req, res) {
-    // A simple check if an admin is logged in
     if(!loggedInUserEmail) return res.redirect("/");
-
     Promise.all([
         Announcement.find().sort({ _id: -1 }).limit(2),
         Event.find(),
-        Event.countDocuments({ status: "Upcoming" }),
-        Event.countDocuments({ status: "Completed" }),
+        Event.countDocuments({status:"Upcoming"}),
+        Event.countDocuments({status:"Completed"}),
         PendingRequest.countDocuments()
     ])
     .then(([docs, allEvents, upcomingCount, completedCount, pendingCount]) => {
@@ -175,8 +189,7 @@ app.get("/user_management", function(req, res){
 
 app.get("/all_users", function(req, res){
     if(!loggedInUserEmail) return res.redirect("/");
-    const deleteSuccess = req.query.deleteSuccess === 'true';
-    const editSuccess = req.query.editSuccess === 'true';
+    const successStatus = req.query.status;
     Promise.all([
         Alumini.find({}),
         Student.find({})
@@ -185,8 +198,7 @@ app.get("/all_users", function(req, res){
         res.render("all_users", { 
             users: allUsers, 
             admin: loggedInUserEmail,
-            deleteSuccess: deleteSuccess,
-            editSuccess: editSuccess
+            successStatus: successStatus
         });
     }).catch(err => {
         console.log("error " + err);
@@ -196,11 +208,12 @@ app.get("/all_users", function(req, res){
 
 app.get("/pending-requests", function(req, res){
     if(!loggedInUserEmail) return res.redirect("/");
-    PendingRequest.find({})
+    PendingRequest.find({}).sort({ requestDate: 1 })
         .then(requests => {
             res.render("pending-requests", {
                 requests: requests,
-                admin: loggedInUserEmail
+                admin: loggedInUserEmail,
+                status: req.query.status
             });
         })
         .catch(err => {
@@ -214,9 +227,7 @@ app.post("/approve-alumni", function(req, res){
     const { requestId } = req.body;
     PendingRequest.findById(requestId)
         .then(request => {
-            if (!request) {
-                return res.status(404).send("Request not found.");
-            }
+            if (!request) { return res.status(404).send("Request not found."); }
             const newAlumni = new Alumini({
                 name: request.name, email: request.email, password: request.password,
                 batch: request.batch, role: "Alumni", rno: request.rno,
@@ -224,13 +235,8 @@ app.post("/approve-alumni", function(req, res){
             });
             return newAlumni.save().then(() => PendingRequest.findByIdAndDelete(requestId));
         })
-        .then(() => {
-            res.redirect("/pending-requests?status=approved");
-        })
-        .catch(err => {
-            console.error("Error approving request:", err);
-            res.status(500).send("Server error.");
-        });
+        .then(() => res.redirect("/pending-requests?status=approved"))
+        .catch(err => res.status(500).send("Server error."));
 });
 
 app.post("/reject-alumni", function(req, res){
@@ -238,15 +244,10 @@ app.post("/reject-alumni", function(req, res){
     const { requestId } = req.body;
     PendingRequest.findByIdAndDelete(requestId)
         .then(result => {
-            if (!result) {
-                return res.status(404).send("Request not found.");
-            }
+            if (!result) { return res.status(404).send("Request not found."); }
             res.redirect("/pending-requests?status=rejected");
         })
-        .catch(err => {
-            console.error("Error rejecting request:", err);
-            res.status(500).send("Server error.");
-        });
+        .catch(err => res.status(500).send("Server error."));
 });
 
 app.get("/api/search-users", function(req, res) {
@@ -268,23 +269,6 @@ app.get("/api/search-users", function(req, res) {
         .catch(err => res.status(500).json({ error: "An error occurred." }));
 });
 
-app.get("/create_student", function(req,res){
-    if(!loggedInUserEmail) return res.redirect("/");
-    res.render("create_student", { admin: loggedInUserEmail, success: req.query.success === 'true' });
-});
-
-app.post("/create_student", function(req,res){
-  if(!loggedInUserEmail) return res.redirect("/");
-  const user = new Student({
-    name:req.body.fullName, email:req.body.email, password:req.body.password,
-    batch:req.body.batch, role:"Student", rno:req.body.rollNo,
-    course:req.body.Course, dept:req.body.department
-  });
-  user.save()
-    .then(() => res.redirect("/create_student?success=true"))
-    .catch(() => res.redirect("/create_student?success=false"));
-});
-
 app.get("/api/user/:role/:id", async (req, res) => {
     if(!loggedInUserEmail) return res.status(401).send("Unauthorized");
     try {
@@ -302,40 +286,51 @@ app.get("/api/user/:role/:id", async (req, res) => {
 
 app.post("/edit-user", async (req, res) => {
     if(!loggedInUserEmail) return res.redirect("/");
-    const { userId, userRole, newRole, name, rno, batch, course, dept, password } = req.body;
+    const { id, name, rollNo, batch, Course, department, password, role, originalRole } = req.body;
     try {
-        if (userRole === newRole) {
-            const Model = userRole === 'Student' ? Student : Alumini;
-            const updateData = { name, rno, batch, course, dept };
-            if (password && password.trim() !== '') {
-                updateData.password = password;
-            }
-            await Model.findByIdAndUpdate(userId, updateData);
-        } else {
-            const SourceModel = userRole === 'Student' ? Student : Alumini;
-            const TargetModel = newRole === 'Student' ? Student : Alumini;
-            const originalUser = await SourceModel.findById(userId);
-            if (!originalUser) {
-                return res.status(404).send("Original user not found.");
-            }
-            const newUser = new TargetModel({
-                name: name || originalUser.name,
-                email: originalUser.email,
-                password: (password && password.trim() !== '') ? password : originalUser.password,
-                batch: batch || originalUser.batch,
-                role: newRole,
-                rno: rno || originalUser.rno,
-                course: course || originalUser.course,
-                dept: dept || originalUser.dept,
-            });
-            await newUser.save();
-            await SourceModel.findByIdAndDelete(userId);
+        const CurrentModel = originalRole === 'Student' ? Student : Alumini;
+        const TargetModel = role === 'Student' ? Student : Alumini;
+
+        const updatedData = {
+            name: name, rno: rollNo, batch: batch,
+            course: Course, dept: department, role: role
+        };
+
+        if (password && password.trim() !== '') {
+            updatedData.password = password;
         }
-        res.redirect('/all_users?editSuccess=true');
+
+        if (role === originalRole) {
+            await CurrentModel.findByIdAndUpdate(id, updatedData);
+        } else {
+            const originalUser = await CurrentModel.findByIdAndDelete(id);
+            if (!originalUser) throw new Error("User not found for role transition.");
+            const newUserData = { ...updatedData, email: originalUser.email, password: updatedData.password || originalUser.password };
+            const newUser = new TargetModel(newUserData);
+            await newUser.save();
+        }
+        res.redirect('/all_users?status=editSuccess');
     } catch (err) {
         console.error("Error updating user:", err);
         res.status(500).send("Error updating user.");
     }
+});
+
+app.get("/create_student",function(req,res){
+    if(!loggedInUserEmail) return res.redirect("/");
+    res.render("create_student", { admin: loggedInUserEmail, success: req.query.success === 'true' });
+});
+
+app.post("/create_student",function(req,res){
+  if(!loggedInUserEmail) return res.redirect("/");
+  const user = new Student({
+    name:req.body.fullName, email:req.body.email, password:req.body.password,
+    batch:req.body.batch, role:"Student", rno:req.body.rollNo,
+    course:req.body.Course, dept:req.body.department
+  });
+  user.save()
+    .then(() => res.redirect("/create_student?success=true"))
+    .catch(() => res.redirect("/create_student?success=false"));
 });
 
 app.post("/delete-user", function(req, res) {
@@ -345,14 +340,14 @@ app.post("/delete-user", function(req, res) {
     Model.findByIdAndDelete(userId)
         .then(result => {
             if (!result) { return res.status(404).send("User not found."); }
-            res.redirect("/all_users?deleteSuccess=true");
+            res.redirect("/all_users?status=deleteSuccess");
         })
         .catch(err => res.status(500).send("Error deleting user."));
 });
 
 app.get("/create_alumni", function(req,res){
     if(!loggedInUserEmail) return res.redirect("/");
-    res.render("create_alumini", { admin: loggedInUserEmail, success: req.query.success === 'true' });
+    res.render("create_alumni", { admin: loggedInUserEmail, success: req.query.success === 'true' });
 });
 
 app.post("/create_alumni", function(req,res){
@@ -369,7 +364,6 @@ app.post("/create_alumni", function(req,res){
 
 
 // --- ANNOUNCEMENT ROUTES ---
-
 app.get("/announcements", function(req, res) {
     if(!loggedInUserEmail) return res.redirect("/");
     Announcement.find({}).sort({ date: -1 })
@@ -392,7 +386,6 @@ app.post("/create-announcement", function(req, res) {
 
 
 // --- EVENTS ROUTES ---
-
 app.get("/events", function(req, res) {
     if(!loggedInUserEmail) return res.redirect("/");
     const { title, category, status } = req.query;
@@ -417,22 +410,22 @@ app.post("/create-event", function(req, res) {
     if(!loggedInUserEmail) return res.redirect("/");
     const newEvent = new Event(req.body);
     newEvent.save()
-        .then(() => res.sendStatus(200))
-        .catch(() => res.sendStatus(500));
+        .then(() => res.redirect("/events?status=created"))
+        .catch(() => res.redirect("/events?status=failed"));
 });
 
 app.post("/edit-event", function(req, res) {
     if(!loggedInUserEmail) return res.redirect("/");
     Event.findByIdAndUpdate(req.body.id, req.body)
-        .then(() => res.sendStatus(200))
-        .catch(() => res.sendStatus(500));
+        .then(() => res.redirect("/events?status=updated"))
+        .catch(() => res.status(500).send("Error updating event"));
 });
 
 app.post("/delete-event", function(req, res) {
     if(!loggedInUserEmail) return res.redirect("/");
     Event.findByIdAndDelete(req.body.eventId)
-        .then(() => res.sendStatus(200))
-        .catch(() => res.sendStatus(500));
+        .then(() => res.redirect("/events?status=deleted"))
+        .catch(() => res.status(500).send("Error deleting event"));
 });
 
 // --- Server Listener ---
