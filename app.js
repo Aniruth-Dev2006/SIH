@@ -125,7 +125,6 @@ const jobSchema = new mongoose.Schema({
 });
 const Job = mongoose.model("Job", jobSchema);
 
-// New Marketplace Schema
 const marketplaceSchema = new mongoose.Schema({
     title: String,
     description: String,
@@ -429,8 +428,12 @@ app.get("/student-leaderboard", async (req, res) => {
     if (!loggedInUserEmail) return res.redirect("/");
     try {
         const [student, allAlumni] = await Promise.all([
-            Student.findOne({ email: loggedInUserEmail }),
-            Alumini.find({}).sort({ name: 1 }).lean()
+            Student.findOne({
+                email: loggedInUserEmail
+            }),
+            Alumini.find({}).sort({
+                name: 1
+            }).lean()
         ]);
         if (!student) return res.redirect("/");
 
@@ -446,6 +449,59 @@ app.get("/student-leaderboard", async (req, res) => {
         });
     } catch (err) {
         res.status(500).send("Server error.");
+    }
+});
+
+app.get("/student-profile", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const student = await Student.findOne({
+            email: loggedInUserEmail
+        });
+        if (!student) return res.redirect("/");
+        res.render("student_profile", {
+            student,
+            status: req.query.status
+        });
+    } catch (err) {
+        res.status(500).send("Server error.");
+    }
+});
+
+app.post("/student-update-profile", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const {
+            name,
+            rno,
+            batch,
+            course,
+            dept,
+            password
+        } = req.body;
+
+        const student = await Student.findOne({
+            email: loggedInUserEmail
+        });
+        if (!student) return res.status(404).send("Student not found.");
+
+        const updateData = {
+            name,
+            rno,
+            batch,
+            course,
+            dept
+        };
+        if (password && password.trim() !== '') {
+            updateData.password = password;
+        }
+
+        await Student.findByIdAndUpdate(student._id, updateData);
+        res.redirect("/student-profile?status=success");
+
+    } catch (err) {
+        console.error("Error updating student profile:", err);
+        res.redirect("/student-profile?status=error");
     }
 });
 
@@ -1001,24 +1057,24 @@ app.get("/api/user/:role/:id", async (req, res) => {
 
 app.post("/edit-user", async (req, res) => {
     if (!loggedInUserEmail) return res.redirect("/");
-
+    
     console.log("Received data for /edit-user:", req.body);
 
     const {
         userId,
-        originalRole,
+        userRole,
         name,
         rno,
         batch,
         course,
         dept,
         password,
-        role
+        newRole
     } = req.body;
 
     try {
-        const CurrentModel = originalRole === 'Student' ? Student : Alumini;
-        const TargetModel = role === 'Student' ? Student : Alumini;
+        const CurrentModel = userRole === 'Student' ? Student : Alumini;
+        const TargetModel = newRole === 'Student' ? Student : Alumini;
 
         const updatedData = {
             name: name,
@@ -1026,14 +1082,14 @@ app.post("/edit-user", async (req, res) => {
             batch: batch,
             course: course,
             dept: dept,
-            role: role
+            role: newRole
         };
 
         if (password && password.trim() !== '') {
             updatedData.password = password;
         }
 
-        if (role === originalRole) {
+        if (newRole === userRole) {
             await CurrentModel.findByIdAndUpdate(userId, updatedData);
         } else {
             const originalUser = await CurrentModel.findByIdAndDelete(userId);
@@ -1216,3 +1272,4 @@ app.post("/delete-event", function(req, res) {
 app.listen(3000, function(req, res) {
     console.log("Server is running on port 3000\n");
 });
+
