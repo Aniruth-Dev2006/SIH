@@ -1,5 +1,4 @@
 const express = require("express");
-const serverless = require('serverless-http');
 const app = express();
 const mongoose = require("mongoose");
 const ejs = require("ejs");
@@ -17,13 +16,7 @@ app.set("view engine", "ejs");
 var loggedInUserEmail = null;
 
 // --- Database Connection ---
-mongoose.connect("mongodb+srv://2024cs0508_db_user:NHKJcyGShoHuzp1J@sih.lsvvnaz.mongodb.net/test?retryWrites=true&w=majority&appName=SIH")
-    .then(()=>{
-        console.log("connected");
-    })
-    .catch((err)=>{
-        console.log(err)
-    });
+mongoose.connect("mongodb+srv://2024cs0508_db_user:2024cs0508_db_user.lsvvnaz.mongodb.net/?retryWrites=true&w=majority&appName=SIH");
 
 // --- Schemas ---
 const adminschema = new mongoose.Schema({
@@ -188,6 +181,7 @@ app.get("/", function(req, res) {
 });
 
 app.post("/", async function(req, res) {
+    console.log("Login POST received", req.body)
     const {
         email,
         password
@@ -1390,6 +1384,4 @@ app.post("/create-campaign", async (req, res) => {
 
 
 // --- Server Listener ---
-module.exports = app;
-module.exports.handler = serverless(app);
-
+module.exports=app;
