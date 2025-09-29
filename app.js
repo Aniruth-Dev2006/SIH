@@ -16,7 +16,7 @@ app.set("view engine", "ejs");
 var loggedInUserEmail = null;
 
 // --- Database Connection ---
-mongoose.connect("mongodb+srv://2024cs0508_db_user:2024cs0508_db_user.lsvvnaz.mongodb.net/test?retryWrites=true&w=majority&appName=SIH");
+mongoose.connect("mongodb://localhost:27017/communityDB");
 
 // --- Schemas ---
 const adminschema = new mongoose.Schema({
@@ -1401,4 +1401,6 @@ app.post("/delete-event", function(req, res) {
 });
 
 // --- Server Listener ---
-module.exports=app;
+app.get(3000,function(req,res){
+    console.log("logged in");
+})
