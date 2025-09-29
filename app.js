@@ -16,7 +16,13 @@ app.set("view engine", "ejs");
 var loggedInUserEmail = null;
 
 // --- Database Connection ---
-mongoose.connect("mongodb://localhost:27017/communityDB");
+mongoose.connect("mongodb+srv://2024cs0508_db_user:NHKJcyGShoHuzp1J@sih.lsvvnaz.mongodb.net/?retryWrites=true&w=majority&appName=SIH")
+    .then(()=>{
+        console.log("connected");
+    })
+    .catch((err)=>{
+        console.log(err)
+    });
 
 // --- Schemas ---
 const adminschema = new mongoose.Schema({
@@ -1400,7 +1406,5 @@ app.post("/delete-event", function(req, res) {
 });
 
 // --- Server Listener ---
-app.listen(3000, function(req, res) {
-    console.log("Server is running on port 3000\n");
-});
+module.exports = app;
 
