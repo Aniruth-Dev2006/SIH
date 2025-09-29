@@ -1390,4 +1390,5 @@ app.post("/create-campaign", async (req, res) => {
 
 // --- Server Listener ---
 module.exports = app;
+module.exports.handler = serverless(app);
 
