@@ -7,13 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/admin.css">
-    <style>
-        /* Toast Container */
-        .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; }
-        .toast { background-color: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-lg); }
-        .toast-header { background-color: var(--secondary); color: var(--foreground); border-bottom: 1px solid var(--border); }
-        .toast-body { color: var(--foreground); }
-    </style>
 </head>
 <body>
     <!-- Toast Container -->
@@ -39,7 +32,7 @@
                     <li class="nav-item"><a class="nav-link" href="/user_management"><i class="bi bi-people-fill"></i> User Management</a></li>
                     <li class="nav-item"><a class="nav-link" href="/announcements"><i class="bi bi-megaphone-fill"></i> Announcements</a></li>
                     <li class="nav-item"><a class="nav-link" href="/events"><i class="bi bi-calendar-event-fill"></i> Events</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cash-coin"></i> Donations</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/donations"><i class="bi bi-cash-coin"></i> Donations</a></li>
                     <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-quote-fill"></i> Feedback</a></li>
                 </ul>
             </nav>
@@ -126,7 +119,6 @@
                                                 <td><%= events[i].title %></td>
                                                 <td><%= events[i].date %></td>
                                                 <td>
-                                                    <!-- <span class="fw-bold"><%= events[i].registered_count || 'N/A' %></span>  -->
                                                     <% if(events[i].time) { %>
                                                         <%= events[i].time %>
                                                     <% } %>
@@ -223,7 +215,6 @@
         </div>
     </div>
 
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // ========================
@@ -264,21 +255,19 @@
         };
 
         document.addEventListener('DOMContentLoaded', () => {
+            // --- 1. SHARED PAGE LOGIC (THEME, ANIMATIONS, SIDEBAR) ---
             const themeMenuToggle = document.getElementById('theme-menu-toggle');
             const htmlElement = document.documentElement;
             const applyTheme = (theme) => { htmlElement.classList.remove('light', 'dark'); htmlElement.classList.add(theme); };
             
             // The initial theme is now set by the anti-flicker script in the body.
             // This listener just handles the click.
-            if (themeMenuToggle) {
-                themeMenuToggle.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const newTheme = htmlElement.classList.contains('dark') ? 'light' : 'dark';
-                    localStorage.setItem('theme', newTheme);
-                    applyTheme(newTheme);
-                    AlumniumUtils.showToast('Theme changed to ' + newTheme + ' mode', 'success');
-                });
-            }
+            themeMenuToggle.addEventListener('click', (e) => {
+                e.preventDefault();
+                const newTheme = htmlElement.classList.contains('dark') ? 'light' : 'dark';
+                localStorage.setItem('theme', newTheme);
+                applyTheme(newTheme);
+            });
 
             const animatedElements = document.querySelectorAll('.animate-on-scroll');
             const observer = new IntersectionObserver((entries) => {
@@ -294,14 +283,15 @@
                 backdrop.addEventListener('click', () => { sidebar.classList.remove('show'); document.body.classList.remove('sidebar-open'); });
             }
 
-            // --- GEMINI API INTEGRATION ---
-            const apiKey = "AIzaSyDfjT4Bxo8KlWgk-ptKVsY-Z-LOLFI5y-k"; // Keep this empty, it will be handled by the environment.
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+            // --- 2. GEMINI API INTEGRATION ---
+            const apiKey = "AIzaSyAj5yxjf84rHNrIuHw1MPQjUnla_Y4xspk"; // IMPORTANT: Leave this empty. The execution environment provides the key.
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
 
             const callGeminiAPI = async (payload, resultElement, buttonElement) => {
                 const originalButtonText = buttonElement.innerHTML;
                 buttonElement.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...`;
                 buttonElement.disabled = true;
+                resultElement.innerHTML = ''; // Clear previous results
 
                 try {
                     const response = await fetch(apiUrl, {
@@ -309,12 +299,15 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payload)
                     });
-                    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                    if (!response.ok) {
+                         const errorBody = await response.text();
+                         throw new Error(`API Error: ${response.status} - ${errorBody}`);
+                    }
                     const result = await response.json();
                     const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+                    
                     if (text) {
                         resultElement.innerHTML = text.replace(/\n/g, '<br>').replace(/\*/g, '<strong>').replace(/•/g, '<ul><li>').replace(/(<br>|$)/g, '</li>$1');
-                        AlumniumUtils.showToast('AI content generated successfully!', 'success');
                     } else {
                         resultElement.textContent = 'Sorry, the AI could not generate a response.';
                         AlumniumUtils.showToast('AI could not generate a response', 'warning');
@@ -322,7 +315,6 @@
                 } catch (error) {
                     console.error("Gemini API call failed:", error);
                     resultElement.textContent = 'An error occurred. Please try again.';
-                    AlumniumUtils.showToast('Error: ' + error.message, 'error');
                 } finally {
                     buttonElement.innerHTML = originalButtonText;
                     buttonElement.disabled = false;
@@ -340,7 +332,7 @@
                     AlumniumUtils.showToast('Please enter a topic first', 'warning');
                     return;
                 }
-                const systemPrompt = "You are an expert communications manager for a university alumni portal called Alumnium. Write a clear, engaging, and professional announcement based on the following topic. The tone should be formal but friendly. Keep it concise. Start with a compelling headline.";
+                const systemPrompt = "You are an expert communications manager for a university alumni portal called Alumnium. Write a clear, engaging, and professional announcement based on the following topic. The tone should be formal but friendly. Keep it concise. Start with a compelling headline as Markdown heading (e.g., `### Headline`).";
                 const payload = { contents: [{ parts: [{ text: `${systemPrompt} Topic: ${topic}` }] }] };
                 callGeminiAPI(payload, announcementResult, generateAnnouncementBtn);
             });
@@ -349,7 +341,6 @@
             const summarizeFeedbackBtn = document.getElementById('summarize-feedback-btn');
             const feedbackResult = document.getElementById('feedback-result');
             summarizeFeedbackBtn.addEventListener('click', () => {
-                // In a real app, you would fetch this from a database.
                 const mockFeedback = [
                     "The recent webinar on AI was fantastic. It would be great to have more events focused on emerging technologies like blockchain.",
                     "The mentorship program is a great initiative, but the matching process could be improved. My mentor was in a completely different field.",
@@ -358,12 +349,11 @@
                     "Can we have more networking events in Mumbai? It's hard for those of us not in Delhi to attend."
                 ].join('\n');
 
-                const systemPrompt = "You are an analyst for the Alumnium alumni portal. I will provide you with a list of user feedback. Summarize the key themes, overall sentiment, and provide a few actionable suggestions in a bulleted list. Format the output cleanly using Markdown-style lists (e.g., • Point 1).";
+                const systemPrompt = "You are an analyst for the Alumnium alumni portal. I will provide you with a list of user feedback. Summarize the key themes, overall sentiment, and provide a few actionable suggestions in a bulleted list. Format the output cleanly using Markdown.";
                 const payload = { contents: [{ parts: [{ text: `${systemPrompt}\n\nFeedback:\n${mockFeedback}` }] }] };
                 callGeminiAPI(payload, feedbackResult, summarizeFeedbackBtn);
             });
         });
     </script>
 </body>
-
 </html>
