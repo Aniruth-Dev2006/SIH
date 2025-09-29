@@ -141,6 +141,37 @@ const marketplaceSchema = new mongoose.Schema({
 });
 const Marketplace = mongoose.model("Marketplace", marketplaceSchema);
 
+// Donation Schemas
+const campaignSchema = new mongoose.Schema({
+    title: String,
+    description: String,
+    goalAmount: Number,
+    currentAmount: {
+        type: Number,
+        default: 0
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+const Campaign = mongoose.model("Campaign", campaignSchema);
+
+const donationSchema = new mongoose.Schema({
+    campaignId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Campaign'
+    },
+    donorName: String, // Can be 'Anonymous'
+    donorEmail: String,
+    amount: Number,
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+const Donation = mongoose.model("Donation", donationSchema);
+
 
 // --- AUTHENTICATION & SIGNUP ROUTES ---
 
@@ -502,6 +533,52 @@ app.post("/student-update-profile", async (req, res) => {
     } catch (err) {
         console.error("Error updating student profile:", err);
         res.redirect("/student-profile?status=error");
+    }
+});
+
+app.get("/student-donations", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const [student, campaigns] = await Promise.all([
+            Student.findOne({ email: loggedInUserEmail }),
+            Campaign.find().sort({ createdAt: -1 })
+        ]);
+        if (!student) return res.redirect("/");
+        res.render("student_donations", { 
+            student, 
+            campaigns,
+            status: req.query.status
+        });
+    } catch (err) {
+        res.status(500).send("Server error.");
+    }
+});
+
+app.post("/make-donation", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const { campaignId, amount, donorName } = req.body;
+        
+        const campaign = await Campaign.findById(campaignId);
+        if (!campaign) return res.redirect("/student-donations?status=error");
+
+        const donationAmount = Number(amount);
+        
+        const newDonation = new Donation({
+            campaignId,
+            donorName: donorName || 'Anonymous',
+            donorEmail: loggedInUserEmail,
+            amount: donationAmount
+        });
+        await newDonation.save();
+        
+        campaign.currentAmount += donationAmount;
+        await campaign.save();
+        
+        res.redirect("/student-donations?status=success");
+    } catch (err) {
+        console.error("Error making donation:", err);
+        res.redirect("/student-donations?status=error");
     }
 });
 
@@ -1057,39 +1134,37 @@ app.get("/api/user/:role/:id", async (req, res) => {
 
 app.post("/edit-user", async (req, res) => {
     if (!loggedInUserEmail) return res.redirect("/");
-    
-    console.log("Received data for /edit-user:", req.body);
 
     const {
         userId,
-        userRole,
+        originalRole,
         name,
         rno,
         batch,
         course,
         dept,
         password,
-        newRole
+        role
     } = req.body;
 
     try {
-        const CurrentModel = userRole === 'Student' ? Student : Alumini;
-        const TargetModel = newRole === 'Student' ? Student : Alumini;
+        const CurrentModel = originalRole === 'Student' ? Student : Alumini;
+        const TargetModel = role === 'Student' ? Student : Alumini;
 
         const updatedData = {
-            name: name,
-            rno: rno,
-            batch: batch,
-            course: course,
-            dept: dept,
-            role: newRole
+            name,
+            rno,
+            batch,
+            course,
+            dept,
+            role
         };
 
         if (password && password.trim() !== '') {
             updatedData.password = password;
         }
 
-        if (newRole === userRole) {
+        if (role === originalRole) {
             await CurrentModel.findByIdAndUpdate(userId, updatedData);
         } else {
             const originalUser = await CurrentModel.findByIdAndDelete(userId);
@@ -1267,6 +1342,45 @@ app.post("/delete-event", function(req, res) {
         .then(() => res.redirect("/events?status=deleted"))
         .catch(() => res.status(500).send("Error deleting event"));
 });
+
+// --- DONATION ROUTES (ADMIN) ---
+app.get("/donations", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const campaigns = await Campaign.find().sort({
+            createdAt: -1
+        });
+        res.render("admin_donations", {
+            admin: loggedInUserEmail,
+            campaigns: campaigns,
+            status: req.query.status
+        });
+    } catch (err) {
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/create-campaign", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const {
+            title,
+            description,
+            goalAmount
+        } = req.body;
+        const newCampaign = new Campaign({
+            title,
+            description,
+            goalAmount: Number(goalAmount)
+        });
+        await newCampaign.save();
+        res.redirect("/donations?status=created");
+    } catch (err) {
+        console.error("Error creating campaign:", err);
+        res.redirect("/donations?status=error");
+    }
+});
+
 
 // --- Server Listener ---
 app.listen(3000, function(req, res) {
