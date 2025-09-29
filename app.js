@@ -1407,4 +1407,5 @@ app.post("/delete-event", function(req, res) {
 
 // --- Server Listener ---
 module.exports = app;
+module.exports.handler = serverless(app);
 
