@@ -16,7 +16,7 @@ app.set("view engine", "ejs");
 var loggedInUserEmail = null;
 
 // --- Database Connection ---
-mongoose.connect("mongodb+srv://2024cs0508_db_user:2024cs0508_db_user@lsvvnaz.mongodb.net/?retryWrites=true&w=majority&appName=SIH");
+mongoose.connect("mongodb+srv://2024cs0508_db_user:2024cs0508_db_user@sih.lsvvnaz.mongodb.net/?retryWrites=true&w=majority&appName=SIH");
 
 // --- Schemas ---
 const adminschema = new mongoose.Schema({
