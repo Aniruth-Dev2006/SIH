@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -16,7 +17,12 @@ app.set("view engine", "ejs");
 var loggedInUserEmail = null;
 
 // --- Database Connection ---
-mongoose.connect("mongodb+srv://2024cs0508_db_user:2024cs0508_db_user@sih.lsvvnaz.mongodb.net/?retryWrites=true&w=majority&appName=SIH");
+const dbURI = process.env.MONGODB_URI;
+
+// Connect to MongoDB and log the result for easy debugging
+mongoose.connect(dbURI)
+    .then(() => console.log('SUCCESS: MongoDB Connection Open'))
+    .catch(err => console.error('ERROR: MongoDB Connection FAILED:', err.message));
 
 // --- Schemas ---
 const adminschema = new mongoose.Schema({
