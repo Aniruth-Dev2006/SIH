@@ -17,7 +17,7 @@ app.set("view engine", "ejs");
 var loggedInUserEmail = null;
 
 // --- Database Connection ---
-mongoose.connect("mongodb+srv://2024cs0508_db_user:NHKJcyGShoHuzp1J@sih.lsvvnaz.mongodb.net/?retryWrites=true&w=majority&appName=SIH")
+mongoose.connect("mongodb+srv://2024cs0508_db_user:NHKJcyGShoHuzp1J@sih.lsvvnaz.mongodb.net/test?retryWrites=true&w=majority&appName=SIH")
     .then(()=>{
         console.log("connected");
     })
