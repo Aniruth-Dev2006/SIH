@@ -1384,6 +1384,4 @@ app.post("/create-campaign", async (req, res) => {
 
 
 // --- Server Listener ---
-app.get(3000,function(req,res){
-    console.log("logged in");
-})
+module.exports = app;
