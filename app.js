@@ -1401,6 +1401,4 @@ app.post("/delete-event", function(req, res) {
 });
 
 // --- Server Listener ---
-app.get(3000,function(req,res){
-    console.log("logged in");
-})
+module.exports = app;
