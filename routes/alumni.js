@@ -17,8 +17,13 @@ router.get('/alumni-dashboard', isAlumni, async (req, res) => {
         const dashboardData = {
             mentorshipSuggestionCount: 3,
             pendingMentorshipRequests: 1,
+            activeMentorships: [],
             upcomingEvents: [{ name: 'Annual Alumni Meet' }],
             lastAttendedEvent: { name: 'Webinar on AI' },
+            totalConnections: 0,
+            totalDonations: 0,
+            donationCount: 0,
+            unreadMessages: 0,
             userRank: 8,
             rankChange: 2,
             nextRankMessage: 'Mentor 2 more students to climb higher!',
@@ -30,7 +35,23 @@ router.get('/alumni-dashboard', isAlumni, async (req, res) => {
 
         res.render('alumni_dashboard', { alumni, ...dashboardData });
     } catch (err) {
-        res.status(500).send('Server error.');
+        console.error('Dashboard error:', err);
+        // Render with complete defaults on error
+        res.render('alumni_dashboard', {
+            alumni,
+            mentorshipSuggestionCount: 0,
+            pendingMentorshipRequests: 0,
+            activeMentorships: [],
+            upcomingEvents: [],
+            totalConnections: 0,
+            totalDonations: 0,
+            donationCount: 0,
+            unreadMessages: 0,
+            userRank: 1,
+            rankChange: 0,
+            nextRankMessage: 'Start contributing to improve your rank!',
+            messages: []
+        });
     }
 });
 
