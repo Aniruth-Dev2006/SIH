@@ -24,10 +24,10 @@
     <div class="dashboard-layout">
         <%- include('partials/alumni-sidebar', { currentPage: 'connect', alumni: alumni }) %>
 
-        <main class="main-content p-0">
-            <div class="row g-0">
+        <main class="main-content p-0" style="overflow-x: hidden; max-width: 100%;">
+            <div class="row g-0" style="margin: 0; width: 100%; max-width: 100%;">
                 <!-- Chat List Sidebar -->
-                <div class="col-md-4 col-lg-3 chat-sidebar">
+                <div class="col-md-4 col-lg-3 chat-sidebar" style="overflow-x: hidden;">
                     <div class="p-3 border-bottom">
                         <h5 class="mb-3">Messages</h5>
                         <div class="input-group mb-3">
@@ -88,10 +88,10 @@
                 </div>
 
                 <!-- Chat Area -->
-                <div class="col-md-8 col-lg-9">
-                    <div class="chat-area">
+                <div class="col-md-8 col-lg-9" style="overflow-x: hidden;">
+                    <div class="chat-area" style="overflow-x: hidden;">
                         <!-- Chat Header -->
-                        <div class="p-3 border-bottom">
+                        <div class="p-3 border-bottom" style="background-color: var(--card);">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center">
                                     <div class="position-relative">
