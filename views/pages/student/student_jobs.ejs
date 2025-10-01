@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Board | Alumnium</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --background: #f8f9fa; --foreground: #111827; --card: #ffffff; --primary: #111827;
+            --primary-foreground: #ffffff; --secondary: #f3f4f6; --muted-foreground: #6b7280;
+            --border: #e5e7eb; --radius: 1rem; --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
+            --glow-color: rgba(139, 92, 246, 0.2);
+        }
+        html.dark {
+            --background: #0d1117; --foreground: #e6edf3; --card: #161b22; --primary: #e6edf3;
+            --primary-foreground: #0d1117; --secondary: #21262d; --muted-foreground: #8b949e;
+            --border: #30363d; --glow-color: rgba(139, 92, 246, 0.3);
+        }
+
+        body { font-family: var(--font-sans); background-color: var(--secondary); color: var(--foreground); }
+        .dashboard-layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+        .sidebar { background-color: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem; position: fixed; top: 0; left: 0; height: 100%; width: 280px; z-index: 1050; }
+        .main-content { padding: 2.5rem; grid-column: 2; }
+        .sidebar-header { font-size: 1.5rem; font-weight: 700; color: var(--foreground); text-decoration: none; margin-bottom: 2rem; display:flex; align-items:center; gap: 0.5rem; }
+        .sidebar-nav { flex-grow: 1; overflow-y: auto; margin-bottom: 1.5rem; -ms-overflow-style: none; scrollbar-width: none; }
+        .sidebar-nav::-webkit-scrollbar { display: none; }
+        .sidebar-nav .nav-link { color: var(--muted-foreground); font-weight: 500; padding: 0.75rem 1rem; border-radius: 0.75rem; margin-bottom: 0.25rem; display: flex; align-items: center; font-size: 14px; transition: all 0.2s ease; }
+        .sidebar-nav .nav-link i { margin-right: 0.75rem; font-size: 1.1rem; }
+        .sidebar-nav .nav-link:hover { color: var(--foreground); background-color: var(--secondary); }
+        .sidebar-nav .nav-link.active { color: var(--primary-foreground); background-color: var(--primary); }
+        .sidebar-footer { border-top: 1px solid var(--border); padding-top: 1.5rem; }
+        .user-profile { display: flex; align-items: center; text-decoration: none; color: var(--foreground); flex-grow: 1; }
+        .user-profile img { width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; }
+        .content-card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 1.5rem; position: relative; overflow: hidden; }
+        .aurora-glow { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; background: radial-gradient(ellipse at center, var(--glow-color) 0%, rgba(0, 0, 0, 0) 70%); filter: blur(80px); z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s ease-out; }
+        .is-visible .aurora-glow { opacity: 1; }
+        .form-control, .form-select { background-color: var(--secondary); border-color: var(--border); color: var(--foreground); }
+        .btn-primary { background-color: var(--primary); color: var(--primary-foreground); border: none; }
+        .btn-light { background-color: var(--secondary); border-color: var(--border); color: var(--foreground); }
+        .modal-content { background-color: var(--card); border-color: var(--border); }
+        .animate-on-scroll { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .is-visible { opacity: 1; transform: translateY(0); }
+        .animate-on-scroll { transition-delay: calc(0.1s * var(--animation-order, 0)); }
+
+        @media (max-width: 991.98px) {
+            .dashboard-layout { grid-template-columns: 1fr; }
+            .main-content { grid-column: 1 / -1; padding: 1.5rem; }
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s ease-in-out; }
+            .sidebar.show { transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (savedTheme === 'dark') document.documentElement.classList.add('dark');
+        })();
+    </script>
+    
+    <div class="dashboard-layout">
+        <aside class="sidebar" id="sidebar">
+            <a href="/student-dashboard" class="sidebar-header"><i class="bi bi-link-45deg"></i> Alumnium</a>
+            <nav class="sidebar-nav">
+                <ul class="nav flex-column">
+                    <li class="nav-item"><a class="nav-link" href="/student-dashboard"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/student-career-hub"><i class="bi bi-compass-fill"></i> Career Hub</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/student-announcements"><i class="bi bi-megaphone-fill"></i> Announcements</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people-fill"></i> Mentorship</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/student-jobs"><i class="bi bi-briefcase-fill"></i> Jobs</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/student-events"><i class="bi bi-calendar-event-fill"></i> Events</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-lightbulb-fill"></i> Curriculum Feedback</a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="d-flex align-items-center">
+                    <a href="#" class="user-profile">
+                        <img src="https://placehold.co/40x40/EBEBEB/000000?text=<%= student.name.charAt(0) %>" alt="Student">
+                        <div>
+                            <div class="fw-bold"><%= student.name %></div>
+                            <small class="text-muted-foreground"><%= student.email %></small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <h1 class="h2 mb-4">Job Opportunities</h1>
+
+            <div class="content-card mb-4 animate-on-scroll" style="--animation-order: 0;">
+                <div class="aurora-glow"></div>
+                <form action="/student-jobs" method="GET" class="row g-3 align-items-end">
+                    <div class="col-md-7"><label for="title" class="form-label">Search by Title</label><input type="text" class="form-control" name="title" value="<%= titleQuery %>" placeholder="e.g., Software Engineer..."></div>
+                    <div class="col-md-3"><label for="location" class="form-label">Location</label><input type="text" class="form-control" name="location" value="<%= locationQuery %>" placeholder="e.g., New York..."></div>
+                    <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Filter</button></div>
+                </form>
+            </div>
+
+            <div class="row g-4">
+                <% if(jobs.length > 0) { %>
+                    <% jobs.forEach((job, index) => { %>
+                        <div class="col-lg-6 col-xl-4 animate-on-scroll" style="--animation-order: <%= index + 1 %>;">
+                            <div class="content-card h-100 d-flex flex-column">
+                                <div class="aurora-glow"></div>
+                                <h5 class="mb-1"><%= job.title %></h5>
+                                <p class="fw-medium"><%= job.company %></p>
+                                <p class="text-muted-foreground small mb-3"><i class="bi bi-geo-alt-fill me-1"></i> <%= job.location %></p>
+                                <p class="text-muted-foreground flex-grow-1"><%= job.description.substring(0, 120) %>...</p>
+                                <p class="text-muted-foreground small mb-3">Posted by <%= job.postedBy ? job.postedBy.name : 'an Alumnus' %></p>
+                                <button class="btn btn-light mt-auto" data-bs-toggle="modal" data-bs-target="#jobDetailsModal" data-job='<%- JSON.stringify(job) %>'>View Details</button>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="col-12"><div class="content-card text-center py-5 animate-on-scroll"><div class="aurora-glow"></div><h5 class="mb-0">No job opportunities found.</h5><p class="text-muted-foreground mt-2">Check back later for new listings!</p></div></div>
+                <% } %>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal fade" id="jobDetailsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" id="modalTitle"></h5>
+                        <p class="mb-0" id="modalCompanyLocation"></p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Description:</strong></p>
+                    <p id="modalDescription" style="white-space: pre-wrap;"></p>
+                    <p class="small text-muted-foreground" id="modalPostedBy"></p>
+                </div>
+                <div class="modal-footer">
+                    <a href="#" id="modalApplyLink" class="btn btn-primary w-100" target="_blank" rel="noopener noreferrer">Apply Now</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const animatedElements = document.querySelectorAll('.animate-on-scroll');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('is-visible'); });
+            }, { threshold: 0.1 });
+            animatedElements.forEach(el => observer.observe(el));
+
+            const jobDetailsModal = document.getElementById('jobDetailsModal');
+            jobDetailsModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const jobData = JSON.parse(button.getAttribute('data-job'));
+                
+                document.getElementById('modalTitle').textContent = jobData.title;
+                document.getElementById('modalCompanyLocation').textContent = `${jobData.company} - ${jobData.location}`;
+                document.getElementById('modalDescription').textContent = jobData.description;
+                document.getElementById('modalPostedBy').textContent = `Posted by ${jobData.postedBy ? jobData.postedBy.name : 'an Alumnus'}`;
+                document.getElementById('modalApplyLink').href = jobData.applicationLink || '#';
+            });
+        });
+    </script>
+</body>
+</html>

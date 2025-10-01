@@ -380,6 +380,187 @@ const leaderboardSchema = new mongoose.Schema({
 });
 const Leaderboard = mongoose.model("Leaderboard", leaderboardSchema);
 
+// Notification Schema
+const notificationSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        refPath: 'userModel'
+    },
+    userModel: {
+        type: String,
+        required: true,
+        enum: ['alumini', 'student', 'admin']
+    },
+    title: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    message: {
+        type: String,
+        required: true
+    },
+    icon: {
+        type: String,
+        default: 'info-circle'
+    },
+    read: {
+        type: Boolean,
+        default: false
+    },
+    type: {
+        type: String,
+        enum: ['announcement', 'event', 'job', 'general', 'system'],
+        default: 'general'
+    },
+    link: {
+        type: String,
+        default: null
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+}, {
+    timestamps: true
+});
+const Notification = mongoose.model('Notification', notificationSchema);
+
+
+// --- NOTIFICATION API ROUTES ---
+
+// Get all notifications for a user
+app.get("/api/notifications", async (req, res) => {
+    try {
+        if (!loggedInUserEmail) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        // Find the logged-in user
+        let user = await Alumini.findOne({ email: loggedInUserEmail });
+        let userModel = 'alumini';
+        
+        if (!user) {
+            user = await Student.findOne({ email: loggedInUserEmail });
+            userModel = 'student';
+        }
+        
+        if (!user) {
+            user = await Admin.findOne({ email: loggedInUserEmail });
+            userModel = 'admin';
+        }
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Fetch notifications
+        const notifications = await Notification.find({ 
+            userId: user._id,
+            userModel: userModel
+        })
+        .sort({ createdAt: -1 })
+        .limit(50);
+
+        res.json(notifications);
+    } catch (error) {
+        console.error("Error fetching notifications:", error);
+        res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+});
+
+// Mark a single notification as read
+app.patch("/api/notifications/:id/read", async (req, res) => {
+    try {
+        if (!loggedInUserEmail) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        const notification = await Notification.findByIdAndUpdate(
+            req.params.id,
+            { read: true },
+            { new: true }
+        );
+
+        if (!notification) {
+            return res.status(404).json({ error: "Notification not found" });
+        }
+
+        res.json(notification);
+    } catch (error) {
+        console.error("Error marking notification as read:", error);
+        res.status(500).json({ error: "Failed to update notification" });
+    }
+});
+
+// Mark all notifications as read
+app.patch("/api/notifications/mark-all-read", async (req, res) => {
+    try {
+        if (!loggedInUserEmail) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        // Find the logged-in user
+        let user = await Alumini.findOne({ email: loggedInUserEmail });
+        let userModel = 'alumini';
+        
+        if (!user) {
+            user = await Student.findOne({ email: loggedInUserEmail });
+            userModel = 'student';
+        }
+        
+        if (!user) {
+            user = await Admin.findOne({ email: loggedInUserEmail });
+            userModel = 'admin';
+        }
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const result = await Notification.updateMany(
+            { userId: user._id, userModel: userModel, read: false },
+            { read: true }
+        );
+
+        res.json({ 
+            message: "All notifications marked as read", 
+            modifiedCount: result.modifiedCount 
+        });
+    } catch (error) {
+        console.error("Error marking all notifications as read:", error);
+        res.status(500).json({ error: "Failed to update notifications" });
+    }
+});
+
+// Create notification (for testing/admin use)
+app.post("/api/notifications/create", async (req, res) => {
+    try {
+        const { userId, userModel, title, message, icon, type, link } = req.body;
+
+        if (!userId || !userModel || !title || !message) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const notification = new Notification({
+            userId,
+            userModel,
+            title,
+            message,
+            icon: icon || 'info-circle',
+            type: type || 'general',
+            link: link || null
+        });
+
+        await notification.save();
+        res.status(201).json(notification);
+    } catch (error) {
+        console.error("Error creating notification:", error);
+        res.status(500).json({ error: "Failed to create notification" });
+    }
+});
+
 
 // --- AUTHENTICATION & SIGNUP ROUTES ---
 

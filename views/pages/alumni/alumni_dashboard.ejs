@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alumni Dashboard | Alumnium</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/alumni.css">
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer" role="alert" aria-live="polite" aria-atomic="true"></div>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <div class="dashboard-layout">
+        
+        <%- include('partials/alumni-sidebar', { currentPage: 'dashboard', alumni: alumni }) %>
+
+        <main class="main-content">
+            <div class="mobile-header d-lg-none mb-4">
+                <h1 class="h2">Dashboard</h1>
+                <button class="btn btn-light" type="button" id="sidebarToggle"><i class="bi bi-list"></i></button>
+            </div>
+            
+            <h1 class="h2 d-none d-lg-block mb-4">Alumni Dashboard</h1>
+
+            <div class="row g-4">
+                
+                <!-- My Profile Card -->
+                <div class="col-12 animate-on-scroll" style="--animation-order: 1;">
+                    <div class="content-card">
+                        <div class="aurora-glow"></div>
+                        <div class="d-flex align-items-center">
+                            <img src="<%= alumni.profilePicture || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(alumni.name) + '&background=6366f1&color=fff&size=80' %>" 
+                                 class="rounded-circle me-4" 
+                                 alt="<%= alumni.name %>"
+                                 style="width: 80px; height: 80px; object-fit: cover;">
+                            <div>
+                                <h5 class="mb-0">Welcome back, <%= alumni.name %>!</h5>
+                                <p class="text-muted-foreground mb-0">
+                                    <%= alumni.course || 'Alumni' %>, <%= alumni.dept %> - Class of <%= alumni.batch %>
+                                </p>
+                                <% if (alumni.company) { %>
+                                    <p class="text-muted-foreground small mb-0">
+                                        <%= alumni.designation || 'Working' %> at <%= alumni.company %>
+                                    </p>
+                                <% } %>
+                                <a href="/alumni-edit-profile" class="btn btn-sm btn-light mt-2">
+                                    Edit Profile <i class="bi bi-pencil-square ms-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="col-lg-3 col-md-6 animate-on-scroll" style="--animation-order: 2;">
+                    <div class="content-card">
+                        <div class="aurora-glow"></div>
+                        <h6 class="text-muted-foreground">My Connections</h6>
+                        <h2 class="mb-0"><%= totalConnections %></h2>
+                        <a href="/alumni-network" class="btn btn-sm btn-light mt-2">View Network</a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 animate-on-scroll" style="--animation-order: 3;">
+                    <div class="content-card">
+                        <div class="aurora-glow"></div>
+                        <h6 class="text-muted-foreground">Active Mentees</h6>
+                        <h2 class="mb-0"><%= mentorshipSuggestionCount %></h2>
+                        <% if (pendingMentorshipRequests > 0) { %>
+                            <span class="badge bg-warning"><%= pendingMentorshipRequests %> Pending</span>
+                        <% } %>
+                        <a href="/alumni-mentorship" class="btn btn-sm btn-light mt-2">Manage Mentorships</a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 animate-on-scroll" style="--animation-order: 4;">
+                    <div class="content-card">
+                        <div class="aurora-glow"></div>
+                        <h6 class="text-muted-foreground">Total Donations</h6>
+                        <h2 class="mb-0">₹<%= (totalDonations / 1000).toFixed(1) %>K</h2>
+                        <small class="text-muted-foreground"><%= donationCount %> contributions</small>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 animate-on-scroll" style="--animation-order: 5;">
+                    <div class="content-card">
+                        <div class="aurora-glow"></div>
+                        <h6 class="text-muted-foreground">Unread Messages</h6>
+                        <h2 class="mb-0"><%= unreadMessages %></h2>
+                        <a href="/alumni-connect" class="btn btn-sm btn-light mt-2">Check Messages</a>
+                    </div>
+                </div>
+
+                <!-- Mentorship Hub Card -->
+                <div class="col-lg-6 animate-on-scroll" style="--animation-order: 6;">
+                    <div class="content-card">
+                        <div class="aurora-glow"></div>
+                        <h5 class="mb-3"><i class="bi bi-people-fill me-2"></i>Mentorship Hub</h5>
+                        
+                        <% if (pendingMentorshipRequests > 0) { %>
+                            <div class="alert alert-warning">
+                                <i class="bi bi-bell-fill me-2"></i>
+                                You have <strong><%= pendingMentorshipRequests %></strong> pending mentorship request(s)
+                            </div>
+                        <% } %>
+
+                        <% if (activeMentorships && activeMentorships.length > 0) { %>
+                            <div class="list-group">
+                                <% activeMentorships.forEach(mentorship => { %>
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1"><%= mentorship.menteeId.name %></h6>
+                                                <p class="text-muted-foreground small mb-1">
+                                                    <%= mentorship.areaOfInterest %>
+                                                </p>
+                                                <div class="progress" style="height: 5px;">
+                                                    <div class="progress-bar bg-success" 
+                                                         style="width: <%= mentorship.progress %>%"></div>
+                                                </div>
+                                                <small class="text-muted-foreground"><%= mentorship.progress %>% Complete</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p class="text-muted-foreground">No active mentorships yet. Start mentoring students!</p>
+                        <% } %>
+                        
+                        <a href="/alumni-mentorship" class="btn btn-primary w-100 mt-3">
+                            <i class="bi bi-plus-circle me-2"></i>Manage Mentorships
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Events Card -->
+                <div class="col-lg-6 animate-on-scroll" style="--animation-order: 7;">
+                    <div class="content-card">
+                        <div class="aurora-glow"></div>
+                        <h5 class="mb-3"><i class="bi bi-calendar-event-fill me-2"></i>Upcoming Events</h5>
+                        
+                        <% if (upcomingEvents && upcomingEvents.length > 0) { %>
+                            <div class="list-group">
+                                <% upcomingEvents.forEach(event => { %>
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1"><%= event.title %></h6>
+                                                <small class="text-muted-foreground">
+                                                    <i class="bi bi-calendar me-1"></i><%= event.date %>
+                                                </small>
+                                            </div>
+                                            <button class="btn btn-sm btn-primary">RSVP</button>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p class="text-muted-foreground">No upcoming events at the moment.</p>
+                        <% } %>
+                        
+                        <a href="/alumni-events" class="btn btn-light w-100 mt-3">
+                            <i class="bi bi-calendar3 me-2"></i>View All Events
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Leaderboard Card -->
+                <div class="col-lg-6 animate-on-scroll" style="--animation-order: 8;">
+                    <div class="content-card">
+                         <div class="aurora-glow"></div>
+                        <h5 class="mb-3"><i class="bi bi-trophy-fill me-2"></i>Your Impact</h5>
+                        <div class="text-center py-3">
+                            <h2 class="mb-1">Rank #<%= userRank %></h2>
+                            <% if (rankChange > 0) { %>
+                                <span class="badge bg-success">
+                                    <i class="bi bi-arrow-up"></i> +<%= rankChange %> this month
+                                </span>
+                            <% } else if (rankChange < 0) { %>
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-arrow-down"></i> <%= rankChange %> this month
+                                </span>
+                            <% } else { %>
+                                <span class="badge bg-secondary">No change</span>
+                            <% } %>
+                        </div>
+                        <p class="text-muted-foreground text-center mb-3">
+                            <%= nextRankMessage %>
+                        </p>
+                        <a href="/alumni-leaderboard" class="btn btn-light w-100">
+                            <i class="bi bi-trophy me-2"></i>View Leaderboard
+                        </a>
+                    </div>
+                </div>
+
+                 <!-- Quick Actions Card -->
+                 <div class="col-lg-6 animate-on-scroll" style="--animation-order: 9;">
+                    <div class="content-card">
+                        <div class="aurora-glow"></div>
+                        <h5 class="mb-3"><i class="bi bi-lightning-fill me-2"></i>Quick Actions</h5>
+                        <div class="d-grid gap-2">
+                            <a href="/alumni-donations" class="btn btn-outline-primary">
+                                <i class="bi bi-cash-coin me-2"></i>Make a Donation
+                            </a>
+                            <a href="/alumni-jobs" class="btn btn-outline-primary">
+                                <i class="bi bi-briefcase me-2"></i>Post a Job
+                            </a>
+                            <a href="/alumni-marketplace" class="btn btn-outline-primary">
+                                <i class="bi bi-shop me-2"></i>Browse Marketplace
+                            </a>
+                            <a href="/alumni-feedback" class="btn btn-outline-primary">
+                                <i class="bi bi-chat-quote me-2"></i>Give Feedback
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ========================
+        // UTILITY FUNCTIONS
+        // ========================
+        const AlumniumUtils = {
+            showToast: function(message, type = 'info') {
+                const toastContainer = document.getElementById('toastContainer');
+                const toastId = 'toast-' + Date.now();
+                
+                const icons = {
+                    success: 'bi-check-circle-fill text-success',
+                    error: 'bi-x-circle-fill text-danger',
+                    warning: 'bi-exclamation-triangle-fill text-warning',
+                    info: 'bi-info-circle-fill text-primary'
+                };
+                
+                const toastHTML = `
+                    <div class="toast" id="${toastId}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                        <div class="toast-header">
+                            <i class="bi ${icons[type]} me-2"></i>
+                            <strong class="me-auto">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">${message}</div>
+                    </div>
+                `;
+                
+                toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                const toastElement = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
+                
+                toastElement.addEventListener('hidden.bs.toast', () => {
+                    toastElement.remove();
+                });
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // ========================
+            // THEME TOGGLE
+            // ========================
+            const themeMenuToggle = document.getElementById('theme-menu-toggle');
+            const htmlElement = document.documentElement;
+            const applyTheme = (theme) => {
+                htmlElement.classList.remove('light', 'dark');
+                htmlElement.classList.add(theme);
+            };
+            
+            if (themeMenuToggle) {
+                themeMenuToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const newTheme = htmlElement.classList.contains('dark') ? 'light' : 'dark';
+                    localStorage.setItem('theme', newTheme);
+                    applyTheme(newTheme);
+                    AlumniumUtils.showToast('Theme changed to ' + newTheme + ' mode', 'success');
+                });
+            }
+
+            // ========================
+            // SCROLL ANIMATIONS
+            // ========================
+            const animatedElements = document.querySelectorAll('.animate-on-scroll');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); } });
+            }, { threshold: 0.1 });
+            animatedElements.forEach(el => { observer.observe(el); });
+
+            // ========================
+            // MOBILE SIDEBAR TOGGLE
+            // ========================
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('sidebar');
+            const backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebarToggle && sidebar && backdrop) {
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.add('show');
+                    document.body.classList.add('sidebar-open');
+                });
+                backdrop.addEventListener('click', () => {
+                    sidebar.classList.remove('show');
+                    document.body.classList.remove('sidebar-open');
+                });
+            }
+
+            // ========================
+            // WELCOME MESSAGE
+            // ========================
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('login') === 'success') {
+                AlumniumUtils.showToast('Welcome back! You\'re successfully logged in.', 'success');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        });
+    </script>
+</body>
+</html>
+
