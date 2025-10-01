@@ -68,6 +68,21 @@
         .mobile-header { display: none; }
         .sidebar-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1040; opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out; }
         body.sidebar-open .sidebar-backdrop { opacity: 1; visibility: visible; }
+        
+        /* Toast Container */
+        .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; }
+        .toast { background-color: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-lg); }
+        .toast-header { background-color: var(--secondary); color: var(--foreground); border-bottom: 1px solid var(--border); }
+        .toast-body { color: var(--foreground); }
+        
+        /* Loading State */
+        .btn-spinner { display: inline-block; width: 1rem; height: 1rem; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 0.5rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Search Input */
+        .form-control { background-color: var(--secondary); border: 1px solid var(--border); color: var(--foreground); border-radius: 0.5rem; }
+        .form-control:focus { background-color: var(--secondary); border-color: var(--glow-color); box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15); color: var(--foreground); }
+        
         @media (max-width: 991.98px) {
             .dashboard-layout { grid-template-columns: 1fr; }
             .main-content { grid-column: 1 / -1; padding: 1.5rem; }
@@ -78,6 +93,8 @@
     </style>
 </head>
 <body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer" role="alert" aria-live="polite" aria-atomic="true"></div>
 
     <script>
         (function() {
@@ -185,15 +202,15 @@
                         <div class="aurora-glow"></div>
                         <h5 class="mb-3">Mentor Connect</h5>
                         <div class="d-flex mb-3">
-                            <input type="text" class="form-control me-2" placeholder="Search by skill (e.g., AI/ML, Finance)...">
-                            <button class="btn btn-light">Find Mentors</button>
+                            <input type="text" class="form-control me-2" id="mentorSearch" placeholder="Search by skill (e.g., AI/ML, Finance)..." aria-label="Search mentors">
+                            <button class="btn btn-light" onclick="searchMentors()">Find Mentors</button>
                         </div>
-                        <ul class="list-group list-group-flush">
+                        <ul class="list-group list-group-flush" id="mentorList">
                              <% if (mentors.length > 0) { %>
                                 <% mentors.forEach(mentor => { %>
                                     <li class="list-group-item d-flex justify-content-between align-items-center">
                                         <div><div class="fw-bold"><%= mentor.name %></div><small class="text-muted-foreground"><%= mentor.course %> @ <%= mentor.dept %></small></div>
-                                        <button class="btn btn-sm btn-primary">Request Mentorship</button>
+                                        <button class="btn btn-sm btn-primary" onclick="requestMentorship('<%= mentor._id %>', '<%= mentor.name %>')">Request Mentorship</button>
                                     </li>
                                 <% }) %>
                             <% } else { %>
@@ -246,7 +263,78 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // ========================
+        // UTILITY FUNCTIONS
+        // ========================
+        const AlumniumUtils = {
+            showToast: function(message, type = 'info') {
+                const toastContainer = document.getElementById('toastContainer');
+                const toastId = 'toast-' + Date.now();
+                
+                const icons = {
+                    success: 'bi-check-circle-fill text-success',
+                    error: 'bi-x-circle-fill text-danger',
+                    warning: 'bi-exclamation-triangle-fill text-warning',
+                    info: 'bi-info-circle-fill text-primary'
+                };
+                
+                const toastHTML = `
+                    <div class="toast" id="${toastId}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                        <div class="toast-header">
+                            <i class="bi ${icons[type]} me-2"></i>
+                            <strong class="me-auto">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">${message}</div>
+                    </div>
+                `;
+                
+                toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                const toastElement = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
+                
+                toastElement.addEventListener('hidden.bs.toast', () => {
+                    toastElement.remove();
+                });
+            },
+            
+            setLoading: function(button, isLoading, originalText) {
+                if (isLoading) {
+                    button.disabled = true;
+                    button.dataset.originalText = button.innerHTML;
+                    button.innerHTML = '<span class="btn-spinner"></span>Loading...';
+                } else {
+                    button.disabled = false;
+                    button.innerHTML = button.dataset.originalText || originalText || 'Submit';
+                }
+            }
+        };
+
+        // ========================
+        // MENTOR SEARCH & REQUEST
+        // ========================
+        function searchMentors() {
+            const searchTerm = document.getElementById('mentorSearch').value.trim().toLowerCase();
+            if (!searchTerm) {
+                AlumniumUtils.showToast('Please enter a search term', 'warning');
+                return;
+            }
+            AlumniumUtils.showToast('Searching for mentors with "' + searchTerm + '"...', 'info');
+            // In production, this would make an API call
+        }
+
+        function requestMentorship(mentorId, mentorName) {
+            if (confirm('Send mentorship request to ' + mentorName + '?')) {
+                AlumniumUtils.showToast('Mentorship request sent to ' + mentorName + '!', 'success');
+                // In production, this would make an API call to /api/mentorship/request
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            // ========================
+            // THEME TOGGLE
+            // ========================
             const themeMenuToggle = document.getElementById('theme-menu-toggle');
             const htmlElement = document.documentElement;
             const applyTheme = (theme) => {
@@ -254,19 +342,32 @@
                 htmlElement.classList.add(theme);
             };
             
-            themeMenuToggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                const newTheme = htmlElement.classList.contains('dark') ? 'light' : 'dark';
-                localStorage.setItem('theme', newTheme);
-                applyTheme(newTheme);
-            });
+            if (themeMenuToggle) {
+                themeMenuToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const newTheme = htmlElement.classList.contains('dark') ? 'light' : 'dark';
+                    localStorage.setItem('theme', newTheme);
+                    applyTheme(newTheme);
+                    AlumniumUtils.showToast('Theme changed to ' + newTheme + ' mode', 'success');
+                });
+            }
 
+            // ========================
+            // SCROLL ANIMATIONS
+            // ========================
             const animatedElements = document.querySelectorAll('.animate-on-scroll');
             const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); } });
+                entries.forEach(entry => { 
+                    if (entry.isIntersecting) { 
+                        entry.target.classList.add('is-visible'); 
+                    } 
+                });
             }, { threshold: 0.1 });
             animatedElements.forEach(el => { observer.observe(el); });
 
+            // ========================
+            // MOBILE SIDEBAR TOGGLE
+            // ========================
             const sidebarToggle = document.getElementById('sidebarToggle');
             const sidebar = document.getElementById('sidebar');
             const backdrop = document.getElementById('sidebarBackdrop');
@@ -278,6 +379,27 @@
                 backdrop.addEventListener('click', () => {
                     sidebar.classList.remove('show');
                     document.body.classList.remove('sidebar-open');
+                });
+            }
+
+            // ========================
+            // WELCOME MESSAGE
+            // ========================
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('login') === 'success') {
+                AlumniumUtils.showToast('Welcome back! You\'re successfully logged in.', 'success');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // ========================
+            // MENTOR SEARCH ENTER KEY
+            // ========================
+            const mentorSearch = document.getElementById('mentorSearch');
+            if (mentorSearch) {
+                mentorSearch.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        searchMentors();
+                    }
                 });
             }
         });

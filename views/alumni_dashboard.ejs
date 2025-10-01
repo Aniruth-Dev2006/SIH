@@ -6,97 +6,7 @@
     <title>Alumni Dashboard | Alumnium</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
-        /* --- 1. ALUMNIUM THEME --- */
-        :root {
-            --background: #f8f9fa; --foreground: #111827; --card: #ffffff; --primary: #111827;
-            --primary-foreground: #ffffff; --secondary: #f3f4f6; --muted-foreground: #6b7280;
-            --border: #e5e7eb; --radius: 1rem; --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
-            --glow-color: rgba(139, 92, 246, 0.2); --danger: #dc3545; --success: #16a34a; --warning: #f59e0b; --info: #0d6efd;
-        }
-        html.dark {
-            --background: #0d1117; --foreground: #e6edf3; --card: #161b22; --primary: #e6edf3;
-            --primary-foreground: #0d1117; --secondary: #21262d; --muted-foreground: #8b949e;
-            --border: #30363d; --glow-color: rgba(139, 92, 246, 0.3); --danger: #ff5b5b; --success: #22c55e; --warning: #facc15; --info: #3b82f6;
-        }
-
-        /* --- 2. DASHBOARD STRUCTURE --- */
-        html { overflow-y: scroll; }
-        body { font-family: var(--font-sans); background-color: var(--background); color: var(--foreground); overflow-x: hidden; font-size: 15px; }
-        .dashboard-layout { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
-        .sidebar { background-color: var(--card); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 1.5rem; transition: transform 0.3s ease-in-out; position: fixed; top: 0; left: 0; height: 100%; width: 280px; z-index: 1050; }
-        .main-content { background-color: var(--secondary); padding: 2.5rem; overflow-y: auto; grid-column: 2; }
-        h1.h2 { font-size: 1.75rem; font-weight: 700; }
-        h5 { font-size: 1.25rem; font-weight: 600; }
-
-        /* --- 3. SIDEBAR & NAVIGATION --- */
-        .sidebar-header { font-size: 1.5rem; font-weight: 700; color: var(--foreground); text-decoration: none; margin-bottom: 2rem; display:flex; align-items:center; gap: 0.5rem; }
-        
-        /* --- Styles for scrollable navigation with hidden scrollbar --- */
-        .sidebar-nav {
-            flex-grow: 1; /* Allows this area to fill available space */
-            overflow-y: auto; /* Adds a scrollbar only when content overflows */
-            margin-bottom: 1.5rem; /* Adds space between nav and footer */
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
-        }
-        .sidebar-nav::-webkit-scrollbar {
-            display: none; /* For Chrome, Safari, and Opera */
-        }
-
-
-        .sidebar-nav .nav-link { color: var(--muted-foreground); font-weight: 500; padding: 0.75rem 1rem; border-radius: 0.75rem; margin-bottom: 0.25rem; display: flex; align-items: center; font-size: 14px; transition: all 0.2s ease; }
-        .sidebar-nav .nav-link i { margin-right: 0.75rem; font-size: 1.1rem; }
-        .sidebar-nav .nav-link:hover { color: var(--foreground); background-color: var(--secondary); }
-        .sidebar-nav .nav-link.active { color: var(--primary-foreground); background-color: var(--primary); }
-        .sidebar-footer { margin-top: auto; border-top: 1px solid var(--border); padding-top: 1.5rem; }
-        .user-profile { display: flex; align-items: center; text-decoration: none; color: var(--foreground); flex-grow: 1; }
-        .user-profile img { width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; }
-        .profile-menu-trigger { color: var(--muted-foreground); text-decoration: none; padding: 0.5rem; margin-left: 0.5rem; border-radius: 0.5rem; }
-        .profile-menu-trigger:hover { background-color: var(--secondary); color: var(--foreground); }
-        .dropdown-menu { background-color: var(--card); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow-lg); padding: 0.5rem; }
-        .dropdown-item { color: var(--foreground); padding: 0.6rem 1rem; border-radius: 0.5rem; font-weight: 500; font-size: 14px; }
-        .dropdown-item:hover, .dropdown-item:focus { background-color: var(--secondary); color: var(--foreground); }
-        .dropdown-item.text-danger { color: var(--danger) !important; }
-        .dropdown-item.text-danger:hover { background-color: rgba(220, 53, 69, 0.1); }
-        html.dark .dropdown-item.text-danger:hover { background-color: rgba(255, 91, 91, 0.1); }
-        .dropdown-divider { border-color: var(--border); }
-
-        /* --- 4. ALUMNI DASHBOARD COMPONENTS --- */
-        .content-card { background-color: var(--card); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 1.5rem; position: relative; overflow: hidden; height: 100%; display: flex; flex-direction: column; }
-        .aurora-glow { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; background: radial-gradient(ellipse at center, var(--glow-color) 0%, rgba(0, 0, 0, 0) 70%); filter: blur(80px); z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s ease-out; }
-        .is-visible .aurora-glow { opacity: 1; }
-        .btn { border-radius: 0.5rem; font-weight: 500; font-size: 14px; }
-        .btn-primary { background-color: var(--primary); color: var(--primary-foreground); border: none; }
-        .btn-light { background-color: var(--secondary); border-color: var(--border); color: var(--foreground); }
-        .list-group-item { background-color: transparent; border-color: var(--border); color: var(--foreground); }
-        a.list-group-item {color: var(--muted-foreground);}
-        a.list-group-item:hover { background-color: var(--secondary); color: var(--foreground); }
-        .stat-card-value { font-size: 1.75rem; font-weight: 700; }
-
-        /* --- 5. ANIMATIONS --- */
-        .animate-on-scroll { opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
-        .is-visible { opacity: 1; transform: translateY(0); }
-        .animate-on-scroll { transition-delay: calc(0.1s * var(--animation-order, 0)); }
-
-        /* --- 6. MOBILE RESPONSIVENESS --- */
-        .mobile-header { display: none; }
-        .sidebar-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1040; opacity: 0; visibility: hidden; transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; }
-        body.sidebar-open .sidebar-backdrop { opacity: 1; visibility: visible; }
-        @media (max-width: 991.98px) {
-            .dashboard-layout { grid-template-columns: 1fr; }
-            .main-content { grid-column: 1 / -1; padding: 1.5rem; }
-            .sidebar { transform: translateX(-100%); }
-            .sidebar.show { transform: translateX(0); }
-            .mobile-header { display: flex; justify-content: space-between; align-items: center; }
-        }
-    </style>
-</head>
-<body>
-
+    <link rel="stylesheet" href="/alumni.css">
     <script>
         (function() {
             const savedTheme = localStorage.getItem('theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
@@ -105,53 +15,15 @@
             }
         })();
     </script>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer" role="alert" aria-live="polite" aria-atomic="true"></div>
 
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     <div class="dashboard-layout">
         
-        <aside class="sidebar" id="sidebar">
-            <a href="/alumni-dashboard" class="sidebar-header"><i class="bi bi-link-45deg"></i> Alumnium</a>
-            <nav class="sidebar-nav">
-                <ul class="nav flex-column">
-                    <li class="nav-item"><a class="nav-link active" href="/alumni-dashboard"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/alumni-announcements"><i class="bi bi-megaphone-fill"></i> Announcements</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/leaderboard"><i class="bi bi-trophy-fill"></i>Leaderboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-people-fill"></i> Mentorship</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-person-lines-fill"></i> My Network</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/alumni-jobs"><i class="bi bi-briefcase-fill"></i> Jobs</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-search"></i> Connect</a></li>
-                    <li class="nav-item"><a class="nav-link" href="alumni-events"><i class="bi bi-calendar-event-fill"></i> Events</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/alumni-marketplace"><i class="bi bi-shop"></i> Marketplace</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-cash-coin"></i> Donations</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-chat-quote-fill"></i> Feedback</a></li>
-                    <!-- Extra items added to demonstrate scrolling -->
-                    <!-- <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-gear-fill"></i> Settings</a></li> -->
-                    <!-- <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-question-circle-fill"></i> Help Center</a></li> -->
-                    <!-- <li class="nav-item"><a class="nav-link" href="#"><i class="bi bi-graph-up"></i> Reports</a></li> -->
-                    
-                </ul>
-            </nav>
-            <div class="sidebar-footer">
-                <div class="dropdown dropend w-100">
-                    <div class="d-flex align-items-center">
-                        <a href="#" class="user-profile">
-                            <img src="https://placehold.co/40x40/EBEBEB/000000?text=A" alt="Alumni">
-                            <div>
-                                <div class="fw-bold"><%= locals.alumni ? alumni.name : 'Alumni Name' %></div>
-                                <small class="text-muted-foreground"><%= locals.alumni ? alumni.email : 'alumni@email.com' %></small>
-                            </div>
-                        </a>
-                        <a href="#" class="profile-menu-trigger" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots-vertical"></i></a>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-person-fill me-2"></i> My Profile</a></li>
-                            <li><a class="dropdown-item" href="#" id="theme-menu-toggle"><i class="bi bi-moon-stars-fill me-2"></i> Theme</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="/"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </aside>
+        <%- include('partials/alumni-sidebar', { currentPage: 'dashboard', alumni: alumni }) %>
 
         <main class="main-content">
             <div class="mobile-header d-lg-none mb-4">
@@ -168,93 +40,189 @@
                     <div class="content-card">
                         <div class="aurora-glow"></div>
                         <div class="d-flex align-items-center">
-                            <img src="https://placehold.co/80x80/EBEBEB/000000?text=<%= locals.alumni ? alumni.name.charAt(0) : 'A' %>" class="rounded-circle me-4" alt="User Picture">
+                            <img src="<%= alumni.profilePicture || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(alumni.name) + '&background=6366f1&color=fff&size=80' %>" 
+                                 class="rounded-circle me-4" 
+                                 alt="<%= alumni.name %>"
+                                 style="width: 80px; height: 80px; object-fit: cover;">
                             <div>
-                                <h5 class="mb-0">Welcome back, <%= locals.alumni ? alumni.name : 'Alumni Name' %>!</h5>
-                                <p class="text-muted-foreground mb-0"><%= locals.alumni ? alumni.course : 'Course' %>, <%= locals.alumni ? alumni.dept : 'Department' %> - Class of <%= locals.alumni ? alumni.batch : 'Year' %></p>
-                                <a href="#" class="btn btn-sm btn-light mt-2">Edit Profile <i class="bi bi-pencil-square ms-1"></i></a>
+                                <h5 class="mb-0">Welcome back, <%= alumni.name %>!</h5>
+                                <p class="text-muted-foreground mb-0">
+                                    <%= alumni.course || 'Alumni' %>, <%= alumni.dept %> - Class of <%= alumni.batch %>
+                                </p>
+                                <% if (alumni.company) { %>
+                                    <p class="text-muted-foreground small mb-0">
+                                        <%= alumni.designation || 'Working' %> at <%= alumni.company %>
+                                    </p>
+                                <% } %>
+                                <a href="/alumni-edit-profile" class="btn btn-sm btn-light mt-2">
+                                    Edit Profile <i class="bi bi-pencil-square ms-1"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Mentorship Hub Card -->
-                <div class="col-lg-6 animate-on-scroll" style="--animation-order: 2;">
+                <!-- Stats Row -->
+                <div class="col-lg-3 col-md-6 animate-on-scroll" style="--animation-order: 2;">
                     <div class="content-card">
                         <div class="aurora-glow"></div>
-                        <h5 class="mb-3">Mentorship Hub</h5>
-                        <div class="p-3 rounded-2" style="background-color: var(--secondary);">
-                             <p class="mb-1">✨ <strong>AI Suggestion:</strong> <%= locals.mentorshipSuggestionCount || '3' %> students matched with your expertise.</p>
-                             <small class="text-muted-foreground">You have <%= locals.pendingMentorshipRequests || '1' %> new pending mentorship request(s).</small>
-                        </div>
-                        <button class="btn btn-primary w-100 mt-3">Start Mentorship</button>
+                        <h6 class="text-muted-foreground">My Connections</h6>
+                        <h2 class="mb-0"><%= totalConnections %></h2>
+                        <a href="/alumni-network" class="btn btn-sm btn-light mt-2">View Network</a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 animate-on-scroll" style="--animation-order: 3;">
+                    <div class="content-card">
+                        <div class="aurora-glow"></div>
+                        <h6 class="text-muted-foreground">Active Mentees</h6>
+                        <h2 class="mb-0"><%= mentorshipSuggestionCount %></h2>
+                        <% if (pendingMentorshipRequests > 0) { %>
+                            <span class="badge bg-warning"><%= pendingMentorshipRequests %> Pending</span>
+                        <% } %>
+                        <a href="/alumni-mentorship" class="btn btn-sm btn-light mt-2">Manage Mentorships</a>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 animate-on-scroll" style="--animation-order: 4;">
+                    <div class="content-card">
+                        <div class="aurora-glow"></div>
+                        <h6 class="text-muted-foreground">Total Donations</h6>
+                        <h2 class="mb-0">₹<%= (totalDonations / 1000).toFixed(1) %>K</h2>
+                        <small class="text-muted-foreground"><%= donationCount %> contributions</small>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 animate-on-scroll" style="--animation-order: 5;">
+                    <div class="content-card">
+                        <div class="aurora-glow"></div>
+                        <h6 class="text-muted-foreground">Unread Messages</h6>
+                        <h2 class="mb-0"><%= unreadMessages %></h2>
+                        <a href="/alumni-connect" class="btn btn-sm btn-light mt-2">Check Messages</a>
+                    </div>
+                </div>
+
+                <!-- Mentorship Hub Card -->
+                <div class="col-lg-6 animate-on-scroll" style="--animation-order: 6;">
+                    <div class="content-card">
+                        <div class="aurora-glow"></div>
+                        <h5 class="mb-3"><i class="bi bi-people-fill me-2"></i>Mentorship Hub</h5>
+                        
+                        <% if (pendingMentorshipRequests > 0) { %>
+                            <div class="alert alert-warning">
+                                <i class="bi bi-bell-fill me-2"></i>
+                                You have <strong><%= pendingMentorshipRequests %></strong> pending mentorship request(s)
+                            </div>
+                        <% } %>
+
+                        <% if (activeMentorships && activeMentorships.length > 0) { %>
+                            <div class="list-group">
+                                <% activeMentorships.forEach(mentorship => { %>
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1"><%= mentorship.menteeId.name %></h6>
+                                                <p class="text-muted-foreground small mb-1">
+                                                    <%= mentorship.areaOfInterest %>
+                                                </p>
+                                                <div class="progress" style="height: 5px;">
+                                                    <div class="progress-bar bg-success" 
+                                                         style="width: <%= mentorship.progress %>%"></div>
+                                                </div>
+                                                <small class="text-muted-foreground"><%= mentorship.progress %>% Complete</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } else { %>
+                            <p class="text-muted-foreground">No active mentorships yet. Start mentoring students!</p>
+                        <% } %>
+                        
+                        <a href="/alumni-mentorship" class="btn btn-primary w-100 mt-3">
+                            <i class="bi bi-plus-circle me-2"></i>Manage Mentorships
+                        </a>
                     </div>
                 </div>
                 
                 <!-- Events Card -->
-                <div class="col-lg-6 animate-on-scroll" style="--animation-order: 3;">
+                <div class="col-lg-6 animate-on-scroll" style="--animation-order: 7;">
                     <div class="content-card">
                         <div class="aurora-glow"></div>
-                        <h5 class="mb-3">Events & Participation</h5>
-                         <div class="list-group list-group-flush">
-                            <!-- Example of dynamic event list -->
-                            <% if (locals.upcomingEvents && upcomingEvents.length > 0) { %>
+                        <h5 class="mb-3"><i class="bi bi-calendar-event-fill me-2"></i>Upcoming Events</h5>
+                        
+                        <% if (upcomingEvents && upcomingEvents.length > 0) { %>
+                            <div class="list-group">
                                 <% upcomingEvents.forEach(event => { %>
-                                    <div class="list-group-item d-flex justify-content-between align-items-center"><%= event.name %> <button class="btn btn-sm btn-primary">RSVP</button></div>
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h6 class="mb-1"><%= event.title %></h6>
+                                                <small class="text-muted-foreground">
+                                                    <i class="bi bi-calendar me-1"></i><%= event.date %>
+                                                </small>
+                                            </div>
+                                            <button class="btn btn-sm btn-primary">RSVP</button>
+                                        </div>
+                                    </div>
                                 <% }) %>
-                            <% } else { %>
-                                <div class="list-group-item d-flex justify-content-between align-items-center">Annual Alumni Meet <button class="btn btn-sm btn-primary">RSVP</button></div>
-                            <% } %>
-                            
-                            <% if (locals.lastAttendedEvent) { %>
-                                <div class="list-group-item text-muted-foreground">Past event attended: "<%= lastAttendedEvent.name %>"</div>
-                            <% } else { %>
-                                <div class="list-group-item text-muted-foreground">Past event attended: "Webinar on AI"</div>
-                            <% } %>
-                        </div>
+                            </div>
+                        <% } else { %>
+                            <p class="text-muted-foreground">No upcoming events at the moment.</p>
+                        <% } %>
+                        
+                        <a href="/alumni-events" class="btn btn-light w-100 mt-3">
+                            <i class="bi bi-calendar3 me-2"></i>View All Events
+                        </a>
                     </div>
                 </div>
                 
                 <!-- Leaderboard Card -->
-                <div class="col-lg-6 animate-on-scroll" style="--animation-order: 4;">
+                <div class="col-lg-6 animate-on-scroll" style="--animation-order: 8;">
                     <div class="content-card">
                          <div class="aurora-glow"></div>
-                        <h5 class="mb-3">Your Impact</h5>
-                        <p class="stat-card-value mb-1">Rank #<%= locals.userRank || 8 %> <small class="text-success small">(<%= (locals.rankChange > 0 ? '+' : '') + (locals.rankChange || 2) %> this month)</small></p>
-                        <p class="text-muted-foreground small"><%= locals.nextRankMessage || 'Mentor 2 more students to climb higher!' %></p>
-                        <a href="#" class="btn btn-light w-100 mt-auto">View Leaderboard</a>
+                        <h5 class="mb-3"><i class="bi bi-trophy-fill me-2"></i>Your Impact</h5>
+                        <div class="text-center py-3">
+                            <h2 class="mb-1">Rank #<%= userRank %></h2>
+                            <% if (rankChange > 0) { %>
+                                <span class="badge bg-success">
+                                    <i class="bi bi-arrow-up"></i> +<%= rankChange %> this month
+                                </span>
+                            <% } else if (rankChange < 0) { %>
+                                <span class="badge bg-danger">
+                                    <i class="bi bi-arrow-down"></i> <%= rankChange %> this month
+                                </span>
+                            <% } else { %>
+                                <span class="badge bg-secondary">No change</span>
+                            <% } %>
+                        </div>
+                        <p class="text-muted-foreground text-center mb-3">
+                            <%= nextRankMessage %>
+                        </p>
+                        <a href="/alumni-leaderboard" class="btn btn-light w-100">
+                            <i class="bi bi-trophy me-2"></i>View Leaderboard
+                        </a>
                     </div>
                 </div>
 
-                 <!-- Messages Card -->
-                 <div class="col-lg-6 animate-on-scroll" style="--animation-order: 5;">
+                 <!-- Quick Actions Card -->
+                 <div class="col-lg-6 animate-on-scroll" style="--animation-order: 9;">
                     <div class="content-card">
                         <div class="aurora-glow"></div>
-                        <h5 class="mb-3">Messages & Notifications</h5>
-                        <div class="list-group list-group-flush">
-                            <!-- Example of dynamic message list -->
-                            <% if (locals.messages && messages.length > 0) { %>
-                                <% messages.forEach(message => { %>
-                                    <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-start <%= message.is_read ? 'text-muted-foreground' : '' %>">
-                                        <div class="ms-2 me-auto">
-                                            <div class="fw-bold"><%= message.title %></div>
-                                            <div class="small"><%= message.sender %></div>
-                                        </div>
-                                        <% if (!message.is_read) { %>
-                                            <span class="badge bg-info rounded-pill">New</span>
-                                        <% } %>
-                                    </a>
-                                <% }) %>
-                            <% } else { %>
-                                 <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-start">
-                                    <div class="ms-2 me-auto">
-                                        <div class="fw-bold">Mentorship Request</div>
-                                        <div class="text-muted-foreground small">From: Vikram Singh</div>
-                                    </div>
-                                    <span class="badge bg-danger rounded-pill">1</span>
-                                </a>
-                                 <a href="#" class="list-group-item list-group-item-action text-muted-foreground">Event Invite: Annual Meetup</a>
-                            <% } %>
+                        <h5 class="mb-3"><i class="bi bi-lightning-fill me-2"></i>Quick Actions</h5>
+                        <div class="d-grid gap-2">
+                            <a href="/alumni-donations" class="btn btn-outline-primary">
+                                <i class="bi bi-cash-coin me-2"></i>Make a Donation
+                            </a>
+                            <a href="/alumni-jobs" class="btn btn-outline-primary">
+                                <i class="bi bi-briefcase me-2"></i>Post a Job
+                            </a>
+                            <a href="/alumni-marketplace" class="btn btn-outline-primary">
+                                <i class="bi bi-shop me-2"></i>Browse Marketplace
+                            </a>
+                            <a href="/alumni-feedback" class="btn btn-outline-primary">
+                                <i class="bi bi-chat-quote me-2"></i>Give Feedback
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -265,7 +233,47 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // ========================
+        // UTILITY FUNCTIONS
+        // ========================
+        const AlumniumUtils = {
+            showToast: function(message, type = 'info') {
+                const toastContainer = document.getElementById('toastContainer');
+                const toastId = 'toast-' + Date.now();
+                
+                const icons = {
+                    success: 'bi-check-circle-fill text-success',
+                    error: 'bi-x-circle-fill text-danger',
+                    warning: 'bi-exclamation-triangle-fill text-warning',
+                    info: 'bi-info-circle-fill text-primary'
+                };
+                
+                const toastHTML = `
+                    <div class="toast" id="${toastId}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                        <div class="toast-header">
+                            <i class="bi ${icons[type]} me-2"></i>
+                            <strong class="me-auto">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">${message}</div>
+                    </div>
+                `;
+                
+                toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                const toastElement = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
+                
+                toastElement.addEventListener('hidden.bs.toast', () => {
+                    toastElement.remove();
+                });
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
+            // ========================
+            // THEME TOGGLE
+            // ========================
             const themeMenuToggle = document.getElementById('theme-menu-toggle');
             const htmlElement = document.documentElement;
             const applyTheme = (theme) => {
@@ -273,19 +281,28 @@
                 htmlElement.classList.add(theme);
             };
             
-            themeMenuToggle.addEventListener('click', (e) => {
-                e.preventDefault();
-                const newTheme = htmlElement.classList.contains('dark') ? 'light' : 'dark';
-                localStorage.setItem('theme', newTheme);
-                applyTheme(newTheme);
-            });
+            if (themeMenuToggle) {
+                themeMenuToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const newTheme = htmlElement.classList.contains('dark') ? 'light' : 'dark';
+                    localStorage.setItem('theme', newTheme);
+                    applyTheme(newTheme);
+                    AlumniumUtils.showToast('Theme changed to ' + newTheme + ' mode', 'success');
+                });
+            }
 
+            // ========================
+            // SCROLL ANIMATIONS
+            // ========================
             const animatedElements = document.querySelectorAll('.animate-on-scroll');
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('is-visible'); } });
             }, { threshold: 0.1 });
             animatedElements.forEach(el => { observer.observe(el); });
 
+            // ========================
+            // MOBILE SIDEBAR TOGGLE
+            // ========================
             const sidebarToggle = document.getElementById('sidebarToggle');
             const sidebar = document.getElementById('sidebar');
             const backdrop = document.getElementById('sidebarBackdrop');
@@ -298,6 +315,15 @@
                     sidebar.classList.remove('show');
                     document.body.classList.remove('sidebar-open');
                 });
+            }
+
+            // ========================
+            // WELCOME MESSAGE
+            // ========================
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('login') === 'success') {
+                AlumniumUtils.showToast('Welcome back! You\'re successfully logged in.', 'success');
+                window.history.replaceState({}, document.title, window.location.pathname);
             }
         });
     </script>

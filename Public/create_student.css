@@ -8,6 +8,7 @@
             --primary: #111827;
             --primary-foreground: #ffffff;
             --secondary: #f3f4f6;
+            --muted: #f3f4f6;
             --muted-foreground: #6b7280;
             --border: #e5e7eb;
             --radius: 1rem;
@@ -15,6 +16,12 @@
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.07), 0 4px 6px -4px rgb(0 0 0 / 0.07);
             --glow-color: rgba(139, 92, 246, 0.2);
             --danger: #dc3545;
+            --success: #16a34a;
+            --warning: #f59e0b;
+            --info: #0d6efd;
+        }
+        html {
+            overflow-y: scroll; /* Prevents layout shift from scrollbar appearing/disappearing */
         }
         html.dark {
             --background: #0d1117;
@@ -23,10 +30,14 @@
             --primary: #e6edf3;
             --primary-foreground: #0d1117;
             --secondary: #21262d;
+            --muted: #21262d;
             --muted-foreground: #8b949e;
             --border: #30363d;
-            --glow-color: rgba(139, 92, 246, 0.2);
+            --glow-color: rgba(139, 92, 246, 0.3);
             --danger: #ff5b5b;
+            --success: #22c55e;
+            --warning: #facc15;
+            --info: #3b82f6;
         }
 
         /* --- 2. DASHBOARD STRUCTURE --- */
@@ -66,14 +77,47 @@
 
         /* --- 3. SIDEBAR & NAVIGATION --- */
         .sidebar-header { font-size: 1.5rem; font-weight: 700; color: var(--foreground); text-decoration: none; margin-bottom: 2rem; display:flex; align-items:center; gap: 0.5rem; }
+        
+        /* --- Styles for scrollable navigation with hidden scrollbar --- */
+        .sidebar-nav {
+            flex-grow: 1; /* Allows this area to fill available space */
+            overflow-y: auto; /* Adds a scrollbar only when content overflows */
+            margin-bottom: 1.5rem; /* Adds space between nav and footer */
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        .sidebar-nav::-webkit-scrollbar {
+            display: none; /* For Chrome, Safari, and Opera */
+        }
+        
         .sidebar-nav .nav-link {
             color: var(--muted-foreground); font-weight: 500; padding: 0.75rem 1rem; border-radius: 0.75rem;
             margin-bottom: 0.25rem; display: flex; align-items: center; font-size: 14px;
-            transition: all 0.2s ease;
+            transition: all 0.2s ease; position: relative;
         }
         .sidebar-nav .nav-link i { margin-right: 0.75rem; font-size: 1.1rem; }
         .sidebar-nav .nav-link:hover { color: var(--foreground); background-color: var(--secondary); }
         .sidebar-nav .nav-link.active { color: var(--primary-foreground); background-color: var(--primary); }
+        
+        /* Notification Badge */
+        .notification-badge {
+            background-color: var(--danger);
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: auto;
+            min-width: 20px;
+            text-align: center;
+        }
+        .nav-link.active .notification-badge {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        html.dark .nav-link.active .notification-badge {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+        
         .sidebar-footer { margin-top: auto; border-top: 1px solid var(--border); padding-top: 1.5rem; }
         .user-profile { display: flex; align-items: center; text-decoration: none; color: var(--foreground); flex-grow: 1; }
         .user-profile img { width: 40px; height: 40px; border-radius: 50%; margin-right: 0.75rem; }
@@ -190,4 +234,48 @@
             .main-content { grid-column: 1 / -1; padding: 1.5rem; }
             .sidebar { transform: translateX(-100%); }
             .sidebar.show { transform: translateX(0); }
+        }
+
+        /* --- 6. ADDITIONAL DARK THEME SUPPORT --- */
+        html.dark .text-muted { color: var(--muted-foreground) !important; }
+        html.dark .text-muted-foreground { color: var(--muted-foreground) !important; }
+        html.dark .bg-light { background-color: var(--secondary) !important; }
+        html.dark .border { border-color: var(--border) !important; }
+        html.dark .table { color: var(--foreground); }
+        html.dark .table thead th { border-color: var(--border); background-color: var(--secondary); }
+        html.dark .table tbody td { border-color: var(--border); }
+        html.dark .badge { background-color: var(--secondary); color: var(--foreground); }
+        html.dark .alert { background-color: var(--secondary); border-color: var(--border); color: var(--foreground); }
+        html.dark .list-group-item { background-color: var(--card); border-color: var(--border); color: var(--foreground); }
+        html.dark .modal-content { background-color: var(--card); color: var(--foreground); }
+        html.dark .modal-header, html.dark .modal-footer { border-color: var(--border); }
+        html.dark input::placeholder, html.dark textarea::placeholder { color: var(--muted-foreground); opacity: 0.6; }
+        
+        /* Toast/Notification Support */
+        .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; }
+        .toast { background-color: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-lg); }
+        .toast-header { background-color: var(--secondary); color: var(--foreground); border-bottom: 1px solid var(--border); }
+        .toast-body { color: var(--foreground); }
+        html.dark .toast { background-color: var(--card); }
+        html.dark .toast-header { background-color: var(--secondary); }
+
+        /* Improved Three-Dot Menu Styling */
+        .profile-menu-trigger { 
+            color: var(--muted-foreground); 
+            text-decoration: none; 
+            padding: 0.6rem; 
+            margin-left: 0.5rem; 
+            border-radius: 0.6rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .profile-menu-trigger:hover { 
+            background-color: var(--secondary); 
+            color: var(--foreground);
+            transform: scale(1.05);
+        }
+        .profile-menu-trigger i {
+            font-size: 1.25rem;
         }

@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up | Alumnium</title>
-    <!-- Inter Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Bootstrap CSS & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -51,11 +49,22 @@
             border-radius: 0.75rem;
             padding: 0.85rem 1rem;
             font-weight: 500;
-            color: var(--foreground) !important; /* Ensures text is always visible */
+            color: var(--foreground) !important;
+            transition: all 0.2s ease;
         }
         .form-control::placeholder, .form-select::placeholder { color: var(--muted-foreground); }
-        .form-control:focus, .form-select:focus { background-color: var(--secondary); border-color: var(--glow-color); box-shadow: 0 0 0 3px var(--glow-color); }
-        .btn-primary { background-color: var(--primary); color: var(--primary-foreground); border: none; border-radius: 0.75rem; padding: 0.85rem 1rem; font-weight: 600; }
+        .form-control:focus, .form-select:focus { background-color: var(--secondary); border-color: var(--glow-color); box-shadow: 0 0 0 3px var(--glow-color); outline: none; }
+        .form-control.is-invalid { border-color: var(--danger) !important; background-image: none !important; }
+        .form-control.is-invalid:focus { box-shadow: 0 0 0 3px rgba(var(--danger-rgb), 0.25) !important; }
+        .form-control.is-valid { border-color: #198754; background-image: none !important; }
+        .form-control.is-valid:focus { box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.15); }
+        html.dark .form-control.is-invalid:focus { box-shadow: 0 0 0 3px rgba(var(--danger-rgb), 0.35) !important; }
+        
+        .btn-primary { background-color: var(--primary); color: var(--primary-foreground); border: none; border-radius: 0.75rem; padding: 0.85rem 1rem; font-weight: 600; transition: all 0.2s ease; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); opacity: 0.9; }
+        .btn-primary:active { transform: translateY(0); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        
         .aurora-glow-form { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 800px; height: 800px; background: radial-gradient(ellipse at center, var(--glow-color) 0%, rgba(0,0,0,0) 70%); filter: blur(100px); z-index: 0; }
         .signin-link { font-size: 14px; font-weight: 600; color: var(--primary); text-decoration: none; transition: color 0.2s; }
         .signin-link:hover { color: var(--muted-foreground); text-decoration: underline; }
@@ -75,32 +84,42 @@
             cursor: pointer;
             display: flex;
             align-items: center;
+            transition: color 0.2s ease;
         }
+        .password-toggle-btn:hover { color: var(--foreground); }
         .password-wrapper .form-control { padding-right: 3rem; }
 
-        .theme-toggle-btn { position: absolute; top: 1.5rem; right: 1.5rem; background-color: var(--card); border: 1px solid var(--border); color: var(--muted-foreground); width: 40px; height: 40px; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; z-index: 10; }
+        .theme-toggle-btn { position: absolute; top: 1.5rem; right: 1.5rem; background-color: var(--card); border: 1px solid var(--border); color: var(--muted-foreground); width: 40px; height: 40px; border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; z-index: 10; cursor: pointer; transition: all 0.2s ease; }
+        .theme-toggle-btn:hover { background-color: var(--secondary); color: var(--foreground); }
         .theme-toggle-btn .sun-icon { display: block; }
         .theme-toggle-btn .moon-icon { display: none; }
         html.dark .theme-toggle-btn .sun-icon { display: none; }
         html.dark .theme-toggle-btn .moon-icon { display: block; }
 
-        .form-group-error-text { color: var(--danger); font-size: 0.875em; margin-top: 0.25rem; display: none; }
-
-        /* Style for invalid fields */
-        .form-control.is-invalid {
-            border-color: var(--danger) !important;
-            background-image: none !important; /* Removes the Bootstrap exclamation icon */
-        }
-        .form-control.is-invalid:focus {
-            box-shadow: 0 0 0 3px rgba(var(--danger-rgb), 0.25) !important;
-        }
-        html.dark .form-control.is-invalid:focus {
-             box-shadow: 0 0 0 3px rgba(var(--danger-rgb), 0.35) !important;
-        }
+        .invalid-feedback { color: var(--danger); font-size: 0.875rem; margin-top: 0.25rem; display: none; }
+        .invalid-feedback.d-block { display: block !important; }
+        .valid-feedback { color: #198754; font-size: 0.875rem; margin-top: 0.25rem; display: none; }
+        .valid-feedback.d-block { display: block !important; }
         
-        .form-col {
-            margin-bottom: 0.5rem; /* Add space between form rows */
-        }
+        .form-col { margin-bottom: 0.75rem; }
+
+        /* Loading Spinner */
+        .btn-spinner { display: inline-block; width: 1rem; height: 1rem; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; margin-right: 0.5rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Toast Container */
+        .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; }
+        .toast { background-color: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-lg); }
+        .toast-header { background-color: var(--secondary); color: var(--foreground); border-bottom: 1px solid var(--border); }
+        .toast-body { color: var(--foreground); }
+
+        /* Password Strength Indicator */
+        .password-strength { height: 4px; border-radius: 2px; background-color: var(--border); margin-top: 0.5rem; overflow: hidden; }
+        .password-strength-bar { height: 100%; width: 0%; transition: all 0.3s ease; }
+        .strength-weak { width: 33%; background-color: #dc3545; }
+        .strength-medium { width: 66%; background-color: #ffc107; }
+        .strength-strong { width: 100%; background-color: #198754; }
+        .password-strength-text { font-size: 0.75rem; margin-top: 0.25rem; color: var(--muted-foreground); }
 
         @media (max-width: 992px) {
             .auth-layout { grid-template-columns: 1fr; }
@@ -109,6 +128,9 @@
     </style>
 </head>
 <body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer" role="alert" aria-live="polite" aria-atomic="true"></div>
+
     <div class="auth-layout">
         <div class="auth-form-section">
             <div class="aurora-glow-form"></div>
@@ -121,66 +143,137 @@
                     <h2 class="h1 fw-bold">Create an Alumni Account</h2>
                     <p class="text-muted-foreground">Submit your details for verification by an admin.</p>
                 </div>
-                
-                <div id="emailExistsError" class="alert alert-danger d-none align-items-center" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                    <div>This email is already registered. Please <a href="/" class="alert-link">Sign In</a>.</div>
-                </div>
 
                 <form id="signup-form" action="/signup" method="post" novalidate>
                     <div class="row g-2">
                         <div class="col-12 form-col">
                             <label for="name" class="form-label fw-medium">Full Name</label>
-                            <input type="text" name="name" class="form-control" id="name" required>
-                            <div class="form-group-error-text">Please enter your full name.</div>
+                            <input 
+                                type="text" 
+                                name="name" 
+                                class="form-control" 
+                                id="name" 
+                                placeholder="John Doe"
+                                required
+                                autocomplete="name"
+                                aria-describedby="nameError"
+                                minlength="3"
+                            >
+                            <div class="invalid-feedback" id="nameError">Please enter your full name (at least 3 characters).</div>
                         </div>
                         <div class="col-12 form-col">
                             <label for="email" class="form-label fw-medium">Email Address</label>
-                            <input type="email" name="email" class="form-control" id="email" required>
-                            <div class="form-group-error-text">Please enter a valid email address.</div>
+                            <input 
+                                type="email" 
+                                name="email" 
+                                class="form-control" 
+                                id="email" 
+                                placeholder="you@example.com"
+                                required
+                                autocomplete="email"
+                                aria-describedby="emailError"
+                            >
+                            <div class="invalid-feedback" id="emailError">Please enter a valid email address.</div>
                         </div>
                         <div class="col-12 form-col">
                             <label for="password" class="form-label fw-medium">Password</label>
                             <div class="password-wrapper">
-                                <input type="password" name="password" class="form-control" id="password" required>
-                                <button type="button" class="password-toggle-btn">
+                                <input 
+                                    type="password" 
+                                    name="password" 
+                                    class="form-control" 
+                                    id="password" 
+                                    required
+                                    minlength="6"
+                                    autocomplete="new-password"
+                                    aria-describedby="passwordError"
+                                >
+                                <button type="button" class="password-toggle-btn" aria-label="Toggle password visibility">
                                     <i class="bi bi-eye-fill"></i><i class="bi bi-eye-slash-fill d-none"></i>
                                 </button>
                             </div>
-                             <div class="form-group-error-text">Please enter a password.</div>
+                            <div class="password-strength">
+                                <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                            </div>
+                            <div class="password-strength-text" id="passwordStrengthText"></div>
+                            <div class="invalid-feedback" id="passwordError">Password must be at least 6 characters.</div>
                         </div>
                         <div class="col-12 form-col">
                             <label for="confirm-password" class="form-label fw-medium">Confirm Password</label>
-                             <div class="password-wrapper">
-                                <input type="password" name="confirm-password" class="form-control" id="confirm-password" required>
-                                <button type="button" class="password-toggle-btn">
+                            <div class="password-wrapper">
+                                <input 
+                                    type="password" 
+                                    name="confirm-password" 
+                                    class="form-control" 
+                                    id="confirm-password" 
+                                    required
+                                    autocomplete="new-password"
+                                    aria-describedby="confirmPasswordError"
+                                >
+                                <button type="button" class="password-toggle-btn" aria-label="Toggle confirm password visibility">
                                     <i class="bi bi-eye-fill"></i><i class="bi bi-eye-slash-fill d-none"></i>
                                 </button>
                             </div>
-                            <div class="form-group-error-text">Passwords do not match.</div>
+                            <div class="invalid-feedback" id="confirmPasswordError">Passwords do not match.</div>
                         </div>
                         <div class="col-md-6 form-col">
                             <label for="batch" class="form-label fw-medium">Batch (Year)</label>
-                            <input type="number" name="batch" class="form-control" id="batch" placeholder="e.g., 2020" required>
-                             <div class="form-group-error-text">Enter batch year.</div>
+                            <input 
+                                type="number" 
+                                name="batch" 
+                                class="form-control" 
+                                id="batch" 
+                                placeholder="e.g., 2020" 
+                                required
+                                min="1950"
+                                max="2030"
+                                aria-describedby="batchError"
+                            >
+                            <div class="invalid-feedback" id="batchError">Enter a valid batch year.</div>
                         </div>
                         <div class="col-md-6 form-col">
                             <label for="rno" class="form-label fw-medium">Roll Number</label>
-                            <input type="text" name="rno" class="form-control" id="rno" required>
-                             <div class="form-group-error-text">Enter roll number.</div>
+                            <input 
+                                type="text" 
+                                name="rno" 
+                                class="form-control" 
+                                id="rno" 
+                                placeholder="ABC123"
+                                required
+                                aria-describedby="rnoError"
+                            >
+                            <div class="invalid-feedback" id="rnoError">Enter your roll number.</div>
                         </div>
                         <div class="col-md-6 form-col">
                             <label for="course" class="form-label fw-medium">Course</label>
-                            <input type="text" name="course" class="form-control" id="course" placeholder="e.g., B.Tech" required>
-                             <div class="form-group-error-text">Enter your course.</div>
+                            <input 
+                                type="text" 
+                                name="course" 
+                                class="form-control" 
+                                id="course" 
+                                placeholder="e.g., B.Tech" 
+                                required
+                                aria-describedby="courseError"
+                            >
+                            <div class="invalid-feedback" id="courseError">Enter your course.</div>
                         </div>
                         <div class="col-md-6 form-col">
                             <label for="dept" class="form-label fw-medium">Department</label>
-                            <input type="text" name="dept" class="form-control" id="dept" placeholder="e.g., CSE" required>
-                             <div class="form-group-error-text">Enter your department.</div>
+                            <input 
+                                type="text" 
+                                name="dept" 
+                                class="form-control" 
+                                id="dept" 
+                                placeholder="e.g., CSE" 
+                                required
+                                aria-describedby="deptError"
+                            >
+                            <div class="invalid-feedback" id="deptError">Enter your department.</div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary w-100 mt-4">Submit Request</button>
+                    <button type="submit" class="btn btn-primary w-100 mt-4" id="submitBtn">
+                        <span class="btn-text">Submit Request</span>
+                    </button>
                 </form>
 
                 <p class="text-center text-muted-foreground mt-4">Already have an account? <a href="/" class="signin-link">Sign In</a></p>
@@ -194,15 +287,80 @@
         </div>
     </div>
     
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- SHOW ERROR IF EMAIL EXISTS ---
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('status') === 'email_exists') {
-                document.getElementById('emailExistsError').classList.remove('d-none');
-            }
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-            // --- THEME TOGGLE LOGIC ---
+    <script>
+        // ========================
+        // UTILITY FUNCTIONS
+        // ========================
+        const AlumniumUtils = {
+            showToast: function(message, type = 'info') {
+                const toastContainer = document.getElementById('toastContainer');
+                const toastId = 'toast-' + Date.now();
+                
+                const icons = {
+                    success: 'bi-check-circle-fill text-success',
+                    error: 'bi-x-circle-fill text-danger',
+                    warning: 'bi-exclamation-triangle-fill text-warning',
+                    info: 'bi-info-circle-fill text-primary'
+                };
+                
+                const toastHTML = `
+                    <div class="toast" id="${toastId}" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="5000">
+                        <div class="toast-header">
+                            <i class="bi ${icons[type]} me-2"></i>
+                            <strong class="me-auto">${type.charAt(0).toUpperCase() + type.slice(1)}</strong>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">${message}</div>
+                    </div>
+                `;
+                
+                toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                const toastElement = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
+                
+                toastElement.addEventListener('hidden.bs.toast', () => {
+                    toastElement.remove();
+                });
+            },
+            
+            validateEmail: function(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            },
+            
+            setLoading: function(button, isLoading) {
+                const btnText = button.querySelector('.btn-text');
+                if (isLoading) {
+                    button.disabled = true;
+                    btnText.innerHTML = '<span class="btn-spinner"></span>Submitting...';
+                } else {
+                    button.disabled = false;
+                    btnText.innerHTML = 'Submit Request';
+                }
+            },
+            
+            checkPasswordStrength: function(password) {
+                let strength = 0;
+                if (password.length >= 8) strength++;
+                if (password.length >= 12) strength++;
+                if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+                if (/\d/.test(password)) strength++;
+                if (/[^a-zA-Z\d]/.test(password)) strength++;
+                
+                if (strength <= 2) return { level: 'weak', text: 'Weak password', class: 'strength-weak' };
+                if (strength <= 3) return { level: 'medium', text: 'Medium strength', class: 'strength-medium' };
+                return { level: 'strong', text: 'Strong password', class: 'strength-strong' };
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // ========================
+            // THEME TOGGLE
+            // ========================
             const themeToggle = document.getElementById('theme-toggle');
             const htmlElement = document.documentElement;
             const applyTheme = (theme) => {
@@ -218,7 +376,9 @@
                 applyTheme(newTheme);
             });
             
-            // --- PASSWORD TOGGLE LOGIC ---
+            // ========================
+            // PASSWORD TOGGLE
+            // ========================
             document.querySelectorAll('.password-toggle-btn').forEach(toggleBtn => {
                 const wrapper = toggleBtn.closest('.password-wrapper');
                 const input = wrapper.querySelector('input');
@@ -230,64 +390,180 @@
                         input.type = 'text';
                         eyeIcon.classList.add('d-none');
                         eyeSlashIcon.classList.remove('d-none');
+                        toggleBtn.setAttribute('aria-label', 'Hide password');
                     } else {
                         input.type = 'password';
                         eyeIcon.classList.remove('d-none');
                         eyeSlashIcon.classList.add('d-none');
+                        toggleBtn.setAttribute('aria-label', 'Show password');
                     }
                 });
             });
             
-            // --- FORM VALIDATION ---
+            // ========================
+            // URL PARAMETERS HANDLING
+            // ========================
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('status') === 'email_exists') {
+                AlumniumUtils.showToast('This email is already registered. Please sign in instead.', 'error');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+
+            // ========================
+            // PASSWORD STRENGTH INDICATOR
+            // ========================
+            const passwordInput = document.getElementById('password');
+            const strengthBar = document.getElementById('passwordStrengthBar');
+            const strengthText = document.getElementById('passwordStrengthText');
+
+            passwordInput.addEventListener('input', () => {
+                const password = passwordInput.value;
+                if (password.length === 0) {
+                    strengthBar.className = 'password-strength-bar';
+                    strengthText.textContent = '';
+                    return;
+                }
+                
+                const strength = AlumniumUtils.checkPasswordStrength(password);
+                strengthBar.className = 'password-strength-bar ' + strength.class;
+                strengthText.textContent = strength.text;
+            });
+
+            // ========================
+            // FORM VALIDATION
+            // ========================
             const signUpForm = document.getElementById('signup-form');
-            const requiredInputs = signUpForm.querySelectorAll('[required]');
+            const submitBtn = document.getElementById('submitBtn');
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const confirmPasswordInput = document.getElementById('confirm-password');
+            const batchInput = document.getElementById('batch');
+            const rnoInput = document.getElementById('rno');
+            const courseInput = document.getElementById('course');
+            const deptInput = document.getElementById('dept');
 
-            signUpForm.addEventListener('submit', (e) => {
-                e.preventDefault(); 
-                let isFormValid = true;
-
-                requiredInputs.forEach(input => {
-                    const errorElement = input.closest('.form-col').querySelector('.form-group-error-text');
+            // Real-time validation
+            const validateField = (input, validator) => {
+                input.addEventListener('blur', () => {
+                    const feedback = document.getElementById(input.id + 'Error');
                     if (input.value.trim() === '') {
-                        input.classList.add('is-invalid');
-                        if (errorElement) errorElement.style.display = 'block';
-                        isFormValid = false;
-                    }
-                });
-
-                const passwordInput = document.getElementById('password');
-                const confirmPasswordInput = document.getElementById('confirm-password');
-                const passwordMatchError = confirmPasswordInput.closest('.form-col').querySelector('.form-group-error-text');
-                
-                if (passwordInput.value !== confirmPasswordInput.value) {
-                    passwordMatchError.style.display = 'block';
-                    confirmPasswordInput.classList.add('is-invalid');
-                    isFormValid = false;
-                }
-                
-                if (isFormValid) {
-                    signUpForm.submit();
-                }
-            });
-
-            requiredInputs.forEach(input => {
-                input.addEventListener('input', () => {
-                    if (input.value.trim() !== '') {
+                        input.classList.remove('is-valid', 'is-invalid');
+                        feedback.classList.remove('d-block');
+                    } else if (validator(input.value)) {
                         input.classList.remove('is-invalid');
-                         const errorElement = input.closest('.form-col').querySelector('.form-group-error-text');
-                        if (errorElement) {
-                           if(input.id === 'confirm-password') {
-                               const passwordInput = document.getElementById('password');
-                               if (input.value === passwordInput.value) {
-                                   errorElement.style.display = 'none';
-                               }
-                           } else {
-                               errorElement.style.display = 'none';
-                           }
-                        }
+                        input.classList.add('is-valid');
+                        feedback.classList.remove('d-block');
+                    } else {
+                        input.classList.remove('is-valid');
+                        input.classList.add('is-invalid');
+                        feedback.classList.add('d-block');
                     }
                 });
+            };
+
+            validateField(nameInput, val => val.trim().length >= 3);
+            validateField(emailInput, val => AlumniumUtils.validateEmail(val));
+            validateField(passwordInput, val => val.length >= 6);
+            validateField(batchInput, val => {
+                const year = parseInt(val);
+                return year >= 1950 && year <= 2030;
             });
+            validateField(rnoInput, val => val.trim().length > 0);
+            validateField(courseInput, val => val.trim().length > 0);
+            validateField(deptInput, val => val.trim().length > 0);
+
+            // Confirm password validation
+            confirmPasswordInput.addEventListener('blur', () => {
+                const feedback = document.getElementById('confirmPasswordError');
+                if (confirmPasswordInput.value === '') {
+                    confirmPasswordInput.classList.remove('is-valid', 'is-invalid');
+                    feedback.classList.remove('d-block');
+                } else if (confirmPasswordInput.value === passwordInput.value) {
+                    confirmPasswordInput.classList.remove('is-invalid');
+                    confirmPasswordInput.classList.add('is-valid');
+                    feedback.classList.remove('d-block');
+                } else {
+                    confirmPasswordInput.classList.remove('is-valid');
+                    confirmPasswordInput.classList.add('is-invalid');
+                    feedback.classList.add('d-block');
+                }
+            });
+
+            // Also validate confirm password when main password changes
+            passwordInput.addEventListener('input', () => {
+                if (confirmPasswordInput.value !== '') {
+                    const feedback = document.getElementById('confirmPasswordError');
+                    if (confirmPasswordInput.value === passwordInput.value) {
+                        confirmPasswordInput.classList.remove('is-invalid');
+                        confirmPasswordInput.classList.add('is-valid');
+                        feedback.classList.remove('d-block');
+                    } else {
+                        confirmPasswordInput.classList.remove('is-valid');
+                        confirmPasswordInput.classList.add('is-invalid');
+                        feedback.classList.add('d-block');
+                    }
+                }
+            });
+
+            // Form submission
+            signUpForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                let isValid = true;
+                
+                // Validate all fields
+                const validations = [
+                    { input: nameInput, validator: val => val.trim().length >= 3 },
+                    { input: emailInput, validator: val => AlumniumUtils.validateEmail(val) },
+                    { input: passwordInput, validator: val => val.length >= 6 },
+                    { input: confirmPasswordInput, validator: val => val === passwordInput.value },
+                    { input: batchInput, validator: val => {
+                        const year = parseInt(val);
+                        return year >= 1950 && year <= 2030;
+                    }},
+                    { input: rnoInput, validator: val => val.trim().length > 0 },
+                    { input: courseInput, validator: val => val.trim().length > 0 },
+                    { input: deptInput, validator: val => val.trim().length > 0 }
+                ];
+
+                validations.forEach(({ input, validator }) => {
+                    const feedback = document.getElementById(input.id + 'Error');
+                    if (!validator(input.value)) {
+                        input.classList.add('is-invalid');
+                        input.classList.remove('is-valid');
+                        feedback.classList.add('d-block');
+                        isValid = false;
+                    } else {
+                        input.classList.remove('is-invalid');
+                        input.classList.add('is-valid');
+                        feedback.classList.remove('d-block');
+                    }
+                });
+                
+                if (!isValid) {
+                    AlumniumUtils.showToast('Please correct the errors in the form.', 'error');
+                    // Focus on first invalid field
+                    const firstInvalid = signUpForm.querySelector('.is-invalid');
+                    if (firstInvalid) firstInvalid.focus();
+                    return;
+                }
+                
+                // Show loading state
+                AlumniumUtils.setLoading(submitBtn, true);
+                
+                // Submit form
+                this.submit();
+            });
+
+            // ========================
+            // ACCESSIBILITY
+            // ========================
+            nameInput.focus();
+            
+            // Prevent double submission
+            signUpForm.addEventListener('submit', function() {
+                submitBtn.disabled = true;
+            }, { once: true });
         });
     </script>
 </body>

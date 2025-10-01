@@ -1,0 +1,248 @@
+    <!-- Loading Overlay -->
+    <div class="spinner-overlay" id="loadingOverlay">
+        <div class="spinner-border text-light" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
+        <div id="globalToast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body" id="toastMessage"></div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+    <script>
+        // Global Utilities
+        const AlumniumUtils = {
+            // Show toast notification
+            showToast: function(message, type = 'info') {
+                const toast = document.getElementById('globalToast');
+                const toastMessage = document.getElementById('toastMessage');
+                
+                // Set message
+                toastMessage.textContent = message;
+                
+                // Set color based on type
+                toast.className = 'toast align-items-center text-white border-0';
+                switch(type) {
+                    case 'success':
+                        toast.classList.add('bg-success');
+                        break;
+                    case 'error':
+                    case 'danger':
+                        toast.classList.add('bg-danger');
+                        break;
+                    case 'warning':
+                        toast.classList.add('bg-warning');
+                        break;
+                    default:
+                        toast.classList.add('bg-primary');
+                }
+                
+                // Show toast
+                const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+                bsToast.show();
+            },
+
+            // Show loading overlay
+            showLoading: function() {
+                document.getElementById('loadingOverlay')?.classList.add('active');
+            },
+
+            // Hide loading overlay
+            hideLoading: function() {
+                document.getElementById('loadingOverlay')?.classList.remove('active');
+            },
+
+            // Validate email
+            validateEmail: function(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(String(email).toLowerCase());
+            },
+
+            // Validate form
+            validateForm: function(formId) {
+                const form = document.getElementById(formId);
+                if (!form) return false;
+                
+                const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+                let isValid = true;
+                
+                inputs.forEach(input => {
+                    if (!input.value.trim()) {
+                        isValid = false;
+                        input.classList.add('is-invalid');
+                    } else {
+                        input.classList.remove('is-invalid');
+                    }
+                });
+                
+                return isValid;
+            },
+
+            // Confirm action
+            confirm: function(message, callback) {
+                if (window.confirm(message)) {
+                    callback();
+                }
+            },
+
+            // Debounce function
+            debounce: function(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            },
+
+            // Format date
+            formatDate: function(date) {
+                const d = new Date(date);
+                const options = { year: 'numeric', month: 'short', day: 'numeric' };
+                return d.toLocaleDateString('en-US', options);
+            },
+
+            // Time ago
+            timeAgo: function(date) {
+                const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+                let interval = seconds / 31536000;
+                
+                if (interval > 1) return Math.floor(interval) + ' years ago';
+                interval = seconds / 2592000;
+                if (interval > 1) return Math.floor(interval) + ' months ago';
+                interval = seconds / 86400;
+                if (interval > 1) return Math.floor(interval) + ' days ago';
+                interval = seconds / 3600;
+                if (interval > 1) return Math.floor(interval) + ' hours ago';
+                interval = seconds / 60;
+                if (interval > 1) return Math.floor(interval) + ' minutes ago';
+                return Math.floor(seconds) + ' seconds ago';
+            }
+        };
+
+        // Theme Management
+        const ThemeManager = {
+            init: function() {
+                const savedTheme = localStorage.getItem('theme') || 
+                    (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                this.setTheme(savedTheme);
+            },
+
+            setTheme: function(theme) {
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+                localStorage.setItem('theme', theme);
+            },
+
+            toggle: function() {
+                const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                this.setTheme(newTheme);
+                return newTheme;
+            }
+        };
+
+        // Initialize theme on page load
+        ThemeManager.init();
+
+        // Animation on scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            });
+
+            document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                observer.observe(el);
+            });
+        });
+
+        // Handle URL parameters for notifications
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            
+            if (status) {
+                const messages = {
+                    'login_failed': { message: 'Invalid email or password', type: 'error' },
+                    'pending_approval': { message: 'Your account is pending admin approval', type: 'warning' },
+                    'signup_success': { message: 'Registration successful! Awaiting admin approval', type: 'success' },
+                    'email_exists': { message: 'Email already registered', type: 'error' },
+                    'logout_success': { message: 'Successfully logged out', type: 'success' },
+                    'unauthorized': { message: 'Please login to continue', type: 'warning' },
+                    'approved': { message: 'Request approved successfully', type: 'success' },
+                    'rejected': { message: 'Request rejected', type: 'info' },
+                    'created': { message: 'Created successfully', type: 'success' },
+                    'updated': { message: 'Updated successfully', type: 'success' },
+                    'deleted': { message: 'Deleted successfully', type: 'success' },
+                    'deleteSuccess': { message: 'Deleted successfully', type: 'success' },
+                    'editSuccess': { message: 'Updated successfully', type: 'success' },
+                    'error': { message: 'An error occurred', type: 'error' }
+                };
+                
+                if (messages[status]) {
+                    setTimeout(() => {
+                        AlumniumUtils.showToast(messages[status].message, messages[status].type);
+                    }, 300);
+                }
+            }
+        });
+
+        // Error handling for images
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('img').forEach(img => {
+                img.addEventListener('error', function() {
+                    this.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect width="100" height="100" fill="%23ddd"/%3E%3Ctext x="50" y="50" font-size="18" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E';
+                });
+            });
+        });
+
+        // Prevent double form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const submitBtn = form.querySelector('[type="submit"]');
+                    if (submitBtn && !submitBtn.disabled) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+                        
+                        // Re-enable after 3 seconds as fallback
+                        setTimeout(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = submitBtn.getAttribute('data-original-text') || 'Submit';
+                        }, 3000);
+                    }
+                });
+            });
+        });
+
+        // Store original button text
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('[type="submit"]').forEach(btn => {
+                btn.setAttribute('data-original-text', btn.textContent.trim());
+            });
+        });
+    </script>
+</body>
+</html>
