@@ -879,44 +879,56 @@ app.get("/alumni-dashboard", async (req, res) => {
         });
         if (!alumni) return res.redirect("/");
 
-        // Fetch real dashboard data
-        const [
-            mentorshipRequests,
-            activeMentorships,
-            upcomingEvents,
-            myConnections,
-            myDonations,
-            unreadMessages
-        ] = await Promise.all([
-            Mentorship.countDocuments({ mentorId: alumni._id, status: 'Pending' }),
-            Mentorship.find({ mentorId: alumni._id, status: 'Active' }).populate('menteeId').limit(3),
-            Event.find({ status: 'Upcoming' }).sort({ date: 1 }).limit(3),
-            Connection.countDocuments({
-                $or: [
-                    { requesterId: alumni._id, status: 'Accepted' },
-                    { recipientId: alumni._id, status: 'Accepted' }
-                ]
-            }),
-            Donation.aggregate([
-                { $match: { donorId: alumni._id } },
-                { $group: { _id: null, total: { $sum: "$amount" }, count: { $sum: 1 } } }
-            ]),
-            Message.countDocuments({ recipientId: alumni._id, read: false })
-        ]);
+        // Fetch real dashboard data with fallbacks
+        let mentorshipRequests = 0;
+        let activeMentorships = [];
+        let upcomingEvents = [];
+        let myConnections = 0;
+        let myDonations = [];
+        let unreadMessages = 0;
+
+        try {
+            [
+                mentorshipRequests,
+                activeMentorships,
+                upcomingEvents,
+                myConnections,
+                myDonations,
+                unreadMessages
+            ] = await Promise.all([
+                Mentorship.countDocuments({ mentorId: alumni._id, status: 'Pending' }).catch(() => 0),
+                Mentorship.find({ mentorId: alumni._id, status: 'Active' }).populate('menteeId').limit(3).catch(() => []),
+                Event.find({ status: 'Upcoming' }).sort({ date: 1 }).limit(3).catch(() => []),
+                Connection.countDocuments({
+                    $or: [
+                        { requesterId: alumni._id, status: 'Accepted' },
+                        { recipientId: alumni._id, status: 'Accepted' }
+                    ]
+                }).catch(() => 0),
+                Donation.aggregate([
+                    { $match: { donorId: alumni._id } },
+                    { $group: { _id: null, total: { $sum: "$amount" }, count: { $sum: 1 } } }
+                ]).catch(() => []),
+                Message.countDocuments({ recipientId: alumni._id, read: false }).catch(() => 0)
+            ]);
+        } catch (error) {
+            console.error("Error fetching dashboard data:", error);
+            // Continue with default values
+        }
 
         // Calculate alumni rank
-        const allAlumni = await Alumini.countDocuments();
-        const userMentorshipCount = await Mentorship.countDocuments({ mentorId: alumni._id, status: 'Active' });
+        const allAlumni = await Alumini.countDocuments().catch(() => 0);
+        const userMentorshipCount = await Mentorship.countDocuments({ mentorId: alumni._id, status: 'Active' }).catch(() => 0);
         
         const dashboardData = {
             mentorshipSuggestionCount: activeMentorships.length,
             pendingMentorshipRequests: mentorshipRequests,
             activeMentorships: activeMentorships,
             upcomingEvents: upcomingEvents,
-            totalConnections: myConnections,
+            totalConnections: myConnections || 0,
             totalDonations: myDonations[0] ? myDonations[0].total : 0,
             donationCount: myDonations[0] ? myDonations[0].count : 0,
-            unreadMessages: unreadMessages,
+            unreadMessages: unreadMessages || 0,
             userRank: Math.floor(Math.random() * 50) + 1, // Simplified - should calculate based on contributions
             rankChange: 2,
             nextRankMessage: 'Mentor 2 more students to climb higher!'
