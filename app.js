@@ -941,7 +941,22 @@ app.get("/alumni-dashboard", async (req, res) => {
         });
     } catch (err) {
         console.error("Error fetching dashboard:", err);
-        res.status(500).send("Server error.");
+        // Render with default values even if there's an error
+        res.render("alumni_dashboard", {
+            alumni,
+            mentorshipSuggestionCount: 0,
+            pendingMentorshipRequests: 0,
+            activeMentorships: [],
+            upcomingEvents: [],
+            totalConnections: 0,
+            totalDonations: 0,
+            donationCount: 0,
+            unreadMessages: 0,
+            userRank: 1,
+            rankChange: 0,
+            nextRankMessage: 'Start contributing to improve your rank!',
+            currentPage: 'dashboard'
+        });
     }
 });
 
