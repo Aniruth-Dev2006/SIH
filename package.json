@@ -1,13 +1,17 @@
 {
   "name": "sih-alumini",
   "version": "1.0.0",
-  "main": "app.js",
+  "main": "server.js",
   "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "start-old": "node app.js",
+    "seed": "node seed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Aniruth",
   "license": "ISC",
-  "description": "",
+  "description": "Alumni Management System",
   "dependencies": {
     "body-parser": "^2.2.0",
     "dotenv": "^17.2.2",
@@ -15,5 +19,8 @@
     "express": "^5.1.0",
     "express-session": "^1.18.2",
     "mongoose": "^8.18.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }

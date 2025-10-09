@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Network | Alumnium</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/create_student.css">
+    <style>
+        .toast-container { position: fixed; top: 1rem; right: 1rem; z-index: 9999; }
+        .user-card { transition: all 0.3s; cursor: pointer; }
+        .user-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .connection-status { font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+    <%- include('partials/header') %>
+
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <div class="dashboard-layout">
+        <%- include('partials/sidebar', { role: 'student' }) %>
+
+        <main class="main-content">
+            <div class="mobile-header d-lg-none mb-4">
+                <h1 class="h2">My Network</h1>
+                <button class="btn btn-light" type="button" id="sidebarToggle"><i class="bi bi-list"></i></button>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="content-card mb-4">
+                <div class="row g-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" id="searchNetwork" placeholder="Search by name, batch, department...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="filterType">
+                            <option value="all">All Connections</option>
+                            <option value="students">Students</option>
+                            <option value="alumni">Alumni</option>
+                            <option value="pending">Pending Requests</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Stats -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="content-card text-center">
+                        <h3 class="text-primary mb-1">42</h3>
+                        <p class="text-muted-foreground mb-0">Total Connections</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="content-card text-center">
+                        <h3 class="text-success mb-1">28</h3>
+                        <p class="text-muted-foreground mb-0">Alumni Connections</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="content-card text-center">
+                        <h3 class="text-info mb-1">14</h3>
+                        <p class="text-muted-foreground mb-0">Student Connections</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="content-card text-center">
+                        <h3 class="text-warning mb-1">5</h3>
+                        <p class="text-muted-foreground mb-0">Pending Requests</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Requests -->
+            <div class="content-card mb-4">
+                <h5 class="mb-3">Pending Connection Requests</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card user-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <img src="https://ui-avatars.com/api/?name=Priya+Sharma&background=random" class="rounded-circle me-3" width="60" height="60">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">Priya Sharma</h6>
+                                        <p class="text-muted-foreground mb-2 small">Software Engineer @ Google • Class of 2020</p>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-sm btn-primary" onclick="acceptRequest(1)">
+                                                <i class="bi bi-check-circle"></i> Accept
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary" onclick="rejectRequest(1)">
+                                                <i class="bi bi-x-circle"></i> Decline
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card user-card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-start">
+                                    <img src="https://ui-avatars.com/api/?name=Rahul+Gupta&background=random" class="rounded-circle me-3" width="60" height="60">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">Rahul Gupta</h6>
+                                        <p class="text-muted-foreground mb-2 small">CSE - Semester 4</p>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-sm btn-primary" onclick="acceptRequest(2)">
+                                                <i class="bi bi-check-circle"></i> Accept
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary" onclick="rejectRequest(2)">
+                                                <i class="bi bi-x-circle"></i> Decline
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Connections -->
+            <div class="content-card">
+                <h5 class="mb-3">My Connections</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="card user-card">
+                            <div class="card-body">
+                                <div class="text-center">
+                                    <img src="https://ui-avatars.com/api/?name=Amit+Kumar&background=random" class="rounded-circle mb-2" width="80" height="80">
+                                    <h6 class="mb-1">Amit Kumar</h6>
+                                    <p class="text-muted-foreground small mb-2">Senior Developer @ Microsoft</p>
+                                    <span class="badge bg-success mb-3">Alumni - 2019</span>
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <button class="btn btn-sm btn-primary" onclick="sendMessage(1)">
+                                            <i class="bi bi-chat-dots"></i> Message
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="viewProfile(1)">
+                                            <i class="bi bi-person"></i> Profile
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card user-card">
+                            <div class="card-body">
+                                <div class="text-center">
+                                    <img src="https://ui-avatars.com/api/?name=Sneha+Reddy&background=random" class="rounded-circle mb-2" width="80" height="80">
+                                    <h6 class="mb-1">Sneha Reddy</h6>
+                                    <p class="text-muted-foreground small mb-2">Data Scientist @ Amazon</p>
+                                    <span class="badge bg-success mb-3">Alumni - 2021</span>
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <button class="btn btn-sm btn-primary" onclick="sendMessage(2)">
+                                            <i class="bi bi-chat-dots"></i> Message
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="viewProfile(2)">
+                                            <i class="bi bi-person"></i> Profile
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card user-card">
+                            <div class="card-body">
+                                <div class="text-center">
+                                    <img src="https://ui-avatars.com/api/?name=Rohan+Singh&background=random" class="rounded-circle mb-2" width="80" height="80">
+                                    <h6 class="mb-1">Rohan Singh</h6>
+                                    <p class="text-muted-foreground small mb-2">CSE - Semester 6</p>
+                                    <span class="badge bg-info mb-3">Student</span>
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <button class="btn btn-sm btn-primary" onclick="sendMessage(3)">
+                                            <i class="bi bi-chat-dots"></i> Message
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="viewProfile(3)">
+                                            <i class="bi bi-person"></i> Profile
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button class="btn btn-outline-primary">Load More Connections</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <%- include('partials/footer') %>
+    <script>
+        function acceptRequest(id) {
+            AlumniumUtils.showToast('Connection request accepted!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        }
+
+        function rejectRequest(id) {
+            AlumniumUtils.showToast('Connection request declined', 'info');
+            setTimeout(() => location.reload(), 1000);
+        }
+
+        function sendMessage(id) {
+            window.location.href = '/student-connect?user=' + id;
+        }
+
+        function viewProfile(id) {
+            AlumniumUtils.showToast('Opening profile...', 'info');
+        }
+
+        document.getElementById('searchNetwork').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            if (query.length > 2) {
+                AlumniumUtils.showToast(`Searching for: ${query}`, 'info');
+            }
+        });
+    </script>
+</body>
+</html>
