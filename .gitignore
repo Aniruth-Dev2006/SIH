@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 
 node_modules/
 .env
@@ -15,6 +15,6 @@ yarn-error.log*
 
 .vercel
 
-=======
+
 .env
->>>>>>> 3509df7 (vercel)
+
