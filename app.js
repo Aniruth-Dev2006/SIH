@@ -8,21 +8,14 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({
     extended: true
 }));
-// Middleware to parse JSON bodies
 app.use(express.json());
 app.use(express.static("Public"));
 app.set("view engine", "ejs");
 
-// Using a global variable to track the logged-in user.
 var loggedInUserEmail = null;
 
 // --- Database Connection ---
-const dbURI = process.env.MONGODB_URI;
-
-// Connect to MongoDB and log the result for easy debugging
-mongoose.connect(dbURI)
-    .then(() => console.log('SUCCESS: MongoDB Connection Open'))
-    .catch(err => console.error('ERROR: MongoDB Connection FAILED:', err.message));
+mongoose.connect("mongodb://localhost:27017/communityDB");
 
 // --- Schemas ---
 const adminschema = new mongoose.Schema({
@@ -52,45 +45,31 @@ const aluminschema = new mongoose.Schema({
     rno: String,
     course: String,
     dept: String,
-    // Extended Profile Fields
     phone: String,
     dob: Date,
     gender: String,
     location: String,
     bio: String,
     profilePicture: String,
-    // Professional Details
     company: String,
     designation: String,
     industry: String,
     experience: Number,
-    // Skills and Achievements
     skills: [String],
     achievements: [String],
-    // Social Links
     linkedin: String,
     github: String,
     twitter: String,
     website: String,
-    // Timestamps
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
 });
 const Alumini = mongoose.model("alumini", aluminschema);
 
 const announcementschema = new mongoose.Schema({
     title: String,
     content: String,
-    date: {
-        type: Date,
-        default: Date.now
-    }
+    date: { type: Date, default: Date.now }
 });
 const Announcement = mongoose.model("Announcement", announcementschema);
 
@@ -104,14 +83,8 @@ const eventschema = new mongoose.Schema({
     organizer_name: String,
     organizer_contact: String,
     category: String,
-    status: {
-        type: String,
-        default: 'Upcoming'
-    },
-    created_at: {
-        type: Date,
-        default: Date.now
-    }
+    status: { type: String, default: 'Upcoming' },
+    created_at: { type: Date, default: Date.now }
 });
 const Event = mongoose.model("Event", eventschema);
 
@@ -128,18 +101,9 @@ const pendingRequestSchema = new mongoose.Schema({
 const PendingRequest = mongoose.model("pendingRequest", pendingRequestSchema);
 
 const rsvpSchema = new mongoose.Schema({
-    alumniId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'alumini'
-    },
-    eventId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Event'
-    },
-    date: {
-        type: Date,
-        default: Date.now
-    }
+    alumniId: { type: mongoose.Schema.Types.ObjectId, ref: 'alumini' },
+    eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event' },
+    date: { type: Date, default: Date.now }
 });
 const Rsvp = mongoose.model("Rsvp", rsvpSchema);
 
@@ -149,14 +113,8 @@ const jobSchema = new mongoose.Schema({
     location: String,
     description: String,
     applicationLink: String,
-    postedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'alumini'
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    }
+    postedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'alumini' },
+    createdAt: { type: Date, default: Date.now }
 });
 const Job = mongoose.model("Job", jobSchema);
 
@@ -166,16 +124,399 @@ const marketplaceSchema = new mongoose.Schema({
     category: String,
     price: Number,
     contactInfo: String,
-    postedBy: {
+    postedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'alumini' },
+    createdAt: { type: Date, default: Date.now }
+});
+const Marketplace = mongoose.model("Marketplace", marketplaceSchema);
+
+// Donation Schema
+const donationSchema = new mongoose.Schema({
+    donorId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'alumini'
+        refPath: 'donorModel'
+    },
+    donorModel: {
+        type: String,
+        enum: ['student', 'alumini']
+    },
+    donorName: String,
+    donorEmail: String,
+    campaignId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Campaign'
+    },
+    amount: Number,
+    paymentMethod: String,
+    status: {
+        type: String,
+        default: 'Completed'
+    },
+    anonymous: {
+        type: Boolean,
+        default: false
+    },
+    date: {
+        type: Date,
+        default: Date.now
+    }
+});
+const Donation = mongoose.model("Donation", donationSchema);
+
+// Campaign Schema
+const campaignSchema = new mongoose.Schema({
+    name: String,
+    description: String,
+    goalAmount: Number,
+    currentAmount: {
+        type: Number,
+        default: 0
+    },
+    endDate: Date,
+    status: {
+        type: String,
+        default: 'Active'
     },
     createdAt: {
         type: Date,
         default: Date.now
     }
 });
-const Marketplace = mongoose.model("Marketplace", marketplaceSchema);
+const Campaign = mongoose.model("Campaign", campaignSchema);
+
+// Feedback Schema
+const feedbackSchema = new mongoose.Schema({
+    type: {
+        type: String,
+        enum: ['Curriculum', 'General', 'Portal', 'Event', 'Mentorship', 'Other']
+    },
+    submittedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        refPath: 'submitterModel'
+    },
+    submitterModel: {
+        type: String,
+        enum: ['student', 'alumini']
+    },
+    submitterName: String,
+    submitterEmail: String,
+    subject: String,
+    message: String,
+    rating: Number,
+    course: String,
+    semester: String,
+    priority: {
+        type: String,
+        default: 'Medium'
+    },
+    status: {
+        type: String,
+        default: 'Pending'
+    },
+    adminResponse: String,
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+const Feedback = mongoose.model("Feedback", feedbackSchema);
+
+// Connection Schema
+const connectionSchema = new mongoose.Schema({
+    requesterId: {
+        type: mongoose.Schema.Types.ObjectId,
+        refPath: 'requesterModel'
+    },
+    requesterModel: {
+        type: String,
+        enum: ['student', 'alumini']
+    },
+    recipientId: {
+        type: mongoose.Schema.Types.ObjectId,
+        refPath: 'recipientModel'
+    },
+    recipientModel: {
+        type: String,
+        enum: ['student', 'alumini']
+    },
+    status: {
+        type: String,
+        enum: ['Pending', 'Accepted', 'Declined'],
+        default: 'Pending'
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+const Connection = mongoose.model("Connection", connectionSchema);
+
+// Mentorship Schema
+const mentorshipSchema = new mongoose.Schema({
+    mentorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'alumini'
+    },
+    menteeId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'student'
+    },
+    areaOfInterest: String,
+    description: String,
+    frequency: String,
+    status: {
+        type: String,
+        enum: ['Pending', 'Active', 'Completed', 'Declined'],
+        default: 'Pending'
+    },
+    progress: {
+        type: Number,
+        default: 0
+    },
+    nextSessionDate: Date,
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+const Mentorship = mongoose.model("Mentorship", mentorshipSchema);
+
+// Message Schema
+const messageSchema = new mongoose.Schema({
+    senderId: {
+        type: mongoose.Schema.Types.ObjectId,
+        refPath: 'senderModel'
+    },
+    senderModel: {
+        type: String,
+        enum: ['student', 'alumini']
+    },
+    recipientId: {
+        type: mongoose.Schema.Types.ObjectId,
+        refPath: 'recipientModel'
+    },
+    recipientModel: {
+        type: String,
+        enum: ['student', 'alumini']
+    },
+    content: String,
+    read: {
+        type: Boolean,
+        default: false
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+const Message = mongoose.model("Message", messageSchema);
+
+// Leaderboard Entry Schema
+const leaderboardSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        refPath: 'userModel'
+    },
+    userModel: {
+        type: String,
+        enum: ['student', 'alumini']
+    },
+    name: String,
+    points: {
+        type: Number,
+        default: 0
+    },
+    contributions: {
+        type: Number,
+        default: 0
+    },
+    achievements: [String],
+    updatedAt: {
+        type: Date,
+        default: Date.now
+    }
+});
+const Leaderboard = mongoose.model("Leaderboard", leaderboardSchema);
+
+// Notification Schema
+const notificationSchema = new mongoose.Schema({
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        refPath: 'userModel'
+    },
+    userModel: {
+        type: String,
+        required: true,
+        enum: ['alumini', 'student', 'admin']
+    },
+    title: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    message: {
+        type: String,
+        required: true
+    },
+    icon: {
+        type: String,
+        default: 'info-circle'
+    },
+    read: {
+        type: Boolean,
+        default: false
+    },
+    type: {
+        type: String,
+        enum: ['announcement', 'event', 'job', 'general', 'system'],
+        default: 'general'
+    },
+    link: {
+        type: String,
+        default: null
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+}, {
+    timestamps: true
+});
+const Notification = mongoose.model('Notification', notificationSchema);
+
+
+// --- NOTIFICATION API ROUTES ---
+
+// Get all notifications for a user
+app.get("/api/notifications", async (req, res) => {
+    try {
+        if (!loggedInUserEmail) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        // Find the logged-in user
+        let user = await Alumini.findOne({ email: loggedInUserEmail });
+        let userModel = 'alumini';
+        
+        if (!user) {
+            user = await Student.findOne({ email: loggedInUserEmail });
+            userModel = 'student';
+        }
+        
+        if (!user) {
+            user = await Admin.findOne({ email: loggedInUserEmail });
+            userModel = 'admin';
+        }
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Fetch notifications
+        const notifications = await Notification.find({ 
+            userId: user._id,
+            userModel: userModel
+        })
+        .sort({ createdAt: -1 })
+        .limit(50);
+
+        res.json(notifications);
+    } catch (error) {
+        console.error("Error fetching notifications:", error);
+        res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+});
+
+// Mark a single notification as read
+app.patch("/api/notifications/:id/read", async (req, res) => {
+    try {
+        if (!loggedInUserEmail) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        const notification = await Notification.findByIdAndUpdate(
+            req.params.id,
+            { read: true },
+            { new: true }
+        );
+
+        if (!notification) {
+            return res.status(404).json({ error: "Notification not found" });
+        }
+
+        res.json(notification);
+    } catch (error) {
+        console.error("Error marking notification as read:", error);
+        res.status(500).json({ error: "Failed to update notification" });
+    }
+});
+
+// Mark all notifications as read
+app.patch("/api/notifications/mark-all-read", async (req, res) => {
+    try {
+        if (!loggedInUserEmail) {
+            return res.status(401).json({ error: "Not authenticated" });
+        }
+
+        // Find the logged-in user
+        let user = await Alumini.findOne({ email: loggedInUserEmail });
+        let userModel = 'alumini';
+        
+        if (!user) {
+            user = await Student.findOne({ email: loggedInUserEmail });
+            userModel = 'student';
+        }
+        
+        if (!user) {
+            user = await Admin.findOne({ email: loggedInUserEmail });
+            userModel = 'admin';
+        }
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const result = await Notification.updateMany(
+            { userId: user._id, userModel: userModel, read: false },
+            { read: true }
+        );
+
+        res.json({ 
+            message: "All notifications marked as read", 
+            modifiedCount: result.modifiedCount 
+        });
+    } catch (error) {
+        console.error("Error marking all notifications as read:", error);
+        res.status(500).json({ error: "Failed to update notifications" });
+    }
+});
+
+// Create notification (for testing/admin use)
+app.post("/api/notifications/create", async (req, res) => {
+    try {
+        const { userId, userModel, title, message, icon, type, link } = req.body;
+
+        if (!userId || !userModel || !title || !message) {
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const notification = new Notification({
+            userId,
+            userModel,
+            title,
+            message,
+            icon: icon || 'info-circle',
+            type: type || 'general',
+            link: link || null
+        });
+
+        await notification.save();
+        res.status(201).json(notification);
+    } catch (error) {
+        console.error("Error creating notification:", error);
+        res.status(500).json({ error: "Failed to create notification" });
+    }
+});
 
 
 // --- AUTHENTICATION & SIGNUP ROUTES ---
@@ -186,7 +527,6 @@ app.get("/", function(req, res) {
 });
 
 app.post("/", async function(req, res) {
-    console.log("Login POST received", req.body)
     const {
         email,
         password
@@ -465,12 +805,8 @@ app.get("/student-leaderboard", async (req, res) => {
     if (!loggedInUserEmail) return res.redirect("/");
     try {
         const [student, allAlumni] = await Promise.all([
-            Student.findOne({
-                email: loggedInUserEmail
-            }),
-            Alumini.find({}).sort({
-                name: 1
-            }).lean()
+            Student.findOne({ email: loggedInUserEmail }),
+            Alumini.find({}).sort({ name: 1 }).lean()
         ]);
         if (!student) return res.redirect("/");
 
@@ -486,105 +822,6 @@ app.get("/student-leaderboard", async (req, res) => {
         });
     } catch (err) {
         res.status(500).send("Server error.");
-    }
-});
-
-app.get("/student-profile", async (req, res) => {
-    if (!loggedInUserEmail) return res.redirect("/");
-    try {
-        const student = await Student.findOne({
-            email: loggedInUserEmail
-        });
-        if (!student) return res.redirect("/");
-        res.render("student_profile", {
-            student,
-            status: req.query.status
-        });
-    } catch (err) {
-        res.status(500).send("Server error.");
-    }
-});
-
-app.post("/student-update-profile", async (req, res) => {
-    if (!loggedInUserEmail) return res.redirect("/");
-    try {
-        const {
-            name,
-            rno,
-            batch,
-            course,
-            dept,
-            password
-        } = req.body;
-
-        const student = await Student.findOne({
-            email: loggedInUserEmail
-        });
-        if (!student) return res.status(404).send("Student not found.");
-
-        const updateData = {
-            name,
-            rno,
-            batch,
-            course,
-            dept
-        };
-        if (password && password.trim() !== '') {
-            updateData.password = password;
-        }
-
-        await Student.findByIdAndUpdate(student._id, updateData);
-        res.redirect("/student-profile?status=success");
-
-    } catch (err) {
-        console.error("Error updating student profile:", err);
-        res.redirect("/student-profile?status=error");
-    }
-});
-
-app.get("/student-donations", async (req, res) => {
-    if (!loggedInUserEmail) return res.redirect("/");
-    try {
-        const [student, campaigns] = await Promise.all([
-            Student.findOne({ email: loggedInUserEmail }),
-            Campaign.find().sort({ createdAt: -1 })
-        ]);
-        if (!student) return res.redirect("/");
-        res.render("student_donations", { 
-            student, 
-            campaigns,
-            status: req.query.status
-        });
-    } catch (err) {
-        res.status(500).send("Server error.");
-    }
-});
-
-app.post("/make-donation", async (req, res) => {
-    if (!loggedInUserEmail) return res.redirect("/");
-    try {
-        const { campaignId, amount, donorName } = req.body;
-        
-        const campaign = await Campaign.findById(campaignId);
-        if (!campaign) return res.redirect("/student-donations?status=error");
-
-        const donationAmount = Number(amount);
-        
-        const newDonation = new Donation({
-            campaignId,
-            donorName: donorName || 'Anonymous',
-            donorEmail: loggedInUserEmail,
-            amount: donationAmount
-        });
-        await newDonation.save();
-        
-        campaign.currentAmount += donationAmount;
-        await campaign.save();
-        
-        res.redirect("/student-donations?status=success");
-    } catch (err) {
-        console.error("Error making donation:", err);
-        res.redirect("/student-donations?status=error");
     }
 });
 
@@ -1196,6 +1433,8 @@ app.get("/api/user/:role/:id", async (req, res) => {
 app.post("/edit-user", async (req, res) => {
     if (!loggedInUserEmail) return res.redirect("/");
 
+    console.log("Received data for /edit-user:", req.body);
+
     const {
         userId,
         originalRole,
@@ -1213,12 +1452,12 @@ app.post("/edit-user", async (req, res) => {
         const TargetModel = role === 'Student' ? Student : Alumini;
 
         const updatedData = {
-            name,
-            rno,
-            batch,
-            course,
-            dept,
-            role
+            name: name,
+            rno: rno,
+            batch: batch,
+            course: course,
+            dept: dept,
+            role: role
         };
 
         if (password && password.trim() !== '') {
@@ -1406,5 +1645,917 @@ app.post("/delete-event", function(req, res) {
         .catch(() => res.status(500).send("Error deleting event"));
 });
 
+// --- New Feature Routes with Backend Integration ---
+
+// ========== ADMIN ROUTES ==========
+
+// Admin Donations
+app.get("/admin-donations", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const [campaigns, donations, stats] = await Promise.all([
+            Campaign.find().sort({ createdAt: -1 }),
+            Donation.find().populate('campaignId').sort({ date: -1 }).limit(20),
+            Donation.aggregate([
+                { $group: { _id: null, total: { $sum: "$amount" }, count: { $sum: 1 } } }
+            ])
+        ]);
+
+        const totalRaised = stats[0] ? stats[0].total : 0;
+        const totalDonors = stats[0] ? stats[0].count : 0;
+
+        res.render("admin_donations", {
+            campaigns,
+            donations,
+            totalRaised,
+            totalDonors,
+            activeCampaigns: campaigns.filter(c => c.status === 'Active').length
+        });
+    } catch (err) {
+        console.error("Error fetching donations:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/admin-donations/create-campaign", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const newCampaign = new Campaign(req.body);
+        await newCampaign.save();
+        res.redirect("/admin-donations?status=created");
+    } catch (err) {
+        console.error("Error creating campaign:", err);
+        res.redirect("/admin-donations?status=error");
+    }
+});
+
+// Admin Feedback
+app.get("/admin-feedback", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const [allFeedback, pendingCount, reviewedCount] = await Promise.all([
+            Feedback.find().sort({ createdAt: -1 }),
+            Feedback.countDocuments({ status: 'Pending' }),
+            Feedback.countDocuments({ status: 'Reviewed' })
+        ]);
+
+        const curriculumFeedback = allFeedback.filter(f => f.type === 'Curriculum');
+        const generalFeedback = allFeedback.filter(f => f.type !== 'Curriculum');
+
+        res.render("admin_feedback", {
+            curriculumFeedback,
+            generalFeedback,
+            pendingCount,
+            reviewedCount,
+            totalFeedback: allFeedback.length
+        });
+    } catch (err) {
+        console.error("Error fetching feedback:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/admin-feedback/respond", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        await Feedback.findByIdAndUpdate(req.body.feedbackId, {
+            adminResponse: req.body.response,
+            status: 'Reviewed'
+        });
+        res.redirect("/admin-feedback?status=responded");
+    } catch (err) {
+        console.error("Error responding to feedback:", err);
+        res.redirect("/admin-feedback?status=error");
+    }
+});
+
+// ========== STUDENT ROUTES ==========
+
+// Student Network
+app.get("/student-network", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const student = await Student.findOne({ email: loggedInUserEmail });
+        if (!student) return res.redirect("/");
+
+        const [connections, pendingRequests, allUsers] = await Promise.all([
+            Connection.find({
+                $or: [
+                    { requesterId: student._id, status: 'Accepted' },
+                    { recipientId: student._id, status: 'Accepted' }
+                ]
+            }).populate('requesterId recipientId'),
+            Connection.find({
+                recipientId: student._id,
+                status: 'Pending'
+            }).populate('requesterId'),
+            Promise.all([
+                Student.find({ _id: { $ne: student._id } }).limit(10),
+                Alumini.find().limit(10)
+            ])
+        ]);
+
+        const networkStats = {
+            totalConnections: connections.length,
+            alumniConnections: connections.filter(c => 
+                (c.requesterId && c.requesterId.role === 'Alumni') || 
+                (c.recipientId && c.recipientId.role === 'Alumni')
+            ).length,
+            studentConnections: connections.filter(c => 
+                (c.requesterId && c.requesterId.role !== 'Alumni') || 
+                (c.recipientId && c.recipientId.role !== 'Alumni')
+            ).length,
+            pendingRequests: pendingRequests.length
+        };
+
+        res.render("student_network", {
+            student,
+            connections,
+            pendingRequests,
+            suggestedUsers: [...allUsers[0], ...allUsers[1]],
+            networkStats
+        });
+    } catch (err) {
+        console.error("Error fetching network:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/student-network/connect", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const student = await Student.findOne({ email: loggedInUserEmail });
+        const newConnection = new Connection({
+            requesterId: student._id,
+            requesterModel: 'student',
+            recipientId: req.body.recipientId,
+            recipientModel: req.body.recipientModel,
+            status: 'Pending'
+        });
+        await newConnection.save();
+        res.redirect("/student-network?status=sent");
+    } catch (err) {
+        console.error("Error sending connection:", err);
+        res.redirect("/student-network?status=error");
+    }
+});
+
+app.post("/student-network/accept", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        await Connection.findByIdAndUpdate(req.body.connectionId, { status: 'Accepted' });
+        res.redirect("/student-network?status=accepted");
+    } catch (err) {
+        console.error("Error accepting connection:", err);
+        res.redirect("/student-network?status=error");
+    }
+});
+
+// Student Mentorship
+app.get("/student-mentorship", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const student = await Student.findOne({ email: loggedInUserEmail });
+        if (!student) return res.redirect("/");
+
+        const [activeMentorships, pendingMentorships, availableMentors] = await Promise.all([
+            Mentorship.find({ menteeId: student._id, status: 'Active' }).populate('mentorId'),
+            Mentorship.find({ menteeId: student._id, status: 'Pending' }).populate('mentorId'),
+            Alumini.find().limit(12)
+        ]);
+
+        const mentorshipStats = {
+            active: activeMentorships.length,
+            pending: pendingMentorships.length,
+            completedSessions: activeMentorships.reduce((sum, m) => sum + Math.floor(m.progress / 10), 0)
+        };
+
+        res.render("student_mentorship", {
+            student,
+            activeMentorships,
+            pendingMentorships,
+            availableMentors,
+            mentorshipStats
+        });
+    } catch (err) {
+        console.error("Error fetching mentorship:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/student-mentorship/request", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const student = await Student.findOne({ email: loggedInUserEmail });
+        const newMentorship = new Mentorship({
+            mentorId: req.body.mentorId,
+            menteeId: student._id,
+            areaOfInterest: req.body.areaOfInterest,
+            description: req.body.description,
+            frequency: req.body.frequency,
+            status: 'Pending'
+        });
+        await newMentorship.save();
+        res.redirect("/student-mentorship?status=requested");
+    } catch (err) {
+        console.error("Error requesting mentorship:", err);
+        res.redirect("/student-mentorship?status=error");
+    }
+});
+
+// Student Connect/Messaging
+app.get("/student-connect", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const student = await Student.findOne({ email: loggedInUserEmail });
+        if (!student) return res.redirect("/");
+
+        const connections = await Connection.find({
+            $or: [
+                { requesterId: student._id, status: 'Accepted' },
+                { recipientId: student._id, status: 'Accepted' }
+            ]
+        }).populate('requesterId recipientId');
+
+        const connectedUsers = connections.map(conn => 
+            conn.requesterId._id.equals(student._id) ? conn.recipientId : conn.requesterId
+        );
+
+        let messages = [];
+        if (req.query.user) {
+            messages = await Message.find({
+                $or: [
+                    { senderId: student._id, recipientId: req.query.user },
+                    { senderId: req.query.user, recipientId: student._id }
+                ]
+            }).sort({ createdAt: 1 });
+        }
+
+        res.render("student_connect", {
+            student,
+            connectedUsers,
+            messages,
+            activeUserId: req.query.user || null
+        });
+    } catch (err) {
+        console.error("Error fetching messages:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/student-connect/send", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const student = await Student.findOne({ email: loggedInUserEmail });
+        const newMessage = new Message({
+            senderId: student._id,
+            senderModel: 'student',
+            recipientId: req.body.recipientId,
+            recipientModel: req.body.recipientModel,
+            content: req.body.content
+        });
+        await newMessage.save();
+        res.redirect(`/student-connect?user=${req.body.recipientId}`);
+    } catch (err) {
+        console.error("Error sending message:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+// Student Donations
+app.get("/student-donations", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const student = await Student.findOne({ email: loggedInUserEmail });
+        if (!student) return res.redirect("/");
+
+        const [campaigns, myDonations, stats] = await Promise.all([
+            Campaign.find({ status: 'Active' }).sort({ createdAt: -1 }),
+            Donation.find({ donorId: student._id }).populate('campaignId').sort({ date: -1 }),
+            Donation.aggregate([
+                { $match: { donorId: student._id } },
+                { $group: { _id: null, total: { $sum: "$amount" } } }
+            ])
+        ]);
+
+        const totalContributions = stats[0] ? stats[0].total : 0;
+
+        res.render("student_donations", {
+            student,
+            campaigns,
+            myDonations,
+            totalContributions
+        });
+    } catch (err) {
+        console.error("Error fetching donations:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/student-donations/donate", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const student = await Student.findOne({ email: loggedInUserEmail });
+        const newDonation = new Donation({
+            donorId: student._id,
+            donorModel: 'student',
+            donorName: student.name,
+            donorEmail: student.email,
+            campaignId: req.body.campaignId,
+            amount: req.body.amount,
+            paymentMethod: req.body.paymentMethod,
+            anonymous: req.body.anonymous === 'on',
+            status: 'Completed'
+        });
+        await newDonation.save();
+
+        // Update campaign amount
+        await Campaign.findByIdAndUpdate(req.body.campaignId, {
+            $inc: { currentAmount: req.body.amount }
+        });
+
+        res.redirect("/student-donations?status=success");
+    } catch (err) {
+        console.error("Error processing donation:", err);
+        res.redirect("/student-donations?status=error");
+    }
+});
+
+// Student Curriculum Feedback
+app.get("/student-curriculum-feedback", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const student = await Student.findOne({ email: loggedInUserEmail });
+        if (!student) return res.redirect("/");
+
+        const myFeedback = await Feedback.find({
+            submittedBy: student._id,
+            type: 'Curriculum'
+        }).sort({ createdAt: -1 });
+
+        res.render("student_curriculum_feedback", {
+            student,
+            myFeedback,
+            courses: ['Database Management Systems', 'Software Engineering', 'Operating Systems', 'Computer Networks']
+        });
+    } catch (err) {
+        console.error("Error fetching curriculum feedback:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/student-curriculum-feedback/submit", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const student = await Student.findOne({ email: loggedInUserEmail });
+        const newFeedback = new Feedback({
+            type: 'Curriculum',
+            submittedBy: student._id,
+            submitterModel: 'student',
+            submitterName: student.name,
+            submitterEmail: student.email,
+            course: req.body.course,
+            semester: req.body.semester,
+            rating: req.body.rating,
+            message: req.body.message,
+            status: 'Pending'
+        });
+        await newFeedback.save();
+        res.redirect("/student-curriculum-feedback?status=submitted");
+    } catch (err) {
+        console.error("Error submitting feedback:", err);
+        res.redirect("/student-curriculum-feedback?status=error");
+    }
+});
+
+// Student General Feedback
+app.get("/student-feedback", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const student = await Student.findOne({ email: loggedInUserEmail });
+        if (!student) return res.redirect("/");
+
+        const myFeedback = await Feedback.find({
+            submittedBy: student._id,
+            type: { $ne: 'Curriculum' }
+        }).sort({ createdAt: -1 });
+
+        const feedbackStats = {
+            total: myFeedback.length,
+            pending: myFeedback.filter(f => f.status === 'Pending').length,
+            resolved: myFeedback.filter(f => f.status === 'Resolved').length
+        };
+
+        res.render("student_feedback", {
+            student,
+            myFeedback,
+            feedbackStats
+        });
+    } catch (err) {
+        console.error("Error fetching feedback:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/student-feedback/submit", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const student = await Student.findOne({ email: loggedInUserEmail });
+        const newFeedback = new Feedback({
+            type: req.body.type || 'General',
+            submittedBy: student._id,
+            submitterModel: 'student',
+            submitterName: student.name,
+            submitterEmail: student.email,
+            subject: req.body.subject,
+            message: req.body.message,
+            priority: req.body.priority,
+            status: 'Pending'
+        });
+        await newFeedback.save();
+        res.redirect("/student-feedback?status=submitted");
+    } catch (err) {
+        console.error("Error submitting feedback:", err);
+        res.redirect("/student-feedback?status=error");
+    }
+});
+
+// ========== ALUMNI ROUTES ==========
+
+// Alumni Network
+app.get("/alumni-network", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const alumni = await Alumini.findOne({ email: loggedInUserEmail });
+        if (!alumni) return res.redirect("/");
+
+        const [connections, pendingRequests, allUsers] = await Promise.all([
+            Connection.find({
+                $or: [
+                    { requesterId: alumni._id, status: 'Accepted' },
+                    { recipientId: alumni._id, status: 'Accepted' }
+                ]
+            }).populate('requesterId recipientId'),
+            Connection.find({
+                recipientId: alumni._id,
+                status: 'Pending'
+            }).populate('requesterId'),
+            Promise.all([
+                Student.find().limit(10),
+                Alumini.find({ _id: { $ne: alumni._id } }).limit(10)
+            ])
+        ]);
+
+        const networkStats = {
+            totalConnections: connections.length,
+            alumniConnections: connections.filter(c => 
+                (c.requesterId && c.requesterId.role === 'Alumni') || 
+                (c.recipientId && c.recipientId.role === 'Alumni')
+            ).length,
+            studentMentees: connections.filter(c => 
+                (c.requesterId && c.requesterId.role !== 'Alumni') || 
+                (c.recipientId && c.recipientId.role !== 'Alumni')
+            ).length,
+            pendingRequests: pendingRequests.length
+        };
+
+        res.render("alumni_network", {
+            alumni,
+            connections,
+            pendingRequests,
+            suggestedUsers: [...allUsers[0], ...allUsers[1]],
+            networkStats,
+            currentPage: 'network'
+        });
+    } catch (err) {
+        console.error("Error fetching network:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/alumni-network/accept", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        await Connection.findByIdAndUpdate(req.body.connectionId, { status: 'Accepted' });
+        res.redirect("/alumni-network?status=accepted");
+    } catch (err) {
+        console.error("Error accepting connection:", err);
+        res.redirect("/alumni-network?status=error");
+    }
+});
+
+// Alumni Mentorship
+app.get("/alumni-mentorship", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const alumni = await Alumini.findOne({ email: loggedInUserEmail });
+        if (!alumni) return res.redirect("/");
+
+        const [activeMentorships, pendingRequests, completedSessions] = await Promise.all([
+            Mentorship.find({ mentorId: alumni._id, status: 'Active' }).populate('menteeId'),
+            Mentorship.find({ mentorId: alumni._id, status: 'Pending' }).populate('menteeId'),
+            Mentorship.countDocuments({ mentorId: alumni._id, status: 'Completed' })
+        ]);
+
+        const mentorshipStats = {
+            active: activeMentorships.length,
+            pending: pendingRequests.length,
+            completedSessions: completedSessions
+        };
+
+        res.render("alumni_mentorship", {
+            alumni,
+            activeMentorships,
+            pendingRequests,
+            mentorshipStats,
+            currentPage: 'mentorship'
+        });
+    } catch (err) {
+        console.error("Error fetching mentorship:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/alumni-mentorship/accept", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        await Mentorship.findByIdAndUpdate(req.body.mentorshipId, { status: 'Active' });
+        res.redirect("/alumni-mentorship?status=accepted");
+    } catch (err) {
+        console.error("Error accepting mentorship:", err);
+        res.redirect("/alumni-mentorship?status=error");
+    }
+});
+
+// Alumni Connect
+app.get("/alumni-connect", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const alumni = await Alumini.findOne({ email: loggedInUserEmail });
+        if (!alumni) return res.redirect("/");
+
+        const connections = await Connection.find({
+            $or: [
+                { requesterId: alumni._id, status: 'Accepted' },
+                { recipientId: alumni._id, status: 'Accepted' }
+            ]
+        }).populate('requesterId recipientId');
+
+        const connectedUsers = connections.map(conn => 
+            conn.requesterId._id.equals(alumni._id) ? conn.recipientId : conn.requesterId
+        );
+
+        let messages = [];
+        if (req.query.user) {
+            messages = await Message.find({
+                $or: [
+                    { senderId: alumni._id, recipientId: req.query.user },
+                    { senderId: req.query.user, recipientId: alumni._id }
+                ]
+            }).sort({ createdAt: 1 });
+        }
+
+        res.render("alumni_connect", {
+            alumni,
+            connectedUsers,
+            messages,
+            activeUserId: req.query.user || null,
+            currentPage: 'connect'
+        });
+    } catch (err) {
+        console.error("Error fetching messages:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/alumni-connect/send", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const alumni = await Alumini.findOne({ email: loggedInUserEmail });
+        const newMessage = new Message({
+            senderId: alumni._id,
+            senderModel: 'alumini',
+            recipientId: req.body.recipientId,
+            recipientModel: req.body.recipientModel,
+            content: req.body.content
+        });
+        await newMessage.save();
+        res.redirect(`/alumni-connect?user=${req.body.recipientId}`);
+    } catch (err) {
+        console.error("Error sending message:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+// Alumni Donations
+app.get("/alumni-donations", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const alumni = await Alumini.findOne({ email: loggedInUserEmail });
+        if (!alumni) return res.redirect("/");
+
+        const [campaigns, myDonations, stats] = await Promise.all([
+            Campaign.find({ status: 'Active' }).sort({ createdAt: -1 }),
+            Donation.find({ donorId: alumni._id }).populate('campaignId').sort({ date: -1 }),
+            Donation.aggregate([
+                { $match: { donorId: alumni._id } },
+                { $group: { _id: null, total: { $sum: "$amount" } } }
+            ])
+        ]);
+
+        const totalContributions = stats[0] ? stats[0].total : 0;
+        let donorBadge = 'Bronze';
+        if (totalContributions >= 25000) donorBadge = 'Gold';
+        else if (totalContributions >= 10000) donorBadge = 'Silver';
+
+        res.render("alumni_donations", {
+            alumni,
+            campaigns,
+            myDonations,
+            totalContributions,
+            donorBadge,
+            currentPage: 'donations'
+        });
+    } catch (err) {
+        console.error("Error fetching donations:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/alumni-donations/donate", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const alumni = await Alumini.findOne({ email: loggedInUserEmail });
+        const newDonation = new Donation({
+            donorId: alumni._id,
+            donorModel: 'alumini',
+            donorName: alumni.name,
+            donorEmail: alumni.email,
+            campaignId: req.body.campaignId,
+            amount: req.body.amount,
+            paymentMethod: req.body.paymentMethod,
+            anonymous: req.body.anonymous === 'on',
+            status: 'Completed'
+        });
+        await newDonation.save();
+
+        // Update campaign amount
+        await Campaign.findByIdAndUpdate(req.body.campaignId, {
+            $inc: { currentAmount: req.body.amount }
+        });
+
+        res.redirect("/alumni-donations?status=success");
+    } catch (err) {
+        console.error("Error processing donation:", err);
+        res.redirect("/alumni-donations?status=error");
+    }
+});
+
+// Alumni Feedback
+app.get("/alumni-feedback", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const alumni = await Alumini.findOne({ email: loggedInUserEmail });
+        if (!alumni) return res.redirect("/");
+
+        const myFeedback = await Feedback.find({
+            submittedBy: alumni._id
+        }).sort({ createdAt: -1 });
+
+        const feedbackStats = {
+            total: myFeedback.length,
+            pending: myFeedback.filter(f => f.status === 'Pending').length,
+            implemented: myFeedback.filter(f => f.status === 'Resolved').length
+        };
+
+        res.render("alumni_feedback", {
+            alumni,
+            myFeedback,
+            feedbackStats,
+            currentPage: 'feedback'
+        });
+    } catch (err) {
+        console.error("Error fetching feedback:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+app.post("/alumni-feedback/submit", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const alumni = await Alumini.findOne({ email: loggedInUserEmail });
+        const newFeedback = new Feedback({
+            type: req.body.type || 'General',
+            submittedBy: alumni._id,
+            submitterModel: 'alumini',
+            submitterName: alumni.name,
+            submitterEmail: alumni.email,
+            subject: req.body.subject,
+            message: req.body.message,
+            rating: req.body.rating,
+            priority: req.body.priority || 'Medium',
+            status: 'Pending'
+        });
+        await newFeedback.save();
+        res.redirect("/alumni-feedback?status=submitted");
+    } catch (err) {
+        console.error("Error submitting feedback:", err);
+        res.redirect("/alumni-feedback?status=error");
+    }
+});
+
+// ========== ALUMNI PROFILE MANAGEMENT ==========
+
+// View Profile
+app.get("/alumni-profile", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const alumni = await Alumini.findOne({ email: loggedInUserEmail });
+        if (!alumni) return res.redirect("/");
+
+        // Calculate profile stats
+        const [connectionsCount, menteesCount, eventsCount, donationsTotal] = await Promise.all([
+            Connection.countDocuments({
+                $or: [
+                    { requesterId: alumni._id, status: 'Accepted' },
+                    { recipientId: alumni._id, status: 'Accepted' }
+                ]
+            }),
+            Mentorship.countDocuments({ mentorId: alumni._id, status: 'Active' }),
+            Rsvp.countDocuments({ alumniId: alumni._id }),
+            Donation.aggregate([
+                { $match: { donorId: alumni._id } },
+                { $group: { _id: null, total: { $sum: "$amount" } } }
+            ])
+        ]);
+
+        const stats = {
+            connections: connectionsCount,
+            mentees: menteesCount,
+            eventsAttended: eventsCount,
+            totalDonations: donationsTotal[0] ? donationsTotal[0].total : 0
+        };
+
+        res.render("alumni_profile", {
+            alumni,
+            stats,
+            currentPage: 'profile'
+        });
+    } catch (err) {
+        console.error("Error fetching profile:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+// Edit Profile Page
+app.get("/alumni-edit-profile", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const alumni = await Alumini.findOne({ email: loggedInUserEmail });
+        if (!alumni) return res.redirect("/");
+
+        res.render("alumni_edit_profile", {
+            alumni,
+            currentPage: 'profile'
+        });
+    } catch (err) {
+        console.error("Error loading edit profile:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+// Update Profile
+app.post("/alumni-update-profile", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const alumni = await Alumini.findOne({ email: loggedInUserEmail });
+        if (!alumni) return res.redirect("/");
+
+        // Extract skills array from form data
+        let skills = [];
+        if (req.body['skills[]']) {
+            skills = Array.isArray(req.body['skills[]']) ? req.body['skills[]'] : [req.body['skills[]']];
+        }
+
+        // Update alumni profile
+        const updateData = {
+            name: req.body.name,
+            phone: req.body.phone,
+            dob: req.body.dob,
+            gender: req.body.gender,
+            location: req.body.location,
+            bio: req.body.bio,
+            course: req.body.course,
+            company: req.body.company,
+            designation: req.body.designation,
+            industry: req.body.industry,
+            experience: req.body.experience,
+            skills: skills,
+            linkedin: req.body.linkedin,
+            github: req.body.github,
+            twitter: req.body.twitter,
+            website: req.body.website,
+            updatedAt: new Date()
+        };
+
+        await Alumini.findByIdAndUpdate(alumni._id, updateData);
+
+        res.redirect("/alumni-profile?updated=true");
+    } catch (err) {
+        console.error("Error updating profile:", err);
+        res.redirect("/alumni-edit-profile?error=true");
+    }
+});
+
+// Alumni Leaderboard (fixing the route)
+app.get("/alumni-leaderboard", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const alumni = await Alumini.findOne({ email: loggedInUserEmail });
+        if (!alumni) return res.redirect("/");
+
+        // Fetch all alumni and calculate their scores
+        const allAlumni = await Alumini.find().sort({ batch: -1 });
+        
+        // Calculate scores for each alumni based on their contributions
+        const leaderboardPromises = allAlumni.map(async (user) => {
+            const [mentorships, donations, connections] = await Promise.all([
+                Mentorship.countDocuments({ mentorId: user._id, status: 'Active' }),
+                Donation.aggregate([
+                    { $match: { donorId: user._id } },
+                    { $group: { _id: null, total: { $sum: "$amount" } } }
+                ]),
+                Connection.countDocuments({
+                    $or: [
+                        { requesterId: user._id, status: 'Accepted' },
+                        { recipientId: user._id, status: 'Accepted' }
+                    ]
+                })
+            ]);
+
+            const donationTotal = donations[0] ? donations[0].total : 0;
+            // Score calculation: mentorships * 100 + donations/100 + connections * 10
+            const score = (mentorships * 100) + (donationTotal / 100) + (connections * 10);
+
+            return {
+                _id: user._id,
+                name: user.name,
+                batch: user.batch,
+                company: user.company || 'Not Specified',
+                dept: user.dept,
+                score: Math.round(score),
+                mentorships,
+                donations: donationTotal,
+                connections
+            };
+        });
+
+        const leaderboard = (await Promise.all(leaderboardPromises))
+            .sort((a, b) => b.score - a.score)
+            .map((user, index) => ({ ...user, rank: index + 1 }));
+
+        res.render("alumni_leaderboard", {
+            alumni,
+            leaderboard,
+            currentPage: 'leaderboard'
+        });
+    } catch (err) {
+        console.error("Error fetching leaderboard:", err);
+        res.status(500).send("Server error");
+    }
+});
+
+// Logout route
+app.get("/logout", (req, res) => {
+    loggedInUserEmail = null;
+    res.redirect("/?status=logged_out");
+});
+
+app.post("/alumni-feedback/submit", async (req, res) => {
+    if (!loggedInUserEmail) return res.redirect("/");
+    try {
+        const alumni = await Alumini.findOne({ email: loggedInUserEmail });
+        const newFeedback = new Feedback({
+            type: req.body.type || 'General',
+            submittedBy: alumni._id,
+            submitterModel: 'alumini',
+            submitterName: alumni.name,
+            submitterEmail: alumni.email,
+            subject: req.body.subject,
+            message: req.body.message,
+            rating: req.body.rating,
+            priority: req.body.priority || 'Medium',
+            status: 'Pending'
+        });
+        await newFeedback.save();
+        res.redirect("/alumni-feedback?status=submitted");
+    } catch (err) {
+        console.error("Error submitting feedback:", err);
+        res.redirect("/alumni-feedback?status=error");
+    }
+});
+
 // --- Server Listener ---
-module.exports = app;
+app.listen(3000, function(req, res) {
+    console.log("Server is running on port 3000\n");
+});
